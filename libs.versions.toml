@@ -1,0 +1,14 @@
+[versions]
+kotlin = "1.9.10"
+kotlinSerializationVersion = "1.6.1"
+kotlinCoroutinesVersion = "1.6.3"
+
+
+[libraries]
+kotlinSerializationCore = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinSerializationVersion" }
+kotlinSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerializationVersion" }
+kotlinCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutinesVersion" }
+
+
+[bundles]
+kotlinSerialization = ["kotlinSerializationCore", "kotlinSerializationJson"]

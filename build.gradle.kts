@@ -1,8 +1,11 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("jvm") version "1.9.21"
+    val kotlinVersion = libs.versions.kotlin
+    kotlin("jvm") version kotlinVersion
     application
+    kotlin("plugin.serialization") version kotlinVersion
 }
 
 group = "org.example"
@@ -13,6 +16,9 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.bundles.kotlinSerialization)
+    implementation(libs.kotlinCoroutines)
+
     testImplementation(kotlin("test"))
 }
 
