@@ -3,7 +3,7 @@ package analyzer
 import python.PythonTree
 import python.PythonType
 
-class Pandalyzer {
+class Pandalyzer(private val metadata: AnalyzerMetadata) {
 
     fun analyze(tree: PythonTree): AnalysisResult =
         analyze(tree, AnalysisContext.createEmpty())

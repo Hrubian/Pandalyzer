@@ -2,22 +2,22 @@ package analyzer
 
 
 data class AnalysisContext(
-    val datasets: Map<String, Dataset>,
+    val dataFrames: Map<String, DataFrame>,
     val returnValue: Any?
 ) {
     companion object {
         fun createEmpty(): AnalysisContext = AnalysisContext(
-            datasets = emptyMap(),
+            dataFrames = emptyMap(),
             returnValue = null
         )
     }
 }
 
-data class Dataset(
-    val fields: Map<String, DatasetField>
+data class DataFrame(
+    val fields: Map<String, DataFrameFields>
 )
 
-enum class DatasetField {
+enum class DataFrameFields {
     // numpy types
     FloatType,
     IntType,

@@ -2,12 +2,12 @@ import analyzer.Pandalyzer
 import python.PythonTree
 
 
-fun main(args: Array<String>) {
-    with(ProgramArguments("/Users/janhruby/IdeaProjects/Pandalyzer/test.py")) {
-        PythonTree.fromFile(inputFile).let { tree ->
-            Pandalyzer().analyze(tree).let { result ->
+fun main(args: Array<String>) =
+    with(parseArgs(args)) {
+        PythonTree.fromFile(inputFile)
+            .let { tree ->
+                Pandalyzer(metadata).analyze(tree)
+            }.let { result ->
                 println(result)
             }
-        }
     }
-}
