@@ -23,7 +23,7 @@ sealed class PythonType {
     }
 
     @Serializable
-    sealed class Statement {
+    sealed class Statement : PythonType() {
 
         @Serializable
         @SerialName("FunctionDef")
@@ -107,7 +107,7 @@ sealed class PythonType {
     }
 
     @Serializable
-    sealed class Expression {
+    sealed class Expression : PythonType() {
         //todo boolop, namedExpr
 
         @Serializable
@@ -121,7 +121,7 @@ sealed class PythonType {
         @Serializable
         @SerialName("Constant")
         data class Constant (
-            val value: Int //todo what is n, s
+            val value: String//todo what is n, s
         ) : Expression()
 
         @Serializable
@@ -133,47 +133,75 @@ sealed class PythonType {
             //todo keywords
         ) : Expression()
 
+        @Serializable
+        @SerialName("Name")
+        data class Name (
+            @SerialName("id")
+            val identifier: String
+        ) : Expression()
+
+        @Serializable
+        @SerialName("Attribute")
+        data class Attribute (
+            val value: Expression,
+            val attr: String
+        ) : Expression()
+
+        @Serializable
+        @SerialName("Subscript")
+        data class Subscript (
+            val value: Expression,
+            val slice: Expression,
+        ) : Expression()
+
+        @Serializable
+        @SerialName("Compare")
+        data class Compare (
+            val left: Expression,
+            //todo
+        ) : Expression()
+
+        @Serializable
+        @SerialName("List")
+        data class PythonList (
+            @SerialName("elts")
+            val elements: List<Expression>,
+        ) :Expression()
+    }
+
+
+    @Serializable
+    sealed class BoolOperation : PythonType() {
+        @Serializable
+        @SerialName("And")
+        class And : BoolOperation()
+        @Serializable
+        @SerialName("Or")
+        class Or: BoolOperation()
+
     }
 
     @Serializable
-    sealed class ExpressionContext {
-
+    sealed class Operator : PythonType() {
+        @Serializable
+        @SerialName("Add")
+        class Add : Operator()
+        @Serializable
+        @SerialName("Sub")
+        class Sub : Operator()
+        @Serializable
+        @SerialName("Mult")
+        class Mult : Operator()
+        //todo many more
     }
-
-    @Serializable
-    sealed class BoolOperation {
-
-    }
-
-    @Serializable
-    sealed class Operator {
-        class Add : Statement()
-        class Sub : Statement()
-    }
-
-
-
-
-    // old implementation
-    @Serializable
-    @SerialName("FunctionDef")
-    data class FunctionDef (
-        val name: String,
-    ) : PythonType()
-
-    @Serializable
-    @SerialName("Import")
-    data class Import (
-        val names: List<PythonType> //todo maybe Aliases?
-    ) : PythonType()
 
     @Serializable
     @SerialName("alias")
     data class Alias ( //todo what about col_offset, lineno...?
         @SerialName("asname")
-        val aliasName: String,
+        val aliasName: String?,
         val name: String
-    )
+    ) : PythonType()
 
 
 }

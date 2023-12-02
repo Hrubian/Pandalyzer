@@ -4,7 +4,7 @@ import kotlinx.serialization.json.Json
 import java.io.File
 
 @JvmInline
-value class PythonTree private constructor(private val root: PythonType) {
+value class PythonTree private constructor(val root: PythonType) {
 
     companion object {
         private val json = Json { ignoreUnknownKeys = true }
@@ -19,8 +19,8 @@ value class PythonTree private constructor(private val root: PythonType) {
                 .redirectInput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.INHERIT)
                 .start()
-                .inputStream.readAllBytes().toString()
-                .let { json.decodeFromString<PythonType>(it) }
+                .inputStream.readAllBytes()
+                .let { println(String(it)); json.decodeFromString<PythonType>(String(it)) }
                 .let { PythonTree(it) }
         }
     }
