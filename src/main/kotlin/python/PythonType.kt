@@ -166,7 +166,14 @@ sealed class PythonType {
         data class PythonList (
             @SerialName("elts")
             val elements: List<Expression>,
-        ) :Expression()
+        ) : Expression()
+
+        @Serializable
+        @SerialName("Dict")
+        data class Dictionary (
+            val keys: List<Expression>,
+            val values: List<Expression>,
+        ) : Expression()
     }
 
 

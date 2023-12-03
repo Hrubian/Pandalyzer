@@ -1,6 +1,6 @@
 import analyzer.AnalyzerMetadata
-import analyzer.DataFrame
-import analyzer.DataFrameFields
+import dataframe.DataFrame
+import dataframe.FieldType
 
 data class ProgramArguments(
     val inputFile: String,
@@ -14,18 +14,18 @@ fun parseArgs(args: Array<String>): ProgramArguments {
             mapOf(
                 "kamaradi.csv" to DataFrame(
                     fields = mapOf(
-                        "id" to DataFrameFields.IntType,
-                        "nickname" to DataFrameFields.StringType,
-                        "fullname" to DataFrameFields.StringType,
-                        "vyska" to DataFrameFields.IntType,
-                        "bydliste" to DataFrameFields.StringType,
+                        "id" to FieldType.IntType,
+                        "nickname" to FieldType.StringType,
+                        "fullname" to FieldType.StringType,
+                        "vyska" to FieldType.IntType,
+                        "bydliste" to FieldType.StringType,
                     )
                 ),
                 "mesta.csv" to DataFrame(
                     fields = mapOf(
-                        "name" to DataFrameFields.StringType,
-                        "vzdalenost_od_prahy" to DataFrameFields.StringType,
-                        "datum_zalozeni" to DataFrameFields.StringType,
+                        "name" to FieldType.StringType,
+                        "vzdalenost_od_prahy" to FieldType.StringType,
+                        "datum_zalozeni" to FieldType.StringType,
                     )
                 )
             )
