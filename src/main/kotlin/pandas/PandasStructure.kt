@@ -1,4 +1,4 @@
-package dataframe
+package pandas
 
 typealias FieldName = String
 

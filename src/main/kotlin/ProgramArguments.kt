@@ -1,6 +1,6 @@
 import analyzer.AnalyzerMetadata
-import dataframe.DataFrame
-import dataframe.FieldType
+import pandas.DataFrame
+import pandas.FieldType
 
 data class ProgramArguments(
     val inputFile: String,

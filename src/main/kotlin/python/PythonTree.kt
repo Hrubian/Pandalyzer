@@ -20,8 +20,9 @@ value class PythonTree private constructor(val root: PythonType) {
                 .redirectError(ProcessBuilder.Redirect.INHERIT)
                 .start()
                 .inputStream.readAllBytes()
-                .let { println(String(it)); json.decodeFromString<PythonType>(String(it)) }
+                .let { json.decodeFromString<PythonType>(String(it)) }
                 .let { PythonTree(it) }
+                .also { println(it) }
         }
     }
 }

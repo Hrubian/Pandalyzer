@@ -1,5 +1,6 @@
 package python
 
+import analyzer.AnalysisContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -8,37 +9,43 @@ import kotlinx.serialization.json.JsonClassDiscriminator
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonClassDiscriminator("_type")
-sealed class PythonType {
+sealed interface PythonType : IAnalyzable {
     @Serializable
-    sealed class Mod : PythonType() {
+    sealed interface Mod : PythonType {
 
         @Serializable
         @SerialName("Module")
         data class Module (
             val body: List<Statement>
             //todo type_ignore
-        ) : Mod()
+        ) : Mod {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         //todo missing Interactive, Expression, FunctionType
     }
 
     @Serializable
-    sealed class Statement : PythonType() {
+    sealed interface Statement : PythonType {
 
         @Serializable
         @SerialName("FunctionDef")
         data class FunctionDef(
             val name: String,
 //            val args: List //todo arguments
-            val body: Statement
+            val body: List<Statement>,
             //todo others
-        ) : Statement()
+        ) : Statement {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("Return")
         data class Return(
             val value: Expression,
-        ) : Statement()
+        ) : Statement {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("Assign")
@@ -46,7 +53,9 @@ sealed class PythonType {
             val targets: List<Expression>,
             val value: Expression,
             //todo type_comment?
-        ) : Statement()
+        ) : Statement {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("For")
@@ -57,7 +66,9 @@ sealed class PythonType {
             val body: Statement,
             val orElse: Statement
             //todo type_comment?
-        ) : Statement()
+        ) : Statement {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("While")
@@ -65,22 +76,28 @@ sealed class PythonType {
             val test: Expression,
             val body: Statement,
             val orElse: Statement
-        ) : Statement()
+        ) : Statement {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("If")
         data class IfStatement (
             val test: Expression,
-            val body: Statement,
-            val orElse: Statement
-        ) : Statement()
+            val body: List<Statement>,
+            val orElse: List<Statement>,
+        ) : Statement {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
         //todo missing with, match try, raise
 
         @Serializable
         @SerialName("Import")
         data class Import (
             val names: List<Alias>,
-        ) : Statement()
+        ) : Statement {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("ImportFrom")
@@ -88,26 +105,35 @@ sealed class PythonType {
             val module: String?,
             val names: List<Alias>,
             val level: Int // todo do we need it?
-        ) : Statement()
+        ) : Statement {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+
+        }
 
         @Serializable
         @SerialName("Expr")
         data class ExpressionStatement(
             @SerialName("value")
             val expression: Expression
-        ) : Statement()
+        ) : Statement {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("Break")
-        class Break : Statement()
+        data object Break : Statement {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("Continue")
-        class Continue : Statement()
+        data object Continue : Statement {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
     }
 
     @Serializable
-    sealed class Expression : PythonType() {
+    sealed interface Expression : PythonType {
         //todo boolop, namedExpr
 
         @Serializable
@@ -116,13 +142,17 @@ sealed class PythonType {
             val left: Expression,
             val right: Expression,
             val operator: Operator
-        ) : Expression()
+        ) : Expression {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("Constant")
         data class Constant (
             val value: String//todo what is n, s
-        ) : Expression()
+        ) : Expression {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("Call")
@@ -131,74 +161,101 @@ sealed class PythonType {
             @SerialName("args")
             val arguments: List<Expression>,
             //todo keywords
-        ) : Expression()
+        ) : Expression {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("Name")
         data class Name (
             @SerialName("id")
             val identifier: String
-        ) : Expression()
+        ) : Expression {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("Attribute")
         data class Attribute (
             val value: Expression,
             val attr: String
-        ) : Expression()
+        ) : Expression {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("Subscript")
         data class Subscript (
             val value: Expression,
             val slice: Expression,
-        ) : Expression()
+        ) : Expression {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("Compare")
         data class Compare (
             val left: Expression,
             //todo
-        ) : Expression()
+        ) : Expression {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("List")
         data class PythonList (
             @SerialName("elts")
             val elements: List<Expression>,
-        ) : Expression()
+        ) : Expression {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
         @Serializable
         @SerialName("Dict")
         data class Dictionary (
             val keys: List<Expression>,
             val values: List<Expression>,
-        ) : Expression()
+        ) : Expression {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
     }
 
 
     @Serializable
-    sealed class BoolOperation : PythonType() {
+    sealed interface BoolOperation : PythonType {
         @Serializable
         @SerialName("And")
-        class And : BoolOperation()
+        data object And : BoolOperation {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
+
         @Serializable
         @SerialName("Or")
-        class Or: BoolOperation()
+        data object Or : BoolOperation {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
 
     }
 
     @Serializable
-    sealed class Operator : PythonType() {
+    sealed interface Operator : PythonType {
         @Serializable
         @SerialName("Add")
-        class Add : Operator()
+        data object Add : Operator {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
+
         @Serializable
         @SerialName("Sub")
-        class Sub : Operator()
+        data object Sub : Operator {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
+
         @Serializable
         @SerialName("Mult")
-        class Mult : Operator()
+        data object Mult : Operator {
+            override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+        }
         //todo many more
     }
 
@@ -208,7 +265,9 @@ sealed class PythonType {
         @SerialName("asname")
         val aliasName: String?,
         val name: String
-    ) : PythonType()
+    ) : PythonType {
+        override fun analyzeWith(analyzer: IAnalyzer, context: AnalysisContext) = analyzer.analyze(this, context)
+    }
 
 
 }
