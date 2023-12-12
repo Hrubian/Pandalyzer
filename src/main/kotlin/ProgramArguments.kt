@@ -1,11 +1,37 @@
 import analyzer.AnalyzerMetadata
 import pandas.DataFrame
 import pandas.FieldType
+import java.io.InputStream
+import java.io.OutputStream
 
 data class ProgramArguments(
     val inputFile: String,
+    val outputStream: OutputStream,
+    val outputFormat: OutputFormat,
     val metadata: AnalyzerMetadata,
+    val printHelp: Boolean,
+    val treatWarningsAsErrors: Boolean,
+    val verbose: Boolean,
 )
+
+enum class OutputFormat {
+    HumanReadable,
+    JSON;
+    companion object {
+        fun fromString(it: String): OutputFormat = when (it) {
+            "hr" -> HumanReadable
+            "json" -> JSON
+            else -> HumanReadable //todo warning/error
+        }
+
+        fun default() = HumanReadable
+    }
+}
+
+enum class ExitWays(exitCode: Int) {
+    OK(0),
+    BadArgs()
+}
 
 fun parseArgs(args: Array<String>): ProgramArguments {
     return ProgramArguments( // todo parse from args
