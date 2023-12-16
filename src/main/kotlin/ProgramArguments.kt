@@ -1,6 +1,6 @@
 import analyzer.AnalyzerMetadata
-import pandas.DataFrame
-import pandas.FieldType
+import python.datastructures.pandas.DataFrame
+import python.datastructures.pandas.FieldType
 import java.io.InputStream
 import java.io.OutputStream
 

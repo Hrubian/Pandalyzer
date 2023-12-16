@@ -1,15 +1,16 @@
 package analyzer
 
-import pandas.PandasStructure
+import python.datastructures.PythonDataStructure
 import python.PythonType
 
 typealias Identifier = String
 
 data class AnalysisContext(
-    val initialStructures: Map<Identifier, PandasStructure>,
-    val pandasStructures: Map<Identifier, PandasStructure>,
+    val initialStructures: Map<Identifier, PythonDataStructure>,
+    val pythonDataStructures: Map<Identifier, PythonDataStructure>,
     val knownFunctionDefs: Map<Identifier, PythonType.Statement.FunctionDef>,
-    val returnValue: PandasStructure?,
+    val returnValue: PythonDataStructure?,
+    val functionStack: List<Identifier>,
 ) {
 
     fun summarize(): AnalysisResult {
@@ -21,10 +22,12 @@ data class AnalysisContext(
     }
 
     companion object {
-        fun createEmpty(): AnalysisContext = AnalysisContext(
-            pandasStructures = emptyMap(),
+        val empty: AnalysisContext = AnalysisContext(
+            initialStructures = emptyMap(),
+            pythonDataStructures = emptyMap(),
             knownFunctionDefs = emptyMap(),
             returnValue = null,
+            functionStack = emptyList(),
         )
 
         fun combineNondeterministic(first: AnalysisContext, second: AnalysisContext): AnalysisContext {
@@ -43,7 +46,7 @@ class ContextBuilder(previousContext: AnalysisContext) {
 
     }
 
-    fun returnValue(structure: PandasStructure?) {
+    fun returnValue(structure: PythonDataStructure?) {
 
     }
 
