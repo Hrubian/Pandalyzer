@@ -17,7 +17,7 @@ class Pandalyzer {
         module.body.foldStatements(context)
 
     fun analyze(functionDef: FunctionDef, context: AnalysisContext): AnalysisContext = context.map {
-        addFunc(functionDef.name, functionDef.body)
+        addFunc(functionDef)
     }
 
     fun analyze(returnStatement: Return, context: AnalysisContext): AnalysisContext =
