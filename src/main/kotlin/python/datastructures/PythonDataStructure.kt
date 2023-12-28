@@ -1,12 +1,11 @@
 package python.datastructures
 
 import analyzer.Identifier
-import python.datastructures.pandas.FieldName
 import python.OperationResult
 import python.fail
 import kotlin.reflect.KClass
 
-interface PythonDataStructure {
+sealed interface PythonDataStructure {
     val typeName: KClass<PythonDataStructure>
         get() = javaClass.kotlin
 
@@ -30,4 +29,10 @@ interface PythonDataStructure {
         fail("Cannot sort values of $typeName by key $by")
     fun sumWith(struct: PythonDataStructure): OperationResult<PythonDataStructure> =
         fail("Cannot sum $typeName with ${struct.typeName}")
+    fun multiplyWith(struct: PythonDataStructure): OperationResult<PythonDataStructure> =
+        fail("Cannot multiply $typeName with ${struct.typeName}")
+    fun divideBy(struct: PythonDataStructure): OperationResult<PythonDataStructure> =
+        fail("Cannot divide $typeName by ${struct.typeName}")
+    fun subtract(struct: PythonDataStructure): OperationResult<PythonDataStructure> =
+        fail ("Cannot ${struct.typeName} from $typeName")
 }

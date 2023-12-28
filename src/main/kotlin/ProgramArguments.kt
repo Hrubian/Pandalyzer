@@ -1,7 +1,6 @@
 import analyzer.AnalyzerMetadata
-import python.datastructures.pandas.DataFrame
-import python.datastructures.pandas.FieldType
-import java.io.InputStream
+import python.datastructures.DataFrame
+import python.datastructures.FieldType
 import java.io.OutputStream
 
 data class ProgramArguments(

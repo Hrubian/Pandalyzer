@@ -1,10 +1,10 @@
 package python
 
-import analyzer.AnalysisContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonClassDiscriminator
+import java.math.BigInteger
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
@@ -111,6 +111,13 @@ sealed interface PythonType {
         //todo boolop, namedExpr
 
         @Serializable
+        @SerialName("BoolOp")
+        data class BoolOperation (
+            val operator: BoolOperator,
+            val values: List<Expression>
+        ) : Expression
+
+        @Serializable
         @SerialName("BinOp")
         data class BinaryOperation (
             val left: Expression,
@@ -119,10 +126,32 @@ sealed interface PythonType {
         ) : Expression
 
         @Serializable
-        @SerialName("Constant")
-        data class Constant (
-            val value: String//todo what is n, s
-        ) : Expression
+        sealed interface Constant : Expression {
+
+            @Serializable
+            @SerialName("StringConstant")
+            data class StringConstant (
+                val value: String
+            ) : Constant
+
+            @Serializable
+            @SerialName("IntConstant")
+            data class IntConstant (
+                val value: BigInteger
+            ) : Constant
+
+            @Serializable
+            @SerialName("BoolConstant")
+            data class BoolConstant (
+                val value: Boolean
+            ) : Constant
+
+            @Serializable
+            @SerialName("NoneConstant")
+            data class NoneConstant (
+                val value: Boolean
+            ) : Constant
+        }
 
         @Serializable
         @SerialName("Call")
@@ -137,14 +166,18 @@ sealed interface PythonType {
         @SerialName("Name")
         data class Name (
             @SerialName("id")
-            val identifier: String
+            val identifier: String,
+            @SerialName("ctx")
+            val context: ExpressionContext
         ) : Expression
 
         @Serializable
         @SerialName("Attribute")
         data class Attribute (
             val value: Expression,
-            val attr: String
+            val attr: String,
+            @SerialName("ctx")
+            val context: ExpressionContext
         ) : Expression
 
         @Serializable
@@ -152,13 +185,17 @@ sealed interface PythonType {
         data class Subscript (
             val value: Expression,
             val slice: Expression,
+            @SerialName("ctx")
+            val context: ExpressionContext,
         ) : Expression
 
         @Serializable
         @SerialName("Compare")
         data class Compare (
             val left: Expression,
-            //todo
+            @SerialName("ops")
+            val operators: List<BoolOperator>,
+            val comparators: List<Expression>
         ) : Expression
 
         @Serializable
@@ -166,6 +203,8 @@ sealed interface PythonType {
         data class PythonList (
             @SerialName("elts")
             val elements: List<Expression>,
+            @SerialName("ctx")
+            val context: ExpressionContext,
         ) : Expression
 
         @Serializable
@@ -178,13 +217,13 @@ sealed interface PythonType {
 
 
     @Serializable
-    sealed interface BoolOperation : PythonType {
+    sealed interface BoolOperator : PythonType {
         @Serializable
         @SerialName("And")
-        data object And : BoolOperation
+        data object And : BoolOperator
         @Serializable
         @SerialName("Or")
-        data object Or : BoolOperation
+        data object Or : BoolOperator
     }
 
     @Serializable
@@ -200,6 +239,10 @@ sealed interface PythonType {
         @Serializable
         @SerialName("Mult")
         data object Mult : Operator
+
+        @Serializable
+        @SerialName("Div")
+        data object Div : Operator
     }
 
     @Serializable
@@ -209,4 +252,53 @@ sealed interface PythonType {
         val aliasName: String?,
         val name: String
     ) : PythonType
+
+    @Serializable
+    sealed interface ExpressionContext : PythonType {
+        @Serializable
+        @SerialName("Load")
+        data object Load : ExpressionContext
+        @Serializable
+        @SerialName("Store")
+        data object Store : ExpressionContext
+        @Serializable
+        @SerialName("Del")
+        data object Delete : ExpressionContext
+    }
+
+    @Serializable
+    sealed interface CompareOperator : PythonType {
+       //Eq | NotEq | Lt | LtE | Gt | GtE | Is | IsNot | In | NotIn
+        @Serializable
+        @SerialName("Eq")
+        data object Equal : CompareOperator
+        @Serializable
+        @SerialName("NotEq")
+        data object NotEqual : CompareOperator
+        @Serializable
+        @SerialName("Lt")
+        data object LessThan : CompareOperator
+        @Serializable
+        @SerialName("LtE")
+        data object LessThanEqual : CompareOperator
+        @Serializable
+        @SerialName("Gt")
+        data object GreaterThan : CompareOperator
+        @Serializable
+        @SerialName("GtE")
+        data object GreaterThanEqual : CompareOperator
+        @Serializable
+        @SerialName("Is")
+        data object Is : CompareOperator
+        @Serializable
+        @SerialName("IsNot")
+        data object IsNot : CompareOperator
+        @Serializable
+        @SerialName("In")
+        data object In : CompareOperator
+        @Serializable
+        @SerialName("NotIn")
+        data object NotIn : CompareOperator
+
+    }
 }

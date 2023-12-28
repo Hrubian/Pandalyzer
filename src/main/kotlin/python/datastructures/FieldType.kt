@@ -1,6 +1,8 @@
-package python.datastructures.pandas
+package python.datastructures
 
 typealias FieldName = String
+
+
 
 enum class FieldType {
     // numpy types
@@ -21,6 +23,3 @@ enum class FieldType {
     StringType,
     NABoolean,
 }
-
-
-

@@ -1,5 +1,6 @@
 package analyzer
 
+import python.OperationResult
 import python.datastructures.PythonDataStructure
 import python.PythonType
 
@@ -11,6 +12,7 @@ data class AnalysisContext(
     val knownFunctionDefs: Map<Identifier, PythonType.Statement.FunctionDef>,
     val returnValue: PythonDataStructure?,
     val functionStack: List<Identifier>,
+    val knownImports: Map<String, String>, //todo manage levels
 ) {
 
     fun summarize(): AnalysisResult {
@@ -37,8 +39,8 @@ data class AnalysisContext(
     }
 }
 
-inline fun mapContext(previousContext: AnalysisContext, block: ContextBuilder.() -> Unit) =
-    ContextBuilder(previousContext).also { it.block() }.build()
+inline fun AnalysisContext.map(block: ContextBuilder.() -> Unit) =
+    ContextBuilder(this).also { it.block() }.build()
 
 class ContextBuilder(previousContext: AnalysisContext) {
 
@@ -50,7 +52,11 @@ class ContextBuilder(previousContext: AnalysisContext) {
 
     }
 
-    fun addFunc() {
+    fun<T : PythonDataStructure> returnResult(result: OperationResult<T>) {
+
+    }
+
+    fun addFunc(name: Identifier, body: List<PythonType.Statement>) { //todo args
 
     }
 
@@ -60,6 +66,10 @@ class ContextBuilder(previousContext: AnalysisContext) {
         )
 
     fun wasKnownFunction(name: Identifier): Boolean {
+
+    }
+
+    fun addImport(name: Identifier, alias: Identifier) {
 
     }
 

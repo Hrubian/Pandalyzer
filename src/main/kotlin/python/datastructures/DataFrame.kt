@@ -1,8 +1,7 @@
-package python.datastructures.pandas
+package python.datastructures
 
 import analyzer.Identifier
 import python.OperationResult
-import python.datastructures.PythonDataStructure
 import python.fail
 import python.ok
 

@@ -2,25 +2,28 @@ package analyzer
 
 import python.PythonType
 import python.PythonType.Alias
-import python.PythonType.BoolOperation.And
-import python.PythonType.BoolOperation.Or
+import python.PythonType.BoolOperator.And
+import python.PythonType.BoolOperator.Or
 import python.PythonType.Expression.*
+import python.PythonType.ExpressionContext.*
 import python.PythonType.Mod.Module
 import python.PythonType.Operator.*
 import python.PythonType.Statement.*
+import python.datastructures.*
 
 class Pandalyzer {
 
     fun analyze(module: Module, context: AnalysisContext): AnalysisContext =
         module.body.foldStatements(context)
 
-    fun analyze(functionDef: FunctionDef, context: AnalysisContext): AnalysisContext {
-        TODO("Not yet implemented")
+    fun analyze(functionDef: FunctionDef, context: AnalysisContext): AnalysisContext = context.map {
+        addFunc(functionDef.name, functionDef.body)
     }
 
-    fun analyze(arg: Return, context: AnalysisContext): AnalysisContext {
-        TODO("Not yet implemented")
-    }
+    fun analyze(returnStatement: Return, context: AnalysisContext): AnalysisContext =
+        returnStatement.value.analyzeWith(context).map {
+            //todo handle levels and removal of imports and current level
+        }
 
     fun analyze(assign: Assign, context: AnalysisContext): AnalysisContext {
         //todo check if the assignment is type hint
@@ -42,12 +45,16 @@ class Pandalyzer {
             )
         }
 
-    fun analyze(import: Import, context: AnalysisContext): AnalysisContext {
-        TODO("Not yet implemented")
+    fun analyze(import: Import, context: AnalysisContext): AnalysisContext = context.map {
+        import.names.forEach { (aliasName, name) -> addImport(name, aliasName ?: name) }
     }
 
-    fun analyze(importFrom: ImportFrom, context: AnalysisContext): AnalysisContext {
-        TODO("Not yet implemented")
+
+    fun analyze(importFrom: ImportFrom, context: AnalysisContext): AnalysisContext = context.map {
+        importFrom.names.forEach { (aliasName, name) ->
+//            addImport()
+            //todo
+        }
     }
 
     fun analyze(expressionStatement: ExpressionStatement, context: AnalysisContext): AnalysisContext =
@@ -62,37 +69,50 @@ class Pandalyzer {
     fun analyze(binaryOperation: BinaryOperation, context: AnalysisContext): AnalysisContext {
         val leftContext = binaryOperation.left.analyzeWith(context)
         val rightContext = binaryOperation.right.analyzeWith(leftContext)
-        return mapContext(rightContext) {
+        return rightContext.map {
             when (binaryOperation.operator) {
-                Add -> leftContext.returnValue + rightContext.returnValue
-                Mult -> leftContext.returnValue * rightContext.returnValue
-                Sub -> leftContext.returnValue - rightContext.returnValue //todo implement operators
-            }.let { returnValue(it) }
+                Add -> leftContext.returnValue!!.sumWith(rightContext.returnValue!!) //todo remove !!
+                Mult -> leftContext.returnValue!!.multiplyWith(rightContext.returnValue!!)
+                Sub -> leftContext.returnValue!!.subtract(rightContext.returnValue!!)
+                Div -> leftContext.returnValue!!.divideBy(rightContext.returnValue!!)
+            }.let { returnResult(it) }
         }
     }
 
-    fun analyze(constant: Constant, context: AnalysisContext): AnalysisContext = mapContext(context) {
-        returnValue(constant)
+    fun analyze(constant: Constant, context: AnalysisContext): AnalysisContext = context.map {
+        returnValue(
+            when(constant) {
+                is Constant.BoolConstant -> PythonBool(constant.value)
+                is Constant.IntConstant -> PythonInt(constant.value)
+                is Constant.StringConstant -> PythonString(constant.value)
+                is Constant.NoneConstant -> null
+            }
+        )
     }
 
-    fun analyze(call: Call, context: AnalysisContext): AnalysisContext {
+    fun analyze(call: Call, context: AnalysisContext, struct: PythonDataStructure): AnalysisContext {
+        call.func
         TODO("Not yet implemented")
     }
 
-    fun analyze(name: Name, context: AnalysisContext): AnalysisContext {
-        TODO("Not yet implemented")
+    fun analyze(name: Name, context: AnalysisContext): AnalysisContext = context.map {
+        returnValue(context.pythonDataStructures[name.identifier] ?: TODO("we need to fail here due to unknown name"))
     }
 
-    fun analyze(attribute: Attribute, context: AnalysisContext): AnalysisContext {
-        TODO("Not yet implemented")
+
+    fun analyze(attribute: Attribute, context: AnalysisContext): AnalysisContext = context.map {
+        returnValue
     }
 
     fun analyze(subscript: Subscript, context: AnalysisContext): AnalysisContext {
+        subscript.value.analyzeWith(context).map {
+
+        }
         TODO("Not yet implemented")
     }
 
     fun analyze(compare: Compare, context: AnalysisContext): AnalysisContext {
-        TODO("Not yet implemented")
+
     }
 
     fun analyze(pythonList: PythonList, context: AnalysisContext): AnalysisContext {
@@ -103,34 +123,45 @@ class Pandalyzer {
         TODO("Not yet implemented")
     }
 
-    fun analyze(and: And, context: AnalysisContext): AnalysisContext {
-        TODO("Not yet implemented")
-    }
+    fun analyze(and: And, context: AnalysisContext): AnalysisContext { error("Called And") }
 
-    fun analyze(or: Or, context: AnalysisContext): AnalysisContext {
-        TODO("Not yet implemented")
-    }
+    fun analyze(or: Or, context: AnalysisContext): AnalysisContext { error("Called Or") }
 
-    fun analyze(add: Add, context: AnalysisContext): AnalysisContext {
-        TODO("Not yet implemented")
-    }
+    fun analyze(add: Add, context: AnalysisContext): AnalysisContext { error("Called Add") }
 
-    fun analyze(sub: Sub, context: AnalysisContext): AnalysisContext {
-        TODO("Not yet implemented")
-    }
+    fun analyze(sub: Sub, context: AnalysisContext): AnalysisContext { error("Called Sub") }
 
-    fun analyze(mult: Mult, context: AnalysisContext): AnalysisContext {
-        TODO("Not yet implemented")
-    }
+    fun analyze(mult: Mult, context: AnalysisContext): AnalysisContext { error("Called Mult") }
 
-    fun analyze(alias: Alias, context: AnalysisContext): AnalysisContext {
-        TODO("Not yet implemented")
+    fun analyze(alias: Alias, context: AnalysisContext): AnalysisContext { error("Called alias") }
+
+    fun analyze(delete: Delete,  context: AnalysisContext): AnalysisContext { error("Called delete") }
+
+    fun analyze(load: Load, context: AnalysisContext): AnalysisContext { error("Called load") }
+
+    fun analyze(store: Store, context: AnalysisContext): AnalysisContext { error("Called store") }
+
+    fun analyze(boolOp: BoolOperation, context: AnalysisContext): AnalysisContext = when (boolOp.operator) {
+        is And -> {
+            boolOp.values.fold(
+                initial = context.map { returnValue(PythonBool(true)) },
+                operation = { context, value -> } //todo fold only before the value is "false" then stop and return current context with false
+            )
+        }
+        is Or -> {
+            // todo fold only before the value is true
+            boolOp.values.fold(
+                initial = context.map { returnValue(PythonBool(false)) },
+                operation = { context, value -> } // todo fold only before the value is true, then stop and return current context with true
+
+            )
+        }
     }
 
     private fun List<PythonType.Statement>.foldStatements(initialContext: AnalysisContext): AnalysisContext =
         this.fold(
             initial = initialContext,
-            operation = { acc, statement -> statement.analyzeWith(acc) } //todo remove return values
+            operation = { acc, statement -> acc.map { returnValue(null) }.let { statement.analyzeWith(it) } }
         )
 
     private fun PythonType.analyzeWith(context: AnalysisContext) = when (this) {
@@ -161,5 +192,9 @@ class Pandalyzer {
         is ImportFrom -> analyze(this, context)
         is Return -> analyze(this, context)
         is WhileLoop -> analyze(this, context)
+        is Delete -> analyze(this, context)
+        is Load -> analyze(this, context)
+        is Store -> analyze(this, context)
+        is BoolOperation -> analyze(this, context)
     }
 }

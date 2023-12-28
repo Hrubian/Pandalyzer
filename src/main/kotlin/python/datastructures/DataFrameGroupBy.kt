@@ -1,6 +1,4 @@
-package python.datastructures.pandas
-
-import python.datastructures.PythonDataStructure
+package python.datastructures
 
 data class DataFrameGroupBy(
     private val dataFrame: DataFrame,
