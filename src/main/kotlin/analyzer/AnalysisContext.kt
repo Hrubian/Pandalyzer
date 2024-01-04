@@ -10,10 +10,13 @@ sealed interface AnalysisContext {
 
     fun fail(reason: String): AnalysisContext
 
+    fun getFunction(name: Identifier): PythonType.Statement.FunctionDef?
+
     data class Error(
         val reason: String
     ) : AnalysisContext {
         override fun fail(reason: String): AnalysisContext = this
+        override fun getFunction(name: Identifier): PythonType.Statement.FunctionDef? = null
     }
 
     data class OK(
@@ -31,6 +34,8 @@ sealed interface AnalysisContext {
         }
 
         override fun fail(reason: String): AnalysisContext = Error(reason)
+
+        override fun getFunction(name: Identifier): PythonType.Statement.FunctionDef? = knownFunctionDefs[name]
 
         companion object {
             fun combineNondeterministic(first: AnalysisContext, second: AnalysisContext): AnalysisContext {
@@ -67,7 +72,7 @@ class ContextBuilder(private val previousContext: AnalysisContext.OK) {
         when (result) {
             is OperationResult.Ok -> returnValue(result.result)
             is OperationResult.Warning -> returnValue(result.result).also { addWarning(result.message) }
-            is OperationResult.Error ->
+            is OperationResult.Error -> error("TODO")
         }
     }
 
@@ -89,16 +94,12 @@ class ContextBuilder(private val previousContext: AnalysisContext.OK) {
                 )
         }
 
-    fun wasKnownFunction(name: Identifier): Boolean {
-
-    }
-
     fun addImport(name: Identifier, alias: Identifier) {
 
     }
 
     companion object {
-        fun buildEmpty() = AnalysisContext(
+        fun buildEmpty() = AnalysisContext.OK(
             initialStructures = emptyMap(),
             pythonDataStructures = emptyMap(),
             knownFunctionDefs = emptyMap(),

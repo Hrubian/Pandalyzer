@@ -1,19 +1,29 @@
 package analyzer
 
 
-class FunctionCaller {
+class FunctionCaller(private val analyzer: Pandalyzer) {
 
     fun callWithContext(functionName: Identifier, context: AnalysisContext): AnalysisContext {
-        if () {
-            //todo check whether we know the function
+        val function = context.getFunction(functionName)
+        if (function != null) {
+            return function.body.fold(
+                initial = context,
+                operation = { acc, statement ->
+                    acc.map { returnValue(null) }.let {
+                        with (analyzer) {
+                            statement.analyzeWith(it) //todo not nice :(
+                        }
+                    } //todo copy-paste code
+                }
+            )
         } else {
-
+            return dispatchPandasFunc(functionName, context)
         }
     }
 
-    private fun dispatchPandasFunc(functionName: Identifier) = when (functionName) {
+    private fun dispatchPandasFunc(functionName: Identifier, context: AnalysisContext): AnalysisContext = when (functionName) {
         "merge" ->
-        else -> null //todo
+        else -> context.fail("Unknown function $functionName")
     }
 
 }

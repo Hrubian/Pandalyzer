@@ -158,13 +158,13 @@ class Pandalyzer {
         }
     }
 
-    private fun List<PythonType.Statement>.foldStatements(initialContext: AnalysisContext): AnalysisContext =
+    fun List<PythonType.Statement>.foldStatements(initialContext: AnalysisContext): AnalysisContext =
         this.fold(
             initial = initialContext,
             operation = { acc, statement -> acc.map { returnValue(null) }.let { statement.analyzeWith(it) } }
         )
 
-    private fun PythonType.analyzeWith(context: AnalysisContext) = when (this) {
+    fun PythonType.analyzeWith(context: AnalysisContext) = when (this) {
         is Module -> analyze(this, context)
         is Alias -> analyze(this, context)
         is And -> analyze(this, context)
