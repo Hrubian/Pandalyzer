@@ -8,15 +8,4 @@ data class Series(
     private val indexType: FieldType? = null,
 ) : PythonDataStructure {
 
-    override fun sumWith(struct: PythonDataStructure): OperationResult<PythonDataStructure> {
-         when (struct) {
-            is DataFrame -> TODO()
-            is DataFrameGroupBy -> TODO()
-            is NondeterministicDataStructure -> TODO()
-            is PythonInt -> TODO()
-            is PythonString -> TODO()
-            is Series -> TODO()
-            is SeriesGroupBy -> TODO()
-        }
-    }
 }

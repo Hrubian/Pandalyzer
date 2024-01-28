@@ -52,6 +52,12 @@ sealed interface PythonDataStructure {
     operator fun div(other: PythonDataStructure): OperationResult<PythonDataStructure> =
         fail("Cannot divide a value of type $typeName")
 
+    infix fun and(other: PythonDataStructure): OperationResult<PythonDataStructure> =
+        fail("Cannot do 'and' on a value of type $typeName")
+
+    infix fun or(other: PythonDataStructure): OperationResult<PythonDataStructure> =
+        fail("Cannot do 'or' on a value of type $typeName")
+
     fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
         fail("the attribute $identifier of $typeName does not exist")
 

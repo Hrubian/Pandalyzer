@@ -1,15 +1,16 @@
 package python.datastructures
 
 import python.OperationResult
+import python.fail
 import python.ok
 
 @JvmInline
 value class PythonString(val value: String) : PythonDataStructure {
-    override fun sumWith(struct: PythonDataStructure): OperationResult<PythonDataStructure> {
-        return if (struct is PythonInt) {
-            PythonString(value + struct.value).ok()
+    operator override fun plus(other: PythonDataStructure): OperationResult<PythonDataStructure> {
+        return if (other is PythonInt) {
+            PythonString(value + other.value).ok()
         } else {
-            super.sumWith(struct)
+            fail("Cannot sum $typeName with ${other.typeName}")
         }
     }
 }

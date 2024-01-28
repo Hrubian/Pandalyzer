@@ -13,7 +13,7 @@ data class DataFrame(
         TODO("Not yet implemented")
     }
 
-    override fun callWithArgs(args: List<PythonDataStructure>, outerContext: AnalysisContext) {
+    override fun callWithArgs(args: List<PythonDataStructure>, outerContext: AnalysisContext): OperationResult<PythonDataStructure> {
         TODO("Not yet implemented")
     }
 

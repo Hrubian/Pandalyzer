@@ -1,8 +1,11 @@
+@file:UseSerializers(BigIntegerSerializer::class)
+
 package python
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import kotlinx.serialization.json.JsonClassDiscriminator
 import java.math.BigInteger
 

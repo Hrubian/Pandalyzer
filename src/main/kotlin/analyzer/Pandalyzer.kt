@@ -1,5 +1,6 @@
 package analyzer
 
+import python.OperationResult
 import python.PythonType
 import python.PythonType.Alias
 import python.PythonType.BoolOperator.And
@@ -27,10 +28,7 @@ class Pandalyzer {
     }
 
     fun analyze(returnStatement: Return, context: AnalysisContext): AnalysisContext =
-        returnStatement.value.analyzeWith(context).map {
-            dropLevel()
-        }
-
+        returnStatement.value.analyzeWith(context)
 
     fun analyze(assign: Assign, context: AnalysisContext): AnalysisContext {
         //todo check if the assignment is type hint
@@ -38,7 +36,7 @@ class Pandalyzer {
         //todo assign value and return resulting context
         val identifier = (assign.targets.first() as Name).identifier
         return newContext.map {
-            addStruct(identifier, newContext.getReturnValue())
+            addStruct(identifier, newContext.getRetValue())
         }
     }
 
@@ -50,20 +48,26 @@ class Pandalyzer {
 
     fun analyze(ifStatement: IfStatement, context: AnalysisContext): AnalysisContext =
         ifStatement.test.analyzeWith(context).let { newContext ->
-            AnalysisContext.combineNondeterministic(
+            AnalysisContext.combineNondeterministic( //todo if the result of test is clear, you do not need to branch :)
                 first = ifStatement.body.foldStatements(newContext),
                 second = ifStatement.orElse.foldStatements(newContext),
             )
         }
 
     fun analyze(import: Import, context: AnalysisContext): AnalysisContext = context.map {
-        import.names.forEach { (aliasName, name) -> addImport(name, aliasName ?: name) }
+        import.names.forEach { (aliasName, name) ->
+            addStruct(aliasName ?: name, ImportStruct(name, aliasName ?: name))
+        }
     }
 
     fun analyze(importFrom: ImportFrom, context: AnalysisContext): AnalysisContext = context.map {
+        val importStruct = ImportStruct(importFrom.module!!, importFrom.module) //tood resolve "!!"
         importFrom.names.forEach { (aliasName, name) ->
-//            addImport()
-            //todo
+            when (val result = importStruct.attribute(name)) {
+                is OperationResult.Ok -> addStruct(aliasName ?: name, result.result)
+                is OperationResult.Warning -> addStruct(aliasName ?: name, result.result).also { addWarning(result.message) }
+                is OperationResult.Error -> fail("The package ${importFrom.module} does not contain $name.")
+            }
         }
     }
 
@@ -81,10 +85,10 @@ class Pandalyzer {
         val rightContext = binaryOperation.right.analyzeWith(leftContext)
         return rightContext.map {
             when (binaryOperation.operator) {
-                Add -> leftContext.getReturnValue() + (rightContext.getReturnValue())
-                Mult -> leftContext.getReturnValue() * (rightContext.getReturnValue())
-                Sub -> leftContext.getReturnValue() - (rightContext.getReturnValue())
-                Div -> leftContext.getReturnValue() / (rightContext.getReturnValue())
+                Add -> leftContext.getRetValue() + (rightContext.getRetValue())
+                Mult -> leftContext.getRetValue() * (rightContext.getRetValue())
+                Sub -> leftContext.getRetValue() - (rightContext.getRetValue())
+                Div -> leftContext.getRetValue() / (rightContext.getRetValue())
             }.let { returnResult(it) }
         }
     }
@@ -101,8 +105,9 @@ class Pandalyzer {
     }
 
     fun analyze(call: Call, context: AnalysisContext): AnalysisContext {
-        val callable = call.func.analyzeWith(context).getReturnValue()
-        val args = call.arguments.fold(context) { currContext, arg -> arg.analyzeWith(currContext) }
+        val callable = call.func.analyzeWith(context).getRetValue()
+//        val args = call.arguments.fold(context) { currContext, arg -> arg.analyzeWith(currContext) }
+        val args = call.arguments.map { it.analyzeWith(context).getRetValue() } //todo pass context from one to other
         callable.callWithArgs(args, context)
         //todo check args, create inner context, add the args as known structures and call the func
         TODO("Not yet implemented")
@@ -119,7 +124,7 @@ class Pandalyzer {
 
     fun analyze(attribute: Attribute, context: AnalysisContext): AnalysisContext = context.map {
         val valResultContext = attribute.value.analyzeWith(context)
-        valResultContext.getReturnValue().attribute(attribute.attr).let {
+        valResultContext.getRetValue().attribute(attribute.attr).let {
             returnResult(it)
         }
     }
@@ -127,19 +132,21 @@ class Pandalyzer {
     fun analyze(subscript: Subscript, context: AnalysisContext): AnalysisContext = context.map {
         val newContext = subscript.value.analyzeWith(context)
         val sliceContext = subscript.slice.analyzeWith(newContext)
-        newContext.getReturnValue().subscript(sliceContext.getReturnValue()).let {
+        newContext.getRetValue().subscript(sliceContext.getRetValue()).let {
             returnResult(it)
         }
     }
 
     fun analyze(compare: Compare, context: AnalysisContext): AnalysisContext {
+        //todo could be folded?
+        val leftContext = compare.left.analyzeWith(context)
         TODO()
     }
 
     fun analyze(pythonList: PythonType.Expression.PythonList, context: AnalysisContext): AnalysisContext {
         when (pythonList.context) {
             is Load -> {
-                val elements = pythonList.elements.map { it.analyzeWith(context).run { getReturnValue() }}
+                val elements = pythonList.elements.map { it.analyzeWith(context).run { getRetValue() }}
                 return context.map { returnValue(PythonList(elements.toMutableList())) }
             }
             is Store -> {
@@ -157,7 +164,7 @@ class Pandalyzer {
                 values = dictionary.keys
                     .zip(dictionary.values)
                     .associate { (key, value) ->
-                        key.analyzeWith(context).getReturnValue() to value.analyzeWith(context).getReturnValue() //todo pass on context
+                        key.analyzeWith(context).getRetValue() to value.analyzeWith(context).getRetValue() //todo pass on context
                     }
                     .toMutableMap()
             )
@@ -168,15 +175,16 @@ class Pandalyzer {
         is And -> {
             boolOp.values.fold(
                 initial = context.map { returnValue(PythonBool(true)) },
-                operation = { context, value -> } //todo fold only before the value is "false" then stop and return current context with false
+                operation = { ctx, value ->
+                    TODO()
+                } //todo fold only before the value is "false" then stop and return current context with false
             )
         }
         is Or -> {
             // todo fold only before the value is true
             boolOp.values.fold(
                 initial = context.map { returnValue(PythonBool(false)) },
-                operation = { context, value -> } // todo fold only before the value is true, then stop and return current context with true
-
+                operation = { ctx, value -> TODO() } // todo fold only before the value is true, then stop and return current context with true
             )
         }
     }
@@ -184,7 +192,7 @@ class Pandalyzer {
     fun List<PythonType.Statement>.foldStatements(initialContext: AnalysisContext): AnalysisContext =
         this.fold(
             initial = initialContext,
-            operation = { acc, statement -> acc.map { returnValue(null) }.let { statement.analyzeWith(it) } }
+            operation = { acc, statement -> acc.map { returnValue(PythonNone) }.let { statement.analyzeWith(it) } }
         )
 
     fun PythonType.analyzeWith(context: AnalysisContext) = when (this) {
