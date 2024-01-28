@@ -3,6 +3,8 @@ package analyzer
 import python.OperationResult
 import python.datastructures.PythonDataStructure
 import python.PythonType
+import python.datastructures.PythonNone
+import python.datastructures.UnresolvedStructure
 
 typealias Identifier = String
 
@@ -10,23 +12,32 @@ sealed interface AnalysisContext {
 
     fun fail(reason: String): AnalysisContext
 
-    fun getFunction(name: Identifier): PythonType.Statement.FunctionDef?
+    fun getStructure(name: Identifier): PythonDataStructure?
+    fun getReturnValue(): PythonDataStructure
 
     data class Error(
         val reason: String
     ) : AnalysisContext {
         override fun fail(reason: String): AnalysisContext = this
-        override fun getFunction(name: Identifier): PythonType.Statement.FunctionDef? = null
+        override fun getStructure(name: Identifier): PythonDataStructure? = null
+        override fun getReturnValue(): PythonDataStructure = UnresolvedStructure //todo really?
     }
 
     data class OK(
-        val initialStructures: Map<Identifier, PythonDataStructure>,
+        //old version
+//        val initialStructures: Map<Identifier, PythonDataStructure>,
+//        val pythonDataStructures: Map<Identifier, PythonDataStructure>,
+//        val knownFunctionDefs: Map<Identifier, PythonType.Statement.FunctionDef>,
+//        val returnValue: PythonDataStructure?,
+//        val functionStack: List<Identifier>,
+//        val knownImports: Map<String, String>, //todo manage levels
+//        val warnings: Sequence<String>,
+        //new version
         val pythonDataStructures: Map<Identifier, PythonDataStructure>,
-        val knownFunctionDefs: Map<Identifier, PythonType.Statement.FunctionDef>,
-        val returnValue: PythonDataStructure?,
-        val functionStack: List<Identifier>,
-        val knownImports: Map<String, String>, //todo manage levels
-        val warnings: Sequence<String>,
+        val returnValue: PythonDataStructure,
+        val outerContext: AnalysisContext?,
+        val knownImports: Map<String, String>,
+        val warnings: List<String>,
     ) : AnalysisContext {
 
         fun summarize(): AnalysisResult {
@@ -35,16 +46,17 @@ sealed interface AnalysisContext {
 
         override fun fail(reason: String): AnalysisContext = Error(reason)
 
-        override fun getFunction(name: Identifier): PythonType.Statement.FunctionDef? = knownFunctionDefs[name]
+        override fun getStructure(name: Identifier): PythonDataStructure? =
+            pythonDataStructures.getOrElse(name) { outerContext?.getStructure(name) }
+
+        override fun getReturnValue(): PythonDataStructure = returnValue
 
         companion object {
             fun combineNondeterministic(first: AnalysisContext, second: AnalysisContext): AnalysisContext {
                 TODO("Not yet implemented")
             }
-
         }
     }
-
 }
 
 
@@ -57,15 +69,20 @@ inline fun AnalysisContext.map(block: ContextBuilder.() -> Unit) =
 
 class ContextBuilder(private val previousContext: AnalysisContext.OK) {
 
-    private var returnValue: PythonDataStructure? = previousContext.returnValue
+    private var returnValue: PythonDataStructure = previousContext.returnValue
     private val newWarnings: List<String> = mutableListOf()
+    private val newImports: Map<String, String> = mutableMapOf()
     private var failReason: String? = null
     fun addHint() {
 
     }
 
-    fun returnValue(structure: PythonDataStructure?) {
+    fun returnValue(structure: PythonDataStructure) {
         returnValue = structure
+    }
+
+    fun dropLevel() {
+        TODO()
     }
 
     fun<T : PythonDataStructure> returnResult(result: OperationResult<T>) {
@@ -78,10 +95,9 @@ class ContextBuilder(private val previousContext: AnalysisContext.OK) {
 
     fun addWarning(message: String) = newWarnings.addLast(message)
 
-    fun addFunc(def: PythonType.Statement.FunctionDef) {
-
+    fun addStruct(identifier: Identifier, struct: PythonDataStructure) {
+        TODO()
     }
-
 
     fun build(): AnalysisContext =
         if (failReason != null) {
@@ -98,15 +114,17 @@ class ContextBuilder(private val previousContext: AnalysisContext.OK) {
 
     }
 
+    fun fail(reason: String) {
+        failReason = reason
+    }
+
     companion object {
-        fun buildEmpty() = AnalysisContext.OK(
-            initialStructures = emptyMap(),
+        fun buildEmpty(outerContext: AnalysisContext? = null) = AnalysisContext.OK(
             pythonDataStructures = emptyMap(),
-            knownFunctionDefs = emptyMap(),
-            returnValue = null,
-            functionStack = emptyList(),
+            returnValue = PythonNone,
             knownImports = emptyMap(),
-            warnings = emptySequence(),
+            warnings = emptyList(),
+            outerContext = outerContext,
         )
     }
 
