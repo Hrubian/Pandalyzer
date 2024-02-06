@@ -22,6 +22,17 @@ sealed interface AnalysisContext {
         override fun getRetValue(): PythonDataStructure = UnresolvedStructure //todo really?
     }
 
+    data class Returned(
+        val value: PythonDataStructure
+    ) : AnalysisContext {
+        override fun fail(reason: String): AnalysisContext = AnalysisContext.Error(reason)
+
+        override fun getStructure(name: Identifier): PythonDataStructure? = null
+
+        override fun getRetValue(): PythonDataStructure = value //todo really?
+
+    }
+
     data class OK(
         //old version
 //        val initialStructures: Map<Identifier, PythonDataStructure>,
@@ -63,6 +74,7 @@ sealed interface AnalysisContext {
 inline fun AnalysisContext.map(block: ContextBuilder.() -> Unit) =
     when (this) {
         is AnalysisContext.OK -> ContextBuilder(this).also {it.block() }.build()
+        is AnalysisContext.Returned -> this
         is AnalysisContext.Error -> this
     }
 
@@ -84,7 +96,7 @@ class ContextBuilder(private val previousContext: AnalysisContext.OK) {
         when (result) {
             is OperationResult.Ok -> returnValue(result.result)
             is OperationResult.Warning -> returnValue(result.result).also { addWarning(result.message) }
-            is OperationResult.Error -> error("TODO")
+            is OperationResult.Error -> failReason = result.reason
         }
     }
 
@@ -96,7 +108,7 @@ class ContextBuilder(private val previousContext: AnalysisContext.OK) {
 
     fun build(): AnalysisContext =
         failReason?.let {
-            AnalysisContext.Error(it) //todo solve non-nullability
+            AnalysisContext.Error(it)
         } ?: AnalysisContext.OK(
             returnValue = returnValue,
             warnings = previousContext.warnings + newWarnings,

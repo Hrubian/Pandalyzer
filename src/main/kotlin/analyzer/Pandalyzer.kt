@@ -28,7 +28,7 @@ class Pandalyzer {
     }
 
     fun analyze(returnStatement: Return, context: AnalysisContext): AnalysisContext =
-        returnStatement.value.analyzeWith(context)
+        returnStatement.value.analyzeWith(context).getRetValue().let { AnalysisContext.Returned(it) }
 
     fun analyze(assign: Assign, context: AnalysisContext): AnalysisContext {
         //todo check if the assignment is type hint
@@ -108,9 +108,9 @@ class Pandalyzer {
         val callable = call.func.analyzeWith(context).getRetValue()
 //        val args = call.arguments.fold(context) { currContext, arg -> arg.analyzeWith(currContext) }
         val args = call.arguments.map { it.analyzeWith(context).getRetValue() } //todo pass context from one to other
-        callable.callWithArgs(args, context)
-        //todo check args, create inner context, add the args as known structures and call the func
-        TODO("Not yet implemented")
+        return context.map {
+            returnResult(callable.callWithArgs(args, context))
+        }
     }
 
     fun analyze(name: Name, context: AnalysisContext): AnalysisContext = context.map {

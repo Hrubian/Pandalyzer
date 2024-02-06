@@ -33,6 +33,7 @@ sealed interface PythonType {
         @SerialName("FunctionDef")
         data class FunctionDef(
             val name: String,
+            val args: Arguments
 //            val args: List //todo arguments
             val body: List<Statement>,
             //todo others
@@ -304,4 +305,26 @@ sealed interface PythonType {
         data object NotIn : CompareOperator
 
     }
+
+    @Serializable
+    data class Arguments(
+        @SerialName("posonlyargs")
+        val positionalArgs: List<Arg>,
+        val arguments: List<Arg>,
+        val keywordArgs: List<KeywordArg>,
+        val keywordDefaults: List<Expression>
+    ) : PythonType
+
+    @Serializable
+    data class Arg(
+        @SerialName("arg")
+        val identifier: String
+    ) : PythonType
+
+    @Serializable
+    data class KeywordArg(
+        @SerialName("arg")
+        val identifier: String,
+        val value: Expression
+    ) : PythonType
 }
