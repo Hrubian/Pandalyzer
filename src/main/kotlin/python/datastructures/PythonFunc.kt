@@ -11,7 +11,7 @@ data class PythonFunc(
     val body: List<PythonType.Statement>,
     val positionArguments: List<String>
 ) : PythonDataStructure {
-    override fun callWithArgs(
+    override fun invoke(
         args: List<PythonDataStructure>,
         outerContext: AnalysisContext
     ): OperationResult<PythonDataStructure> {

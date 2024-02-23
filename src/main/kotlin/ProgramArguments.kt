@@ -1,6 +1,4 @@
 import analyzer.AnalyzerMetadata
-import python.datastructures.DataFrame
-import python.datastructures.FieldType
 import java.io.OutputStream
 
 data class ProgramArguments(

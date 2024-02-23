@@ -1,3 +1,5 @@
+package analyzer
+
 import analyzer.ContextBuilder
 import analyzer.Pandalyzer
 import org.junit.jupiter.api.Test

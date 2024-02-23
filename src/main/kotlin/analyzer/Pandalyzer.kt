@@ -56,12 +56,12 @@ class Pandalyzer {
 
     fun analyze(import: Import, context: AnalysisContext): AnalysisContext = context.map {
         import.names.forEach { (aliasName, name) ->
-            addStruct(aliasName ?: name, ImportStruct(name, aliasName ?: name))
+            addStruct(aliasName ?: name, createImportStruct(name, aliasName ?: name))
         }
     }
 
     fun analyze(importFrom: ImportFrom, context: AnalysisContext): AnalysisContext = context.map {
-        val importStruct = ImportStruct(importFrom.module!!, importFrom.module) //tood resolve "!!"
+        val importStruct = createImportStruct(importFrom.module!!, importFrom.module) //tood resolve "!!"
         importFrom.names.forEach { (aliasName, name) ->
             when (val result = importStruct.attribute(name)) {
                 is OperationResult.Ok -> addStruct(aliasName ?: name, result.result)
@@ -109,7 +109,7 @@ class Pandalyzer {
 //        val args = call.arguments.fold(context) { currContext, arg -> arg.analyzeWith(currContext) }
         val args = call.arguments.map { it.analyzeWith(context).getRetValue() } //todo pass context from one to other
         return context.map {
-            returnResult(callable.callWithArgs(args, context))
+            returnResult(callable.invoke(args, context))
         }
     }
 

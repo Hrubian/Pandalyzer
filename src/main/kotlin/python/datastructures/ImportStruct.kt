@@ -1,9 +1,19 @@
 package python.datastructures
 
 import analyzer.Identifier
+import python.datastructures.pandas.PandasImport
 
-data class ImportStruct(
-    val libName: Identifier,
-    val alias: Identifier = libName,
+interface ImportStruct : PythonDataStructure
 
-) : PythonDataStructure
+fun createImportStruct(
+    libName: Identifier,
+    alias: Identifier = libName,
+    ): ImportStruct {
+
+    if (libName == "pandas") {
+        return PandasImport
+    }
+    else {
+        error("Unknown import $libName")
+    }
+}

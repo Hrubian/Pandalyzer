@@ -3,11 +3,10 @@ package python.datastructures
 import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
-import python.PythonType
 import python.fail
 import kotlin.reflect.KClass
 
-sealed interface PythonDataStructure {
+interface PythonDataStructure {
     val typeName: KClass<PythonDataStructure>
         get() = javaClass.kotlin
 
@@ -61,7 +60,7 @@ sealed interface PythonDataStructure {
     fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
         fail("the attribute $identifier of $typeName does not exist")
 
-    fun callWithArgs(args: List<PythonDataStructure>, outerContext: AnalysisContext): OperationResult<PythonDataStructure> =
+    fun invoke(args: List<PythonDataStructure>, outerContext: AnalysisContext): OperationResult<PythonDataStructure> =
         fail("The $typeName is not callable")
 
 }
