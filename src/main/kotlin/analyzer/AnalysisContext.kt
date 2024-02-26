@@ -62,9 +62,13 @@ sealed interface AnalysisContext {
 
     }
     companion object {
-        fun combineNondeterministic(first: AnalysisContext, second: AnalysisContext): AnalysisContext {
-            TODO("Not yet implemented")
-        }
+        fun combineNondeterministic(first: AnalysisContext, second: AnalysisContext): AnalysisContext =
+            when {
+                first is OK && second is OK -> OK(
+                    pythonDataStructures = first.pythonDataStructures.
+                )
+                first is OK
+            }
     }
 
 }
