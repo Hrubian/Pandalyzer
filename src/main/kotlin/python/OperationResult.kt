@@ -2,7 +2,7 @@ package python
 
 import python.datastructures.PythonDataStructure
 
-sealed interface OperationResult<T : PythonDataStructure> {
+sealed interface OperationResult<out T : PythonDataStructure> {
     @JvmInline
     value class Ok<T : PythonDataStructure>(val result: T) : OperationResult<T>
     data class Warning<T : PythonDataStructure>(val result: T, val message: String) : OperationResult<T>
