@@ -11,16 +11,18 @@ data class NondeterministicDataStructure(
     val left: PythonDataStructure,
     val right: PythonDataStructure,
 ) : PythonDataStructure {
-
     override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> =
         combineResults(left.subscript(key), right.subscript(key))
 
     override operator fun plus(other: PythonDataStructure): OperationResult<PythonDataStructure> =
         combineResults(left.plus(other), right.plus(other))
+
     override operator fun minus(other: PythonDataStructure): OperationResult<PythonDataStructure> =
         combineResults(left.minus(other), right.minus(other))
+
     override operator fun times(other: PythonDataStructure): OperationResult<PythonDataStructure> =
         combineResults(left.times(other), right.times(other))
+
     override operator fun div(other: PythonDataStructure): OperationResult<PythonDataStructure> =
         combineResults(left.div(other), right.div(other))
 
@@ -33,8 +35,10 @@ data class NondeterministicDataStructure(
     override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
         combineResults(left.attribute(identifier), right.attribute(identifier))
 
-    override fun invoke(args: List<PythonDataStructure>, outerContext: AnalysisContext): OperationResult<PythonDataStructure> =
-        combineResults(left.invoke(args, outerContext), right.invoke(args, outerContext))
+    override fun invoke(
+        args: List<PythonDataStructure>,
+        outerContext: AnalysisContext,
+    ): OperationResult<PythonDataStructure> = combineResults(left.invoke(args, outerContext), right.invoke(args, outerContext))
 
     private fun combineResults(
         result1: OperationResult<PythonDataStructure>,

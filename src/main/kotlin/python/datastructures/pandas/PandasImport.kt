@@ -8,7 +8,6 @@ import python.fail
 import python.ok
 
 data object PandasImport : ImportStruct {
-
     override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
         when (identifier) {
             "merge" -> PandasFunc.MergeFunc.ok()
@@ -20,4 +19,3 @@ data object PandasImport : ImportStruct {
             else -> fail("Unknown pandas identifier $identifier.")
         }
 }
-

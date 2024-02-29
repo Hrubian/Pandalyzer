@@ -8,14 +8,16 @@ import python.datastructures.FieldType
 import python.datastructures.PythonDataStructure
 
 data class DataFrame(
-    val fields: Map<FieldName, FieldType>
+    val fields: Map<FieldName, FieldType>,
 ) : PythonDataStructure {
     override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> {
         TODO("Not yet implemented")
     }
 
-    override fun invoke(args: List<PythonDataStructure>, outerContext: AnalysisContext): OperationResult<PythonDataStructure> {
+    override fun invoke(
+        args: List<PythonDataStructure>,
+        outerContext: AnalysisContext,
+    ): OperationResult<PythonDataStructure> {
         TODO("Not yet implemented")
     }
-
 }

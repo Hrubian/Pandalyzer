@@ -6,6 +6,8 @@ plugins {
     kotlin("jvm") version kotlinVersion
     application
     kotlin("plugin.serialization") version kotlinVersion
+
+    alias(libs.plugins.ktlint)
 }
 
 group = "org.example"

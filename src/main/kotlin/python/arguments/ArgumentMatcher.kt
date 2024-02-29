@@ -1,4 +1,3 @@
 package python.arguments
 
-class ArgumentMatcher {
-}
+class ArgumentMatcher

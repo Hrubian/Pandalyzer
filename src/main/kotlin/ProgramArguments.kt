@@ -13,13 +13,16 @@ data class ProgramArguments(
 
 enum class OutputFormat {
     HumanReadable,
-    JSON;
+    JSON,
+    ;
+
     companion object {
-        fun fromString(it: String): OutputFormat = when (it) {
-            "hr" -> HumanReadable
-            "json" -> JSON
-            else -> HumanReadable //todo warning/error
-        }
+        fun fromString(it: String): OutputFormat =
+            when (it) {
+                "hr" -> HumanReadable
+                "json" -> JSON
+                else -> HumanReadable // todo warning/error
+            }
 
         fun default() = HumanReadable
     }
@@ -27,7 +30,7 @@ enum class OutputFormat {
 
 enum class ExitWays(exitCode: Int) {
     OK(0),
-    BadArgs(1)
+    BadArgs(1),
 }
 
 fun parseArgs(args: Array<String>): ProgramArguments {

@@ -2,8 +2,6 @@ package python.datastructures
 
 typealias FieldName = String
 
-
-
 enum class FieldType {
     // numpy types
     FloatType,

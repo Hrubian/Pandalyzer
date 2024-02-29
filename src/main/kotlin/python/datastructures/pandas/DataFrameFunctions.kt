@@ -10,18 +10,16 @@ interface DataFrameFunctions : PythonDataStructure {
     data class GroupByFunc(override val dataFrame: DataFrame) : DataFrameFunctions {
         override fun invoke(
             args: List<PythonDataStructure>,
-            outerContext: AnalysisContext
+            outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> {
-
         }
     }
 
     data class MergeFunc(override val dataFrame: DataFrame) : DataFrameFunctions {
         override fun invoke(
             args: List<PythonDataStructure>,
-            outerContext: AnalysisContext
+            outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> {
-
         }
     }
 }

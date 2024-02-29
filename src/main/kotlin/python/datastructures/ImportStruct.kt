@@ -8,12 +8,10 @@ interface ImportStruct : PythonDataStructure
 fun createImportStruct(
     libName: Identifier,
     alias: Identifier = libName,
-    ): ImportStruct {
-
+): ImportStruct {
     if (libName == "pandas") {
         return PandasImport
-    }
-    else {
+    } else {
         error("Unknown import $libName")
     }
 }

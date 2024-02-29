@@ -10,7 +10,7 @@ interface PythonDataStructure {
     val typeName: KClass<PythonDataStructure>
         get() = javaClass.kotlin
 
-    //old implementation
+    // old implementation
 //    fun index(key: Identifier): OperationResult<PythonDataStructure> =
 //        fail("Cannot apply one-key indexing on $typeName")
 //    fun indexList(keys: List<Identifier>): OperationResult<PythonDataStructure> =
@@ -39,28 +39,26 @@ interface PythonDataStructure {
 //        fail ("Cannot ${struct.typeName} from $typeName")
 
     // new implementation
-    fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> =
-        fail("Cannot subscript a value of type $typeName")
+    fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> = fail("Cannot subscript a value of type $typeName")
 
-    operator fun plus(other: PythonDataStructure): OperationResult<PythonDataStructure> =
-        fail("Cannot add a value of type $typeName")
+    operator fun plus(other: PythonDataStructure): OperationResult<PythonDataStructure> = fail("Cannot add a value of type $typeName")
+
     operator fun minus(other: PythonDataStructure): OperationResult<PythonDataStructure> =
         fail("Cannot subtract from a value of type $typeName")
-    operator fun times(other: PythonDataStructure): OperationResult<PythonDataStructure> =
-        fail("Cannot multiply a value of type $typeName")
-    operator fun div(other: PythonDataStructure): OperationResult<PythonDataStructure> =
-        fail("Cannot divide a value of type $typeName")
 
-    infix fun and(other: PythonDataStructure): OperationResult<PythonDataStructure> =
-        fail("Cannot do 'and' on a value of type $typeName")
+    operator fun times(other: PythonDataStructure): OperationResult<PythonDataStructure> = fail("Cannot multiply a value of type $typeName")
 
-    infix fun or(other: PythonDataStructure): OperationResult<PythonDataStructure> =
-        fail("Cannot do 'or' on a value of type $typeName")
+    operator fun div(other: PythonDataStructure): OperationResult<PythonDataStructure> = fail("Cannot divide a value of type $typeName")
+
+    infix fun and(other: PythonDataStructure): OperationResult<PythonDataStructure> = fail("Cannot do 'and' on a value of type $typeName")
+
+    infix fun or(other: PythonDataStructure): OperationResult<PythonDataStructure> = fail("Cannot do 'or' on a value of type $typeName")
 
     fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
         fail("the attribute $identifier of $typeName does not exist")
 
-    fun invoke(args: List<PythonDataStructure>, outerContext: AnalysisContext): OperationResult<PythonDataStructure> =
-        fail("The $typeName is not callable")
-
+    fun invoke(
+        args: List<PythonDataStructure>,
+        outerContext: AnalysisContext,
+    ): OperationResult<PythonDataStructure> = fail("The $typeName is not callable")
 }
