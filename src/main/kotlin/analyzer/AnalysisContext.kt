@@ -28,7 +28,7 @@ sealed interface AnalysisContext {
     data class Returned(
         val value: PythonDataStructure,
     ) : AnalysisContext {
-        override fun fail(reason: String): AnalysisContext = AnalysisContext.Error(reason)
+        override fun fail(reason: String): AnalysisContext = Error(reason)
 
         override fun getStructure(name: Identifier): PythonDataStructure? = null
 
@@ -36,15 +36,6 @@ sealed interface AnalysisContext {
     }
 
     data class OK(
-        // old version
-//        val initialStructures: Map<Identifier, PythonDataStructure>,
-//        val pythonDataStructures: Map<Identifier, PythonDataStructure>,
-//        val knownFunctionDefs: Map<Identifier, PythonType.Statement.FunctionDef>,
-//        val returnValue: PythonDataStructure?,
-//        val functionStack: List<Identifier>,
-//        val knownImports: Map<String, String>, //todo manage levels
-//        val warnings: Sequence<String>,
-        // new version
         val pythonDataStructures: Map<Identifier, PythonDataStructure>,
         val returnValue: PythonDataStructure,
         val outerContext: AnalysisContext?,
@@ -78,12 +69,22 @@ sealed interface AnalysisContext {
                                     if (item1 != null && item2 != null) {
                                         NondeterministicDataStructure(item1, item2)
                                     } else {
-                                        item1 ?: item2 ?: error("This does not make sense")
+                                        item1 ?: item2!!
                                     }
                                 },
                         outerContext = first.outerContext.also { check(first.outerContext == second.outerContext) },
+                        returnValue = combineNondeterministic(first.returnValue, second.returnValue), //todo,
+                        warnings = first.warnings + second.warnings //todo
                     )
-//                first is OK
+                else -> TODO()
+            }
+
+        private fun combineNondeterministic(
+            first: OperationResult<PythonDataStructure>,
+            second: OperationResult<PythonDataStructure>
+        ): OperationResult<PythonDataStructure> =
+            when {
+                first is Ok
             }
     }
 }
@@ -116,7 +117,7 @@ class ContextBuilder(private val previousContext: AnalysisContext.OK) {
         }
     }
 
-    fun addWarning(message: String): Unit = TODO() // newWarnings.addFirst(message) //todo last
+    fun addWarning(message: String): Unit = newWarnings.addLast(message)
 
     fun addStruct(
         identifier: Identifier,

@@ -4,57 +4,56 @@ import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
 import python.datastructures.PythonDataStructure
+import python.fail
 
-interface PandasFunc : PythonDataStructure {
-    object MergeFunc : PandasFunc {
+interface PandasFunction : PythonDataStructure {
+    object MergeFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
             outerContext: AnalysisContext,
-        ): OperationResult<PythonDataStructure> {
-        }
+        ): OperationResult<PythonDataStructure> = fail("not implemented")
+
     }
 
-    object DataFrameFunc : PandasFunc {
+    object DataFrameFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
             outerContext: AnalysisContext,
-        ): OperationResult<PythonDataStructure> {
-        }
+        ): OperationResult<PythonDataStructure> = fail("not implemented")
+
 
         // we want to support also constructs like: pd.DataFrame.from_dict(...)
-        override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> {
-        }
+        override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> = fail("not implemented")
+
     }
 
-    object SeriesFunc : PandasFunc {
+    object SeriesFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
             outerContext: AnalysisContext,
-        ): OperationResult<PythonDataStructure> {
-        }
+        ): OperationResult<PythonDataStructure> = fail("not implemented")
+
     }
 
-    object ConcatFunc : PandasFunc {
+    object ConcatFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
             outerContext: AnalysisContext,
-        ): OperationResult<PythonDataStructure> {
-        }
+        ): OperationResult<PythonDataStructure> = fail("not implemented")
+
     }
 
-    object GroupByFunc : PandasFunc {
+    object GroupByFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
             outerContext: AnalysisContext,
-        ): OperationResult<PythonDataStructure> {
-        }
+        ): OperationResult<PythonDataStructure> = fail("not implemented")
     }
 
-    object ReadCsvFunc : PandasFunc {
+    object ReadCsvFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
             outerContext: AnalysisContext,
-        ): OperationResult<PythonDataStructure> {
-        }
+        ): OperationResult<PythonDataStructure> = fail("not implemented")
     }
 }

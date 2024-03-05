@@ -1,3 +1,0 @@
-package analyzer
-
-class ExpressionAnalyzer

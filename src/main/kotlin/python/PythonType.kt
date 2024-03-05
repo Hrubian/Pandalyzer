@@ -195,7 +195,7 @@ sealed interface PythonType {
         data class Compare(
             val left: Expression,
             @SerialName("ops")
-            val operators: List<BoolOperator>,
+            val operators: List<CompareOperator>,
             val comparators: List<Expression>,
         ) : Expression
 

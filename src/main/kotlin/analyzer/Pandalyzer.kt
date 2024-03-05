@@ -101,10 +101,19 @@ class Pandalyzer {
         context: AnalysisContext,
     ): AnalysisContext =
         ifStatement.test.analyzeWith(context).let { newContext ->
-            AnalysisContext.combineNondeterministic( // todo if the result of test is clear, you do not need to branch :)
-                first = ifStatement.body.foldStatements(newContext),
-                second = ifStatement.orElse.foldStatements(newContext),
-            )
+            val retValue = newContext.getRetValue()
+            if (retValue is PythonBool) {
+                if (retValue.value) {
+                    ifStatement.body.foldStatements(newContext)
+                } else {
+                    ifStatement.orElse.foldStatements(newContext)
+                }
+            } else {
+                AnalysisContext.combineNondeterministic(
+                    first = ifStatement.body.foldStatements(newContext),
+                    second = ifStatement.orElse.foldStatements(newContext),
+                )
+            }
         }
 
     fun analyze(
@@ -230,9 +239,26 @@ class Pandalyzer {
         compare: Compare,
         context: AnalysisContext,
     ): AnalysisContext {
-        // todo could be folded?
-        val leftContext = compare.left.analyzeWith(context)
-        TODO()
+        check(compare.comparators.size == compare.operators.size)
+        var resultContext = compare.left.analyzeWith(context)
+        for (index: Int in 0..< compare.comparators.size) {
+            val left = resultContext.getRetValue()
+            resultContext = compare.comparators[index].analyzeWith(resultContext)
+            val right = resultContext.getRetValue()
+            when (compare.operators[index]) {
+                CompareOperator.Equal -> TODO()
+                CompareOperator.GreaterThan -> TODO()
+                CompareOperator.GreaterThanEqual -> TODO()
+                CompareOperator.In -> TODO()
+                CompareOperator.Is -> TODO()
+                CompareOperator.IsNot -> TODO()
+                CompareOperator.LessThan -> TODO()
+                CompareOperator.LessThanEqual -> TODO()
+                CompareOperator.NotEqual -> TODO()
+                CompareOperator.NotIn -> TODO()
+            }
+        }
+        return resultContext
     }
 
     fun analyze(
@@ -333,5 +359,8 @@ class Pandalyzer {
             is CompareOperator -> error("Called CompareOperator")
             is ExpressionContext -> error("Called ExpressionContext")
             is Alias -> error("Called Alias")
+            is PythonType.Arg -> error("Called Arg")
+            is PythonType.Arguments -> error("Called Arguments")
+            is PythonType.KeywordArg -> error("Called KeywordArg")
         }
 }
