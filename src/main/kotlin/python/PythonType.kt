@@ -317,8 +317,15 @@ sealed interface PythonType {
     data class Arguments(
         @SerialName("posonlyargs")
         val positionalArgs: List<Arg>,
+        @SerialName("args")
         val arguments: List<Arg>,
-//        val keywordArgs: List<KeywordArg>,
+        @SerialName("vararg")
+        val variadicArg: Arg?,
+        @SerialName("kwargs")
+        val keywordVariadicArg: Arg?,
+        @SerialName("kwonlyargs")
+        val keywordOnlyArgs: List<Arg>,
+        @SerialName("defaults")
         val keywordDefaults: List<Expression>,
     ) : PythonType
 

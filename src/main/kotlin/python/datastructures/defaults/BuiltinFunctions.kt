@@ -1,6 +1,7 @@
 package python.datastructures.defaults
 
 import analyzer.AnalysisContext
+import analyzer.Identifier
 import python.OperationResult
 import python.datastructures.PythonDataStructure
 import python.fail
@@ -9,7 +10,8 @@ import python.ok
 fun interface PythonInvokable : PythonDataStructure {
     override fun invoke(
         args: List<PythonDataStructure>,
-        outerContext: AnalysisContext,
+        keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+        outerContext: AnalysisContext
     ): OperationResult<PythonDataStructure>
 
 }

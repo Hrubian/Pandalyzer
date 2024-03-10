@@ -59,6 +59,7 @@ interface PythonDataStructure {
 
     fun invoke(
         args: List<PythonDataStructure>,
+        keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
         outerContext: AnalysisContext,
     ): OperationResult<PythonDataStructure> = fail("The $typeName is not callable")
 }

@@ -11,7 +11,8 @@ interface PandasFunction : PythonDataStructure {
     object MergeFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
-            outerContext: AnalysisContext,
+            keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+            outerContext: AnalysisContext
         ): OperationResult<PythonDataStructure> = fail("not implemented")
 
     }
@@ -19,7 +20,8 @@ interface PandasFunction : PythonDataStructure {
     object DataFrameFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
-            outerContext: AnalysisContext,
+            keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+            outerContext: AnalysisContext
         ): OperationResult<PythonDataStructure> = fail("not implemented")
 
 
@@ -39,7 +41,8 @@ interface PandasFunction : PythonDataStructure {
     object SeriesFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
-            outerContext: AnalysisContext,
+            keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+            outerContext: AnalysisContext
         ): OperationResult<PythonDataStructure> = fail("not implemented")
 
     }
@@ -47,7 +50,8 @@ interface PandasFunction : PythonDataStructure {
     object ConcatFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
-            outerContext: AnalysisContext,
+            keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+            outerContext: AnalysisContext
         ): OperationResult<PythonDataStructure> {
 
             return concat()
@@ -76,14 +80,16 @@ interface PandasFunction : PythonDataStructure {
     object GroupByFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
-            outerContext: AnalysisContext,
+            keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+            outerContext: AnalysisContext
         ): OperationResult<PythonDataStructure> = fail("not implemented")
     }
 
     object ReadCsvFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
-            outerContext: AnalysisContext,
+            keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+            outerContext: AnalysisContext
         ): OperationResult<PythonDataStructure> = fail("not implemented")
     }
 }

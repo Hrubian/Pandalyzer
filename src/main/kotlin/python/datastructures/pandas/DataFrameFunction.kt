@@ -1,6 +1,7 @@
 package python.datastructures.pandas
 
 import analyzer.AnalysisContext
+import analyzer.Identifier
 import python.OperationResult
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonList
@@ -14,7 +15,8 @@ interface DataFrameFunction : PythonDataStructure {
     data class GroupByFunc(override val dataFrame: DataFrame) : DataFrameFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
-            outerContext: AnalysisContext,
+            keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+            outerContext: AnalysisContext
         ): OperationResult<PythonDataStructure> {
             //todo pair args
 
@@ -54,7 +56,8 @@ interface DataFrameFunction : PythonDataStructure {
     data class MergeFunc(override val dataFrame: DataFrame) : DataFrameFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
-            outerContext: AnalysisContext,
+            keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+            outerContext: AnalysisContext
         ): OperationResult<PythonDataStructure> {
             // todo pair args
 

@@ -37,7 +37,8 @@ data class NondeterministicDataStructure(
 
     override fun invoke(
         args: List<PythonDataStructure>,
-        outerContext: AnalysisContext,
+        keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+        outerContext: AnalysisContext
     ): OperationResult<PythonDataStructure> = combineResults(left.invoke(args, outerContext), right.invoke(args, outerContext))
 
     private fun combineResults(

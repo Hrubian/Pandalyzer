@@ -1,5 +1,6 @@
 package python.arguments
 
+import analyzer.Identifier
 import python.datastructures.PythonDataStructure
 
 data class FunctionSchema(
@@ -17,5 +18,6 @@ data object VariadicArgsMarker : ArgumentMarker
 data object VariadicKeywordArgsMarker : ArgumentMarker
 
 data class MatchedFunctionSchema(
-    val matchedArguments: List<Pair<ArgumentMarker, PythonDataStructure>>,
+//    val matchedArguments: List<Pair<ArgumentMarker, PythonDataStructure>>,
+    val matchedArguments: Map<Identifier, PythonDataStructure>
 )

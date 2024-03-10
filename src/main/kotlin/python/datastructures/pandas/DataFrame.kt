@@ -16,7 +16,8 @@ data class DataFrame(
 
     override fun invoke(
         args: List<PythonDataStructure>,
-        outerContext: AnalysisContext,
+        keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+        outerContext: AnalysisContext
     ): OperationResult<PythonDataStructure> {
         TODO("Not yet implemented")
     }

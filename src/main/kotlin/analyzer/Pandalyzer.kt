@@ -194,8 +194,9 @@ class Pandalyzer {
         val callable = call.func.analyzeWith(context).getRetValue()
 //        val args = call.arguments.fold(context) { currContext, arg -> arg.analyzeWith(currContext) }
         val args = call.arguments.map { it.analyzeWith(context).getRetValue() } // todo pass context from one to other
+        val keywords = call.keywords.map { it.identifier to it.value.analyzeWith(context).getRetValue() } //todo
         return context.map {
-            returnResult(callable.invoke(args, context))
+            returnResult(callable.invoke(args, keywords, context))
         }
     }
 

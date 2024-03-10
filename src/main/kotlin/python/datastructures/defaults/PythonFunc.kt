@@ -16,14 +16,15 @@ import python.ok
 data class PythonFunc(
     val name: Identifier?,
     val body: List<PythonType.Statement>,
-    val positionArguments: List<String>,
+    val arguments: PythonType.Arguments,
 ) : PythonDataStructure {
     override fun invoke(
         args: List<PythonDataStructure>,
-        outerContext: AnalysisContext,
+        keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+        outerContext: AnalysisContext
     ): OperationResult<PythonDataStructure> {
         val initialContext = ContextBuilder.buildEmpty(outerContext)
-        val matchedArguments = ArgumentMatcher.match() //todo
+        val matchedArguments = ArgumentMatcher.match(arguments, args, keywordArgs)
 
         val contextWithArgs = initialContext.map {
             when (matchedArguments) {
@@ -47,7 +48,7 @@ data class PythonFunc(
 
     private companion object {
         fun ContextBuilder.addArgs(args: MatchedFunctionSchema) {
-            TODO()
+            args.matchedArguments.forEach { addStruct(it.key, it.value) }
         }
     }
 }
