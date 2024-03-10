@@ -325,8 +325,9 @@ sealed interface PythonType {
         val keywordVariadicArg: Arg?,
         @SerialName("kwonlyargs")
         val keywordOnlyArgs: List<Arg>,
-        @SerialName("defaults")
+        @SerialName("kw_defaults")
         val keywordDefaults: List<Expression>,
+        val defaults: List<Expression>,
     ) : PythonType
 
     @Serializable

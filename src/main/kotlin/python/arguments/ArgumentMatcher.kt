@@ -29,7 +29,7 @@ object ArgumentMatcher {
         for (argDef in definedArguments.arguments) {
             if (argIndex == calledPositionalArguments.size) {
                 resultArgs[argDef.identifier] = calledKeywordArguments[argDef.identifier]
-                    ?: keywordDefaults.getOrElse(defaultKeywordsIndex++) {
+                    ?: defaults.getOrElse(defaultKeywordsIndex++) {
                     return fail("")
                 }
             } else {
