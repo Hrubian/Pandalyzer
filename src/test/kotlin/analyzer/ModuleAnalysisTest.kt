@@ -10,7 +10,7 @@ import python.PythonType.ExpressionContext.Load
 import python.PythonType.Mod.Module
 import python.PythonType.Statement.Assign
 import python.PythonType.Statement.FunctionDef
-import python.datastructures.PythonInt
+import python.datastructures.defaults.PythonInt
 import java.math.BigInteger
 
 class ModuleAnalysisTest {

@@ -40,12 +40,12 @@ import python.PythonType.Statement.Import
 import python.PythonType.Statement.ImportFrom
 import python.PythonType.Statement.Return
 import python.PythonType.Statement.WhileLoop
-import python.datastructures.PythonBool
-import python.datastructures.PythonDict
-import python.datastructures.PythonFunc
-import python.datastructures.PythonInt
-import python.datastructures.PythonNone
-import python.datastructures.PythonString
+import python.datastructures.defaults.PythonBool
+import python.datastructures.defaults.PythonDict
+import python.datastructures.defaults.PythonFunc
+import python.datastructures.defaults.PythonInt
+import python.datastructures.defaults.PythonNone
+import python.datastructures.defaults.PythonString
 import python.datastructures.createImportStruct
 
 class Pandalyzer {
@@ -268,7 +268,7 @@ class Pandalyzer {
         when (pythonList.context) {
             is Load -> {
                 val elements = pythonList.elements.map { it.analyzeWith(context).run { getRetValue() } }
-                return context.map { returnValue(python.datastructures.PythonList(elements.toMutableList())) }
+                return context.map { returnValue(python.datastructures.defaults.PythonList(elements.toMutableList())) }
             }
             is ExpressionContext.Store -> {
                 TODO("Not implemented yet")

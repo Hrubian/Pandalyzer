@@ -5,7 +5,7 @@ import python.datastructures.FieldType
 import python.datastructures.PythonDataStructure
 
 data class Series(
-    private val name: FieldName,
-    private val type: FieldType,
-    private val indexType: FieldType? = null,
+//    val name: FieldName,
+    val type: FieldType,
+    val indexType: FieldType? = null,
 ) : PythonDataStructure

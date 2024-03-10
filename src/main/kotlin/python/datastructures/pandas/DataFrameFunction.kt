@@ -3,9 +3,8 @@ package python.datastructures.pandas
 import analyzer.AnalysisContext
 import python.OperationResult
 import python.datastructures.PythonDataStructure
-import python.datastructures.PythonList
-import python.datastructures.PythonNone
-import python.datastructures.PythonString
+import python.datastructures.defaults.PythonList
+import python.datastructures.defaults.PythonString
 import python.fail
 import python.ok
 
@@ -24,28 +23,31 @@ interface DataFrameFunction : PythonDataStructure {
 
 
         private fun groupBy(
-            dataframe: PythonDataStructure,
-            by: PythonDataStructure
+            dataFrame: DataFrame,
+            by: PythonString
         ): OperationResult<PythonDataStructure> {
-            val df = dataframe as? DataFrame ?: return fail("todo")
-
-            return when (by) {
-                is PythonString -> {
-                    //todo check
-                    DataFrameGroupBy(df, listOf(by.value)).ok()
-                }
-                is PythonList -> {
-                    //todo check
-                    val byList = by.items.map { (it as? PythonString)?.value ?: return fail("todo") }
-                    DataFrameGroupBy(df, byList).ok()
-                }
-                is PythonNone -> {
-
-                }
-                else -> {
-                    fail("")
-                }
+            return if (by.value in dataFrame.fields) {
+                DataFrameGroupBy(dataFrame, listOf(by.value)).ok()
+            } else {
+                fail("The dataframe does not contain the field $by. Dataframe columns: ${dataFrame.fields.keys}")
             }
+        }
+
+        private fun groupBy(
+            dataFrame: DataFrame,
+            by: PythonList
+        ): OperationResult<PythonDataStructure> {
+            val keys = by.items.map { it as? PythonString ?: return fail("Cannot group a dataframe by ${it.typeName}") }
+
+            val missingKeys = keys.filterNot { it.value in dataFrame.fields }
+            if (missingKeys.isNotEmpty()) {
+                return fail(
+                    "Cannot group by keys $missingKeys, since they were not found in the dataframe. " +
+                            "Dataframe columns: ${dataFrame.fields.keys}"
+                )
+            }
+
+            return DataFrameGroupBy(dataFrame, by.items.map { (it as PythonString).value }).ok()
         }
     }
 
@@ -63,6 +65,7 @@ interface DataFrameFunction : PythonDataStructure {
             left: PythonDataStructure,
             right: PythonDataStructure,
             how: PythonDataStructure,
+            on: PythonDataStructure,
             leftOn: PythonDataStructure,
             rightOn: PythonDataStructure,
         ): OperationResult<PythonDataStructure> {

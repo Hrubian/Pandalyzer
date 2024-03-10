@@ -1,4 +1,4 @@
-package python.datastructures
+package python.datastructures.defaults
 
 import analyzer.AnalysisContext
 import analyzer.ContextBuilder
@@ -9,6 +9,7 @@ import python.OperationResult
 import python.PythonType
 import python.arguments.ArgumentMatcher
 import python.arguments.MatchedFunctionSchema
+import python.datastructures.PythonDataStructure
 import python.fail
 import python.ok
 

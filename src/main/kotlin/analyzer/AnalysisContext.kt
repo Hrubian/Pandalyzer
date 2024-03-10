@@ -3,7 +3,7 @@ package analyzer
 import python.OperationResult
 import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
-import python.datastructures.PythonNone
+import python.datastructures.defaults.PythonNone
 import python.datastructures.UnresolvedStructure
 
 typealias Identifier = String
@@ -38,7 +38,7 @@ sealed interface AnalysisContext {
     data class OK(
         val pythonDataStructures: Map<Identifier, PythonDataStructure>,
         val returnValue: PythonDataStructure,
-        val outerContext: AnalysisContext?,
+        val outerContext: AnalysisContext?, //todo there should probably be a globalContext
         val warnings: List<String>,
     ) : AnalysisContext {
         fun summarize(): AnalysisResult {

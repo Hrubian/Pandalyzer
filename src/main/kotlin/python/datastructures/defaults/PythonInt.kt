@@ -1,8 +1,9 @@
-package python.datastructures
+package python.datastructures.defaults
 
 import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
+import python.datastructures.PythonDataStructure
 import python.fail
 import python.ok
 import java.math.BigInteger

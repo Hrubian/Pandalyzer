@@ -15,7 +15,7 @@ data object PandasImport : ImportStruct {
             "Series" -> PandasFunction.SeriesFunc.ok()
             "concat" -> PandasFunction.ConcatFunc.ok()
             "groupby" -> PandasFunction.GroupByFunc.ok()
-            "read_csv" -> PandasFunction.GroupByFunc.ok()
+            "read_csv" -> PandasFunction.ReadCsvFunc.ok()
             else -> fail("Unknown pandas identifier $identifier.")
         }
 }

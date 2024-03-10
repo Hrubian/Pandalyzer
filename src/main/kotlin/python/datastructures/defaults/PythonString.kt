@@ -1,6 +1,7 @@
-package python.datastructures
+package python.datastructures.defaults
 
 import python.OperationResult
+import python.datastructures.PythonDataStructure
 import python.fail
 import python.ok
 

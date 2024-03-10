@@ -1,4 +1,6 @@
-package python.datastructures
+package python.datastructures.defaults
+
+import python.datastructures.PythonDataStructure
 
 @JvmInline
 value class PythonList(
