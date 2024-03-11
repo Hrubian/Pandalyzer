@@ -14,14 +14,6 @@ value class PythonInt(val value: BigInteger) : PythonDataStructure {
         TODO("Not yet implemented")
     }
 
-    override fun invoke(
-        args: List<PythonDataStructure>,
-        keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-        outerContext: AnalysisContext
-    ): OperationResult<PythonDataStructure> {
-        TODO("Not yet implemented")
-    }
-
     override operator fun plus(other: PythonDataStructure): OperationResult<PythonDataStructure> {
         return if (other is PythonInt) {
             PythonInt(this.value + other.value).ok()

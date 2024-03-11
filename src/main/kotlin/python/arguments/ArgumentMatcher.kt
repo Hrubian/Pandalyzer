@@ -37,6 +37,8 @@ data class ResolvedArguments(
     }
 }
 
+data class MatchedFunctionSchema(val matchedArguments: Map<Identifier, PythonDataStructure>)
+
 object ArgumentMatcher {
     fun match(
         resolvedArguments: ResolvedArguments,

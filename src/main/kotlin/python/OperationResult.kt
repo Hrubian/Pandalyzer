@@ -15,3 +15,10 @@ fun <T> T.ok() = OperationResult.Ok(this)
 fun <T> T.withWarn(message: String) = OperationResult.Warning(this, message)
 
 fun <T> fail(reason: String) = OperationResult.Error<T>(reason)
+
+fun <T1, T2> OperationResult<T1>.map(func: (T1) -> OperationResult<T2>): OperationResult<T2> =
+    when (this) {
+        is OperationResult.Ok -> func(this.result)
+        is OperationResult.Warning -> func(this.result) //todo don't lose the previous warning
+        is OperationResult.Error -> OperationResult.Error(this.reason)
+    }
