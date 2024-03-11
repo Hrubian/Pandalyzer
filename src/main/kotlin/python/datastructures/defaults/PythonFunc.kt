@@ -9,6 +9,7 @@ import python.OperationResult
 import python.PythonType
 import python.arguments.ArgumentMatcher
 import python.arguments.MatchedFunctionSchema
+import python.arguments.ResolvedArguments
 import python.datastructures.PythonDataStructure
 import python.fail
 import python.ok
@@ -16,7 +17,7 @@ import python.ok
 data class PythonFunc(
     val name: Identifier?,
     val body: List<PythonType.Statement>,
-    val arguments: PythonType.Arguments,
+    val arguments: ResolvedArguments
 ) : PythonDataStructure {
     override fun invoke(
         args: List<PythonDataStructure>,
@@ -24,7 +25,7 @@ data class PythonFunc(
         outerContext: AnalysisContext
     ): OperationResult<PythonDataStructure> {
         val initialContext = ContextBuilder.buildEmpty(outerContext)
-        val matchedArguments = ArgumentMatcher.match(arguments, args, keywordArgs)
+        val matchedArguments = ArgumentMatcher.match(arguments, args, keywordArgs.toMap())
 
         val contextWithArgs = initialContext.map {
             when (matchedArguments) {
@@ -37,7 +38,7 @@ data class PythonFunc(
             }
         }
 
-        with(Pandalyzer()) {
+        with(Pandalyzer) {
             return when (val resultContext = body.foldStatements(contextWithArgs)) {
                 is AnalysisContext.OK -> PythonNone.ok()
                 is AnalysisContext.Returned -> resultContext.value.ok()

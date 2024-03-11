@@ -1,5 +1,6 @@
 package analyzer
 
+import analyzer.Pandalyzer.analyzeWith
 import python.OperationResult
 import python.PythonType
 import python.PythonType.Alias
@@ -40,6 +41,8 @@ import python.PythonType.Statement.Import
 import python.PythonType.Statement.ImportFrom
 import python.PythonType.Statement.Return
 import python.PythonType.Statement.WhileLoop
+import python.arguments.ResolvedArguments.Companion.resolve
+import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonBool
 import python.datastructures.defaults.PythonDict
 import python.datastructures.defaults.PythonFunc
@@ -48,7 +51,7 @@ import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
 import python.datastructures.createImportStruct
 
-class Pandalyzer {
+object Pandalyzer {
     fun analyze(
         module: Module,
         context: AnalysisContext,
@@ -57,16 +60,17 @@ class Pandalyzer {
     fun analyze(
         functionDef: FunctionDef,
         context: AnalysisContext,
-    ): AnalysisContext =
-        context.map {
-            val func =
-                PythonFunc(
-                    name = functionDef.name,
-                    body = functionDef.body,
-                    positionArguments = listOf(), // todo add arguments
-                )
+    ): AnalysisContext {
+        val (resolvedArgs, newContext) = functionDef.args.resolve(context)
+        val func = PythonFunc(
+            name = functionDef.name,
+            body = functionDef.body,
+            arguments = resolvedArgs
+        )
+        return newContext.map {
             addStruct(functionDef.name, func)
         }
+    }
 
     fun analyze(
         returnStatement: Return,
@@ -329,6 +333,15 @@ class Pandalyzer {
         this.fold(
             initial = initialContext,
             operation = { acc, statement -> acc.map { returnValue(PythonNone) }.let { statement.analyzeWith(it) } },
+        )
+
+    fun List<PythonType.Expression>.foldExpressions(initialContext: AnalysisContext): Pair<Sequence<PythonDataStructure>, AnalysisContext> =
+        this.fold( //todo this is a general pattern
+            initial = emptySequence<PythonDataStructure>() to initialContext,
+            operation = { (defaultsSoFar, currentContext), current ->
+                val resultContext = current.analyzeWith(currentContext)
+                defaultsSoFar + resultContext.getRetValue() to resultContext
+            }
         )
 
     fun PythonType.analyzeWith(context: AnalysisContext) =
