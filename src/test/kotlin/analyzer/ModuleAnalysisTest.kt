@@ -84,11 +84,12 @@ class ModuleAnalysisTest {
                                         Name(identifier = "result", context = Load),
                                     ),
                                 ),
-                            args = PythonType.Arguments(
-                                emptyList(),
-                                emptyList(),
-                                emptyList()
-                            )
+                            args =
+                                PythonType.Arguments(
+                                    emptyList(),
+                                    emptyList(),
+                                    emptyList(),
+                                ),
                         ),
                         Assign(
                             targets = listOf(Name("func_result", Load)),
@@ -96,7 +97,7 @@ class ModuleAnalysisTest {
                                 Call(
                                     func = Name("foo", Load),
                                     arguments = emptyList(),
-                                    keywords = emptyList()
+                                    keywords = emptyList(),
                                 ),
                         ),
                     ),

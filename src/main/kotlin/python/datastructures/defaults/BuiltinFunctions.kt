@@ -23,11 +23,11 @@ fun interface PythonInvokable : PythonDataStructure {
             fail("Cannot apply abs function to $args")
         },
 
-        "print" to PythonInvokable { _, _ -> PythonNone.ok() },
+        "print" to PythonInvokable { _, _, _ -> PythonNone.ok() },
 
-        "dict" to PythonInvokable { _, _ -> PythonDict(mutableMapOf()).ok() },
+        "dict" to PythonInvokable { _, _, _-> PythonDict(mutableMapOf()).ok() },
 
-        "len" to PythonInvokable { args, _ ->
+        "len" to PythonInvokable { args, _, _ ->
             when (val arg = args.singleOrNull()) {
                 is PythonString -> PythonInt(arg.value.length.toBigInteger()).ok()
                 is PythonList -> PythonInt(arg.items.size.toBigInteger()).ok()
@@ -35,6 +35,6 @@ fun interface PythonInvokable : PythonDataStructure {
             }
         },
 
-        "list" to PythonInvokable { _, _ -> PythonList(mutableListOf()).ok() }, //todo what about version with args
+        "list" to PythonInvokable { _, _, _ -> PythonList(mutableListOf()).ok() }, //todo what about version with args
 
     )

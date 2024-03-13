@@ -336,7 +336,7 @@ object Pandalyzer {
         )
 
     fun List<PythonType.Expression>.foldExpressions(initialContext: AnalysisContext): Pair<Sequence<PythonDataStructure>, AnalysisContext> =
-        this.fold( //todo this is a general pattern
+        this.fold(
             initial = emptySequence<PythonDataStructure>() to initialContext,
             operation = { (defaultsSoFar, currentContext), current ->
                 val resultContext = current.analyzeWith(currentContext)

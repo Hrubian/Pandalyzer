@@ -3,11 +3,18 @@ package python.datastructures.pandas.dataframe.functions
 import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
+import python.PythonType
+import python.arguments.ArgumentMatcher
+import python.arguments.ResolvedArguments
 import python.datastructures.PythonDataStructure
+import python.datastructures.defaults.PythonBool
+import python.datastructures.defaults.PythonList
+import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
 import python.datastructures.pandas.DataFrame
 import python.datastructures.pandas.DataFrameFunction
 import python.fail
+import python.map
 
 data class DataFrame_MergeFunc(override val dataFrame: DataFrame) : DataFrameFunction {
     override fun invoke(
@@ -15,23 +22,69 @@ data class DataFrame_MergeFunc(override val dataFrame: DataFrame) : DataFrameFun
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
         outerContext: AnalysisContext
     ): OperationResult<PythonDataStructure> {
-        // todo pair args
+        val matchedArguments = ArgumentMatcher.match(argumentSchema, args, keywordArgs.toMap())
+        return matchedArguments.map { argumentSchema ->
+            val right = argumentSchema.matchedArguments["right"] as DataFrame
+            when (val how = argumentSchema.matchedArguments["how"]!!) {
+                is PythonString -> merge(dataFrame, right, how, )
+                is PythonList ->
+                else -> fail("The 'how' argument of merge function cannot be of type ${how.typeName}")
+            }
 
-        return merge(dataFrame, )
+        }
     }
 
     private fun merge(
-        left: PythonDataStructure,
-        right: PythonDataStructure,
-        how: PythonDataStructure,
-        on: PythonDataStructure,
-        leftOn: PythonDataStructure,
-        rightOn: PythonDataStructure,
+        left: DataFrame,
+        right: DataFrame,
+        how: PythonString,
+        on: PythonList,
     ): OperationResult<PythonDataStructure> {
-        val leftDf = left as? DataFrame ?: return fail("todo")
-        val rightDf = right as? DataFrame ?: return fail("todo")
-        val howString = how as? PythonString ?: return fail("todo")
     }
 
+    private fun merge(
+        left: DataFrame,
+        right: DataFrame,
+        how: PythonString,
+        on: PythonString,
+    ): OperationResult<PythonDataStructure> {
+    }
+
+
+    private val argumentSchema = ResolvedArguments(
+        arguments = listOf(
+            PythonType.Arg("right"),
+            PythonType.Arg("how"),
+            PythonType.Arg("on"),
+            PythonType.Arg("left_on"),
+            PythonType.Arg("right_on"),
+            PythonType.Arg("left_index"),
+            PythonType.Arg("right_index"),
+            PythonType.Arg("sort"),
+            PythonType.Arg("suffixes"),
+            PythonType.Arg("copy"),
+            PythonType.Arg("indicator"),
+            PythonType.Arg("validate"),
+            ),
+        defaults = listOf(
+            PythonNone,
+            PythonString("inner"),
+            PythonNone,
+            PythonNone,
+            PythonNone,
+            PythonBool(false),
+            PythonBool(false),
+            PythonBool(false),
+            PythonNone, //todo
+            PythonNone,
+            PythonBool(false),
+            PythonNone
+        ),
+        keywordDefaults = emptyList(),
+        keywordOnlyArgs = emptyList(),
+        variadicArg = null,
+        keywordVariadicArg = null,
+        positionalArgs = emptyList()
+    )
 
 }

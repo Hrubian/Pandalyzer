@@ -5,6 +5,7 @@ import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonNone
 import python.datastructures.UnresolvedStructure
+import python.datastructures.defaults.builtinFunctions
 
 typealias Identifier = String
 
@@ -148,5 +149,7 @@ class ContextBuilder(private val previousContext: AnalysisContext.OK) {
                 warnings = emptyList(),
                 outerContext = outerContext,
             )
+
+        fun buildWithBuiltins() = buildEmpty().map { builtinFunctions.forEach { addStruct(it.key, it.value)} }
     }
 }
