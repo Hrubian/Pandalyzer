@@ -17,26 +17,27 @@ import python.ok
 data class PythonFunc(
     val name: Identifier?,
     val body: List<PythonType.Statement>,
-    val arguments: ResolvedArguments
+    val arguments: ResolvedArguments,
 ) : PythonDataStructure {
     override fun invoke(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-        outerContext: AnalysisContext
+        outerContext: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
         val initialContext = ContextBuilder.buildEmpty(outerContext)
         val matchedArguments = ArgumentMatcher.match(arguments, args, keywordArgs.toMap())
 
-        val contextWithArgs = initialContext.map {
-            when (matchedArguments) {
-                is OperationResult.Error -> fail(matchedArguments.reason)
-                is OperationResult.Warning -> {
-                    addWarning(matchedArguments.message)
-                    addArgs(matchedArguments.result)
+        val contextWithArgs =
+            initialContext.map {
+                when (matchedArguments) {
+                    is OperationResult.Error -> fail(matchedArguments.reason)
+                    is OperationResult.Warning -> {
+                        addWarning(matchedArguments.message)
+                        addArgs(matchedArguments.result)
+                    }
+                    is OperationResult.Ok -> addArgs(matchedArguments.result)
                 }
-                is OperationResult.Ok -> addArgs(matchedArguments.result)
             }
-        }
 
         with(Pandalyzer) {
             return when (val resultContext = body.foldStatements(contextWithArgs)) {

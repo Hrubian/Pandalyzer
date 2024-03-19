@@ -27,7 +27,7 @@ data class DataFrame(
             is PythonString -> {
                 if (key.value in fields.keys) {
                     Series(fields[key.value]!!).ok()
-                } else  {
+                } else {
                     fail("The key ${key.value} does note exist in the dataframe")
                 }
             }
@@ -35,7 +35,7 @@ data class DataFrame(
                 if (key.items.all { it is PythonString && it.value in fields }) {
                     DataFrame(fields.filterKeys { it in fields.keys }).ok()
                 } else {
-                    fail("TODO") //todo
+                    fail("TODO") // todo
                 }
             }
             else -> fail("Cannot subscript with ${key.typeName} on dataframe")

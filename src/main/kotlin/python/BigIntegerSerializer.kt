@@ -10,9 +10,9 @@ import java.math.BigInteger
 
 object BigIntegerSerializer : KSerializer<BigInteger> {
     override val descriptor: SerialDescriptor
-        get() = PrimitiveSerialDescriptor("BigInteger", PrimitiveKind.STRING)
+        get() = PrimitiveSerialDescriptor("BigInteger", PrimitiveKind.INT)
 
-    override fun deserialize(decoder: Decoder): BigInteger = BigInteger(decoder.decodeString())
+    override fun deserialize(decoder: Decoder): BigInteger = BigInteger.valueOf(decoder.decodeLong()) // todo possible overflows
 
     override fun serialize(
         encoder: Encoder,

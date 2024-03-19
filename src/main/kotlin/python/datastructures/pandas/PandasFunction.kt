@@ -12,58 +12,49 @@ interface PandasFunction : PythonDataStructure {
         override fun invoke(
             args: List<PythonDataStructure>,
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-            outerContext: AnalysisContext
+            outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> = fail("not implemented")
-
     }
 
     object DataFrameFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-            outerContext: AnalysisContext
+            outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> = fail("not implemented")
-
 
         // we want to support also constructs like: pd.DataFrame.from_dict(...)
         override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
-            when(identifier) {
+            when (identifier) {
                 "from_dict" -> FromDictFunc.ok()
                 else -> fail("Unknown identifier $identifier")
             }
 
-        object FromDictFunc : PandasFunction {
-
-        }
-
+        object FromDictFunc : PandasFunction
     }
 
     object SeriesFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-            outerContext: AnalysisContext
+            outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> = fail("not implemented")
-
     }
 
     object ConcatFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-            outerContext: AnalysisContext
+            outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> {
-
-            return concat()
+            return TODO()
         }
 
-        private fun concat(
-            objects: List<Series>,
-        ): OperationResult<PythonDataStructure> {
-            //todo there is a non-trivial index logic
+        private fun concat(objects: List<Series>): OperationResult<PythonDataStructure> {
+            // todo there is a non-trivial index logic
             val differentTypes = objects.map { it.type }.distinct()
             return when (differentTypes.size) {
-                0 -> fail("") //todo
+                0 -> fail("") // todo
                 1 -> Series(type = differentTypes.first()).ok()
                 else -> fail("Cannot concatenate series of different types. The types in series: $differentTypes")
             }
@@ -71,9 +62,9 @@ interface PandasFunction : PythonDataStructure {
 
         private fun concat(
             objects: List<DataFrame>,
-            join: String = ""
+            join: String = "",
         ): OperationResult<PythonDataStructure> {
-
+            TODO()
         }
     }
 
@@ -81,7 +72,7 @@ interface PandasFunction : PythonDataStructure {
         override fun invoke(
             args: List<PythonDataStructure>,
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-            outerContext: AnalysisContext
+            outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> = fail("not implemented")
     }
 
@@ -89,7 +80,7 @@ interface PandasFunction : PythonDataStructure {
         override fun invoke(
             args: List<PythonDataStructure>,
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-            outerContext: AnalysisContext
+            outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> = fail("not implemented")
     }
 }

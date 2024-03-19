@@ -44,7 +44,7 @@ class ModuleAnalysisTest {
                     ),
             )
 
-        val resultContext = Pandalyzer().analyze(module, ContextBuilder.buildEmpty())
+        val resultContext = Pandalyzer.analyze(module, ContextBuilder.buildWithBuiltins())
 
         val result = resultContext.getStructure("result")
         assert(
@@ -86,9 +86,13 @@ class ModuleAnalysisTest {
                                 ),
                             args =
                                 PythonType.Arguments(
-                                    emptyList(),
-                                    emptyList(),
-                                    emptyList(),
+                                    positionalArgs = emptyList(),
+                                    arguments = emptyList(),
+                                    variadicArg = null,
+                                    keywordVariadicArg = null,
+                                    keywordOnlyArgs = emptyList(),
+                                    keywordDefaults = emptyList(),
+                                    defaults = emptyList(),
                                 ),
                         ),
                         Assign(
@@ -103,7 +107,7 @@ class ModuleAnalysisTest {
                     ),
             )
 
-        val resultContext = Pandalyzer().analyze(module, ContextBuilder.buildEmpty())
+        val resultContext = Pandalyzer.analyze(module, ContextBuilder.buildEmpty())
 
         val result = resultContext.getStructure("func_result")
         assert(

@@ -124,6 +124,7 @@ sealed interface PythonType {
         data class BinaryOperation(
             val left: Expression,
             val right: Expression,
+            @SerialName("op")
             val operator: Operator,
         ) : Expression
 
@@ -322,7 +323,7 @@ sealed interface PythonType {
         @SerialName("vararg")
         val variadicArg: Arg?,
         @SerialName("kwargs")
-        val keywordVariadicArg: Arg?,
+        val keywordVariadicArg: Arg? = null,
         @SerialName("kwonlyargs")
         val keywordOnlyArgs: List<Arg>,
         @SerialName("kw_defaults")

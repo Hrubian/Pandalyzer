@@ -22,7 +22,7 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
     override fun invoke(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-        outerContext: AnalysisContext
+        outerContext: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
         val matchedArguments = ArgumentMatcher.match(argumentSchema, args, keywordArgs.toMap())
         return matchedArguments.map { argumentSchema ->
@@ -36,7 +36,7 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
 
     private fun groupBy(
         dataFrame: DataFrame,
-        by: PythonString
+        by: PythonString,
     ): OperationResult<PythonDataStructure> {
         return if (by.value in dataFrame.fields) {
             DataFrameGroupBy(dataFrame, listOf(by.value)).ok()
@@ -47,7 +47,7 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
 
     private fun groupBy(
         dataFrame: DataFrame,
-        by: PythonList
+        by: PythonList,
     ): OperationResult<PythonDataStructure> {
         val keys = by.items.map { it as? PythonString ?: return fail("Cannot group a dataframe by ${it.typeName}") }
 
@@ -55,38 +55,41 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
         if (missingKeys.isNotEmpty()) {
             return fail(
                 "Cannot group by keys $missingKeys, since they were not found in the dataframe. " +
-                        "Dataframe columns: ${dataFrame.fields.keys}"
+                    "Dataframe columns: ${dataFrame.fields.keys}",
             )
         }
 
         return DataFrameGroupBy(dataFrame, by.items.map { (it as PythonString).value }).ok()
     }
 
-    private val argumentSchema = ResolvedArguments(
-        arguments = listOf(
-            PythonType.Arg("by"),
-            PythonType.Arg("axis"),
-            PythonType.Arg("level"),
-            PythonType.Arg("as_index"),
-            PythonType.Arg("sort"),
-            PythonType.Arg("group_keys"),
-            PythonType.Arg("observed"),
-            PythonType.Arg("dropna")
-        ),
-        defaults = listOf(
-            PythonNone,
-            PythonNone, //todo
-            PythonNone, //todo,
-            PythonBool(true),
-            PythonBool(true),
-            PythonBool(true),
-            PythonNone,
-            PythonBool(true)
-        ),
-        keywordDefaults = emptyList(),
-        keywordOnlyArgs = emptyList(),
-        variadicArg = null,
-        keywordVariadicArg = null,
-        positionalArgs = emptyList()
-    )
+    private val argumentSchema =
+        ResolvedArguments(
+            arguments =
+                listOf(
+                    PythonType.Arg("by"),
+                    PythonType.Arg("axis"),
+                    PythonType.Arg("level"),
+                    PythonType.Arg("as_index"),
+                    PythonType.Arg("sort"),
+                    PythonType.Arg("group_keys"),
+                    PythonType.Arg("observed"),
+                    PythonType.Arg("dropna"),
+                ),
+            defaults =
+                listOf(
+                    PythonNone,
+                    PythonNone, // todo
+                    PythonNone, // todo,
+                    PythonBool(true),
+                    PythonBool(true),
+                    PythonBool(true),
+                    PythonNone,
+                    PythonBool(true),
+                ),
+            keywordDefaults = emptyList(),
+            keywordOnlyArgs = emptyList(),
+            variadicArg = null,
+            keywordVariadicArg = null,
+            positionalArgs = emptyList(),
+        )
 }

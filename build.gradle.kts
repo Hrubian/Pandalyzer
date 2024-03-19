@@ -20,6 +20,7 @@ repositories {
 dependencies {
     implementation(libs.bundles.kotlinSerialization)
     implementation(libs.kotlinCoroutines)
+    implementation(libs.apacheCommonsCLI)
 
     testImplementation(kotlin("test"))
 }

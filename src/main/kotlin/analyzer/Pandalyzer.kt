@@ -43,13 +43,13 @@ import python.PythonType.Statement.Return
 import python.PythonType.Statement.WhileLoop
 import python.arguments.ResolvedArguments.Companion.resolve
 import python.datastructures.PythonDataStructure
+import python.datastructures.createImportStruct
 import python.datastructures.defaults.PythonBool
 import python.datastructures.defaults.PythonDict
 import python.datastructures.defaults.PythonFunc
 import python.datastructures.defaults.PythonInt
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
-import python.datastructures.createImportStruct
 
 object Pandalyzer {
     fun analyze(
@@ -62,11 +62,12 @@ object Pandalyzer {
         context: AnalysisContext,
     ): AnalysisContext {
         val (resolvedArgs, newContext) = functionDef.args.resolve(context)
-        val func = PythonFunc(
-            name = functionDef.name,
-            body = functionDef.body,
-            arguments = resolvedArgs
-        )
+        val func =
+            PythonFunc(
+                name = functionDef.name,
+                body = functionDef.body,
+                arguments = resolvedArgs,
+            )
         return newContext.map {
             addStruct(functionDef.name, func)
         }
@@ -76,6 +77,7 @@ object Pandalyzer {
         returnStatement: Return,
         context: AnalysisContext,
     ): AnalysisContext = returnStatement.value.analyzeWith(context).getRetValue().let { AnalysisContext.Returned(it) }
+    // FIXME: getRetValue returns
 
     fun analyze(
         assign: Assign,
@@ -140,7 +142,10 @@ object Pandalyzer {
                 when (val result = importStruct.attribute(name)) {
                     is OperationResult.Ok -> addStruct(aliasName ?: name, result.result)
                     is OperationResult.Warning -> addStruct(aliasName ?: name, result.result).also { addWarning(result.message) }
-                    is OperationResult.Error -> fail("The package ${importFrom.module} does not contain $name.")
+                    is OperationResult.Error ->
+                        addWarning(
+                            "The package ${importFrom.module} does not contain $name.",
+                        ) // todo change back to fail
                 }
             }
         }
@@ -198,7 +203,7 @@ object Pandalyzer {
         val callable = call.func.analyzeWith(context).getRetValue()
 //        val args = call.arguments.fold(context) { currContext, arg -> arg.analyzeWith(currContext) }
         val args = call.arguments.map { it.analyzeWith(context).getRetValue() } // todo pass context from one to other
-        val keywords = call.keywords.map { it.identifier to it.value.analyzeWith(context).getRetValue() } //todo
+        val keywords = call.keywords.map { it.identifier to it.value.analyzeWith(context).getRetValue() } // todo
         return context.map {
             returnResult(callable.invoke(args, keywords, context))
         }
@@ -246,7 +251,7 @@ object Pandalyzer {
     ): AnalysisContext {
         check(compare.comparators.size == compare.operators.size)
         var resultContext = compare.left.analyzeWith(context)
-        for (index: Int in 0..< compare.comparators.size) {
+        for (index: Int in 0..<compare.comparators.size) {
             val left = resultContext.getRetValue()
             resultContext = compare.comparators[index].analyzeWith(resultContext)
             val right = resultContext.getRetValue()
@@ -341,7 +346,7 @@ object Pandalyzer {
             operation = { (defaultsSoFar, currentContext), current ->
                 val resultContext = current.analyzeWith(currentContext)
                 defaultsSoFar + resultContext.getRetValue() to resultContext
-            }
+            },
         )
 
     fun PythonType.analyzeWith(context: AnalysisContext) =

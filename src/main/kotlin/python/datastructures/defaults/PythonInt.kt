@@ -1,6 +1,5 @@
 package python.datastructures.defaults
 
-import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
 import python.datastructures.PythonDataStructure

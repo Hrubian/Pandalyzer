@@ -3,8 +3,8 @@ package analyzer
 import python.OperationResult
 import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
-import python.datastructures.defaults.PythonNone
 import python.datastructures.UnresolvedStructure
+import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.builtinFunctions
 
 typealias Identifier = String
@@ -39,7 +39,7 @@ sealed interface AnalysisContext {
     data class OK(
         val pythonDataStructures: Map<Identifier, PythonDataStructure>,
         val returnValue: PythonDataStructure,
-        val outerContext: AnalysisContext?, //todo there should probably be a globalContext
+        val outerContext: AnalysisContext?, // todo there should probably be a globalContext
         val warnings: List<String>,
     ) : AnalysisContext {
         fun summarize(): AnalysisResult {
@@ -74,18 +74,10 @@ sealed interface AnalysisContext {
                                     }
                                 },
                         outerContext = first.outerContext.also { check(first.outerContext == second.outerContext) },
-                        returnValue = combineNondeterministic(first.returnValue, second.returnValue), //todo,
-                        warnings = first.warnings + second.warnings //todo
+                        returnValue = NondeterministicDataStructure(first.returnValue, second.returnValue),
+                        warnings = first.warnings + second.warnings, // todo
                     )
                 else -> TODO()
-            }
-
-        private fun combineNondeterministic(
-            first: OperationResult<PythonDataStructure>,
-            second: OperationResult<PythonDataStructure>
-        ): OperationResult<PythonDataStructure> =
-            when {
-                first is Ok
             }
     }
 }
@@ -99,7 +91,7 @@ inline fun AnalysisContext.map(block: ContextBuilder.() -> Unit) =
 
 class ContextBuilder(private val previousContext: AnalysisContext.OK) {
     private var returnValue: PythonDataStructure = previousContext.returnValue
-    private val newWarnings: List<String> = mutableListOf()
+    private val newWarnings: MutableList<String> = mutableListOf()
     private var failReason: String? = null
     private val upsertedDataStructures: MutableMap<Identifier, PythonDataStructure> = mutableMapOf()
 
@@ -118,7 +110,9 @@ class ContextBuilder(private val previousContext: AnalysisContext.OK) {
         }
     }
 
-    fun addWarning(message: String): Unit = newWarnings.addLast(message)
+    fun addWarning(message: String) {
+        newWarnings.add(message)
+    }
 
     fun addStruct(
         identifier: Identifier,
@@ -150,6 +144,6 @@ class ContextBuilder(private val previousContext: AnalysisContext.OK) {
                 outerContext = outerContext,
             )
 
-        fun buildWithBuiltins() = buildEmpty().map { builtinFunctions.forEach { addStruct(it.key, it.value)} }
+        fun buildWithBuiltins() = buildEmpty().map { builtinFunctions.forEach { addStruct(it.key, it.value) } }
     }
 }

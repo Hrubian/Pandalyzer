@@ -18,7 +18,7 @@ data class ResolvedArguments(
     val keywordVariadicArg: PythonType.Arg?,
     val keywordOnlyArgs: List<PythonType.Arg>,
     val keywordDefaults: List<PythonDataStructure>,
-    val defaults: List<PythonDataStructure>
+    val defaults: List<PythonDataStructure>,
 ) {
     companion object {
         fun PythonType.Arguments.resolve(context: AnalysisContext): Pair<ResolvedArguments, AnalysisContext> {
@@ -31,7 +31,7 @@ data class ResolvedArguments(
                 keywordVariadicArg = keywordVariadicArg,
                 keywordOnlyArgs = keywordOnlyArgs,
                 keywordDefaults = resolvedKeywords.toList(),
-                defaults = resolved.toList()
+                defaults = resolved.toList(),
             ) to finalContext
         }
     }
@@ -43,65 +43,64 @@ object ArgumentMatcher {
     fun match(
         resolvedArguments: ResolvedArguments,
         calledPositionalArguments: List<PythonDataStructure>,
-        calledKeywordArguments: Map<Identifier, PythonDataStructure>
-    ): OperationResult<MatchedFunctionSchema> = with(resolvedArguments) {
-        val resultArgs = mutableMapOf<Identifier, PythonDataStructure>()
+        calledKeywordArguments: Map<Identifier, PythonDataStructure>,
+    ): OperationResult<MatchedFunctionSchema> =
+        with(resolvedArguments) {
+            val resultArgs = mutableMapOf<Identifier, PythonDataStructure>()
 
-        // first, process positional arguments
-        var argIndex = 0
-        var defaultsIndex = 0
-        for (argDef in resolvedArguments.positionalArgs) {
-            if (argIndex == calledPositionalArguments.size) {
-                return fail("")
-            }
-            resultArgs[argDef.identifier] = calledPositionalArguments[argIndex]
-            argIndex++
-        }
-
-        for (argDef in resolvedArguments.arguments) {
-            if (argIndex == calledPositionalArguments.size) {
-                resultArgs[argDef.identifier] = calledKeywordArguments[argDef.identifier]
-                    ?: defaults.getOrElse(defaultsIndex++) {
+            // first, process positional arguments
+            var argIndex = 0
+            var defaultsIndex = 0
+            for (argDef in resolvedArguments.positionalArgs) {
+                if (argIndex == calledPositionalArguments.size) {
                     return fail("")
                 }
-            } else {
                 resultArgs[argDef.identifier] = calledPositionalArguments[argIndex]
                 argIndex++
             }
-        }
 
-        if (resolvedArguments.variadicArg != null) {
-            val variadic = mutableListOf<PythonDataStructure>()
-            while (argIndex < calledPositionalArguments.size) {
-                variadic.addLast(calledPositionalArguments[argIndex])
-                argIndex++
+            for (argDef in resolvedArguments.arguments) {
+                if (argIndex == calledPositionalArguments.size) {
+                    resultArgs[argDef.identifier] = calledKeywordArguments[argDef.identifier]
+                        ?: defaults.getOrElse(defaultsIndex++) {
+                            return fail("")
+                        }
+                } else {
+                    resultArgs[argDef.identifier] = calledPositionalArguments[argIndex]
+                    argIndex++
+                }
             }
-            resultArgs[resolvedArguments.variadicArg.identifier] = PythonList(variadic)
-        }
 
-        // then process keyword arguments
-        val remainingKeywordArgs = calledKeywordArguments.keys.toMutableSet()
-        var defaultKeywordIndex = 0
-        for (argDef in resolvedArguments.keywordOnlyArgs) {
-            resultArgs[argDef.identifier] = calledKeywordArguments[argDef.identifier]
-                ?: keywordDefaults.getOrElse(defaultKeywordIndex++) { return fail("") }
-            if (!remainingKeywordArgs.remove(argDef.identifier)) {
-                return fail("") //todo missing keyword
+            if (resolvedArguments.variadicArg != null) {
+                val variadic = mutableListOf<PythonDataStructure>()
+                while (argIndex < calledPositionalArguments.size) {
+                    variadic.add(calledPositionalArguments[argIndex])
+                    argIndex++
+                }
+                resultArgs[resolvedArguments.variadicArg.identifier] = PythonList(variadic)
             }
-        }
 
-        if (resolvedArguments.keywordVariadicArg != null) {
-            val variadicKeywords = mutableMapOf<PythonString, PythonDataStructure>()
-            for (remainingKey in remainingKeywordArgs) {
-                variadicKeywords[PythonString(remainingKey)] = calledKeywordArguments[remainingKey]!!
+            // then process keyword arguments
+            val remainingKeywordArgs = calledKeywordArguments.keys.toMutableSet()
+            var defaultKeywordIndex = 0
+            for (argDef in resolvedArguments.keywordOnlyArgs) {
+                resultArgs[argDef.identifier] = calledKeywordArguments[argDef.identifier]
+                    ?: keywordDefaults.getOrElse(defaultKeywordIndex++) { return fail("") }
+                if (!remainingKeywordArgs.remove(argDef.identifier)) {
+                    return fail("") // todo missing keyword
+                }
             }
-            resultArgs[keywordVariadicArg!!.identifier]
 
-        } else if (remainingKeywordArgs.isNotEmpty()) {
-            return fail("") //todo there is more keyword args than needed
+            if (resolvedArguments.keywordVariadicArg != null) {
+                val variadicKeywords = mutableMapOf<PythonString, PythonDataStructure>()
+                for (remainingKey in remainingKeywordArgs) {
+                    variadicKeywords[PythonString(remainingKey)] = calledKeywordArguments[remainingKey]!!
+                }
+                resultArgs[keywordVariadicArg!!.identifier]
+            } else if (remainingKeywordArgs.isNotEmpty()) {
+                return fail("") // todo there is more keyword args than needed
+            }
+
+            return MatchedFunctionSchema(resultArgs.toMap()).ok()
         }
-
-
-        return MatchedFunctionSchema(resultArgs.toMap()).ok()
-    }
 }

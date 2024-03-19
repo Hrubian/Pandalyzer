@@ -3,12 +3,16 @@ kotlin = "1.9.10"
 kotlinSerializationVersion = "1.6.1"
 kotlinCoroutinesVersion = "1.6.3"
 ktlintVersion = "12.1.0"
+apacheCommonsCLIVersion = "1.4"
 
 
 [libraries]
 kotlinSerializationCore = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinSerializationVersion" }
 kotlinSerializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerializationVersion" }
 kotlinCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutinesVersion" }
+
+# used for command line arguments parsing
+apacheCommonsCLI = { module = "commons-cli:commons-cli", version.ref = "apacheCommonsCLIVersion"}
 
 [plugins]
 ktlint = {id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintVersion" }
