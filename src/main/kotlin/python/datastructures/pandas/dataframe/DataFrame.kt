@@ -34,11 +34,20 @@ data class DataFrame(
             }
             is PythonList -> {
                 if (key.items.all { it is PythonString && it.value in fields }) {
-                    DataFrame(fields.filterKeys { it in fields.keys }).ok()
+                    DataFrame(fields.filterKeys { it in key.items.map { it as PythonString}.map { it.value} }).ok() //todo this is disgusting :)
                 } else {
                     fail("TODO") // todo
                 }
             }
+//            is DataFrame -> {
+//                if (fields.keys != key.fields.keys) {
+//                    fail("The indexing dataset has different keys")
+//                }
+//                if (key.fields.values.any { it != FieldType.BoolType }) {
+//                    fail("Cannot use dataframe with field of different type than bool for indexing")
+//                }
+//
+//            }
             else -> fail("Cannot subscript with ${key.typeName} on dataframe")
         }
 }
