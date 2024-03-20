@@ -1,4 +1,4 @@
-package python.datastructures.pandas
+package python.datastructures.pandas.series
 
 import python.OperationResult
 import python.datastructures.FieldType

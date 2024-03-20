@@ -4,11 +4,10 @@ import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
 import python.fail
-import kotlin.reflect.KClass
 
 interface PythonDataStructure {
-    val typeName: KClass<PythonDataStructure>
-        get() = javaClass.kotlin
+    val typeName: String
+        get() = javaClass.simpleName
 
     fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> = fail("Cannot subscript a value of type $typeName")
 

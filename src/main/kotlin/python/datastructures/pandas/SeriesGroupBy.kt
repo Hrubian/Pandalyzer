@@ -2,6 +2,7 @@ package python.datastructures.pandas
 
 import python.datastructures.FieldName
 import python.datastructures.PythonDataStructure
+import python.datastructures.pandas.series.Series
 
 data class SeriesGroupBy(
     private val series: Series,

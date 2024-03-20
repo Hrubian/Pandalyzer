@@ -53,7 +53,7 @@ object ArgumentMatcher {
             var defaultsIndex = 0
             for (argDef in resolvedArguments.positionalArgs) {
                 if (argIndex == calledPositionalArguments.size) {
-                    return fail("")
+                    return fail("Missing positional argument ${argDef.identifier}")
                 }
                 resultArgs[argDef.identifier] = calledPositionalArguments[argIndex]
                 argIndex++
@@ -81,14 +81,13 @@ object ArgumentMatcher {
             }
 
             // then process keyword arguments
-            val remainingKeywordArgs = calledKeywordArguments.keys.toMutableSet()
+            val remainingKeywordArgs = (calledKeywordArguments.keys - resultArgs.keys).toMutableSet()
             var defaultKeywordIndex = 0
             for (argDef in resolvedArguments.keywordOnlyArgs) {
                 resultArgs[argDef.identifier] = calledKeywordArguments[argDef.identifier]
-                    ?: keywordDefaults.getOrElse(defaultKeywordIndex++) { return fail("") }
-                if (!remainingKeywordArgs.remove(argDef.identifier)) {
-                    return fail("") // todo missing keyword
-                }
+                    ?: keywordDefaults.getOrElse(defaultKeywordIndex) { return fail("") }
+                remainingKeywordArgs.remove(argDef.identifier)
+                defaultKeywordIndex++
             }
 
             if (resolvedArguments.keywordVariadicArg != null) {

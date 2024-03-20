@@ -89,6 +89,13 @@ inline fun AnalysisContext.map(block: ContextBuilder.() -> Unit) =
         is AnalysisContext.Error -> this
     }
 
+fun AnalysisContext.returnFromFunc(): AnalysisContext =
+    when (this) {
+        is AnalysisContext.OK -> AnalysisContext.Returned(getRetValue())
+        is AnalysisContext.Error -> this
+        is AnalysisContext.Returned -> this
+    }
+
 class ContextBuilder(private val previousContext: AnalysisContext.OK) {
     private var returnValue: PythonDataStructure = previousContext.returnValue
     private val newWarnings: MutableList<String> = mutableListOf()

@@ -76,8 +76,7 @@ object Pandalyzer {
     fun analyze(
         returnStatement: Return,
         context: AnalysisContext,
-    ): AnalysisContext = returnStatement.value.analyzeWith(context).getRetValue().let { AnalysisContext.Returned(it) }
-    // FIXME: getRetValue returns
+    ): AnalysisContext = returnStatement.value.analyzeWith(context).returnFromFunc()
 
     fun analyze(
         assign: Assign,
@@ -85,7 +84,6 @@ object Pandalyzer {
     ): AnalysisContext {
         // todo check if the assignment is type hint
         val newContext = assign.value.analyzeWith(context)
-        // todo assign value and return resulting context
         val identifier = (assign.targets.first() as Name).identifier
         return newContext.map {
             addStruct(identifier, newContext.getRetValue())
@@ -266,7 +264,8 @@ object Pandalyzer {
                 CompareOperator.LessThanEqual -> TODO()
                 CompareOperator.NotEqual -> TODO()
                 CompareOperator.NotIn -> TODO()
-            }
+                CompareOperator.GreaterThan -> TODO()
+            }.let { }
         }
         return resultContext
     }
@@ -340,11 +339,13 @@ object Pandalyzer {
             operation = { acc, statement -> acc.map { returnValue(PythonNone) }.let { statement.analyzeWith(it) } },
         )
 
-    fun List<PythonType.Expression>.foldExpressions(initialContext: AnalysisContext): Pair<Sequence<PythonDataStructure>, AnalysisContext> =
+    fun List<PythonType.Expression?>.foldExpressions(
+        initialContext: AnalysisContext,
+    ): Pair<Sequence<PythonDataStructure>, AnalysisContext> =
         this.fold(
             initial = emptySequence<PythonDataStructure>() to initialContext,
             operation = { (defaultsSoFar, currentContext), current ->
-                val resultContext = current.analyzeWith(currentContext)
+                val resultContext = current?.analyzeWith(currentContext) ?: currentContext.map { returnValue(PythonNone) }
                 defaultsSoFar + resultContext.getRetValue() to resultContext
             },
         )

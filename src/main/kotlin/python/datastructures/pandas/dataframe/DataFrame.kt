@@ -1,4 +1,4 @@
-package python.datastructures.pandas
+package python.datastructures.pandas.dataframe
 
 import analyzer.Identifier
 import python.OperationResult
@@ -9,6 +9,7 @@ import python.datastructures.defaults.PythonList
 import python.datastructures.defaults.PythonString
 import python.datastructures.pandas.dataframe.functions.DataFrame_GroupByFunc
 import python.datastructures.pandas.dataframe.functions.DataFrame_MergeFunc
+import python.datastructures.pandas.series.Series
 import python.fail
 import python.ok
 

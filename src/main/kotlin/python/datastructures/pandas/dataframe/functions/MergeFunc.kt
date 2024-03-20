@@ -11,8 +11,7 @@ import python.datastructures.defaults.PythonBool
 import python.datastructures.defaults.PythonList
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
-import python.datastructures.pandas.DataFrame
-import python.datastructures.pandas.DataFrameFunction
+import python.datastructures.pandas.dataframe.DataFrame
 import python.fail
 import python.map
 

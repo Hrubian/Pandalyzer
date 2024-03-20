@@ -33,6 +33,10 @@ import sys
 import ast
 from _ast import AST, Constant
 import json
+import warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 
 parser = argparse.ArgumentParser()
 
@@ -108,10 +112,7 @@ def parse(input_stream, output_stream):
 
 
 if __name__ == '__main__':
-    print("Starting", file=sys.stderr) # todo remove
-    # args = parser.parse_args([] if "__file__" not in globals() else None)
     args = parser.parse_args()
-    print("Got args", args, file=sys.stderr)
     if args.input is None:
         input_stream = sys.stdin
     else:

@@ -8,7 +8,7 @@ import python.ok
 @JvmInline
 value class PythonString(val value: String) : PythonDataStructure {
     override operator fun plus(other: PythonDataStructure): OperationResult<PythonDataStructure> {
-        return if (other is PythonInt) {
+        return if (other is PythonString) {
             PythonString(value + other.value).ok()
         } else {
             fail("Cannot sum $typeName with ${other.typeName}")

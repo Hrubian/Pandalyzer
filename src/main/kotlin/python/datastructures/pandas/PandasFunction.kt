@@ -4,35 +4,12 @@ import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
 import python.datastructures.PythonDataStructure
+import python.datastructures.pandas.dataframe.DataFrame
+import python.datastructures.pandas.series.Series
 import python.fail
 import python.ok
 
 interface PandasFunction : PythonDataStructure {
-    object MergeFunc : PandasFunction {
-        override fun invoke(
-            args: List<PythonDataStructure>,
-            keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-            outerContext: AnalysisContext,
-        ): OperationResult<PythonDataStructure> = fail("not implemented")
-    }
-
-    object DataFrameFunc : PandasFunction {
-        override fun invoke(
-            args: List<PythonDataStructure>,
-            keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-            outerContext: AnalysisContext,
-        ): OperationResult<PythonDataStructure> = fail("not implemented")
-
-        // we want to support also constructs like: pd.DataFrame.from_dict(...)
-        override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
-            when (identifier) {
-                "from_dict" -> FromDictFunc.ok()
-                else -> fail("Unknown identifier $identifier")
-            }
-
-        object FromDictFunc : PandasFunction
-    }
-
     object SeriesFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,

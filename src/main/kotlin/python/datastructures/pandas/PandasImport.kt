@@ -4,14 +4,16 @@ import analyzer.Identifier
 import python.OperationResult
 import python.datastructures.ImportStruct
 import python.datastructures.PythonDataStructure
+import python.datastructures.pandas.functions.PandasDataframeFunc
+import python.datastructures.pandas.functions.PandasMergeFunc
 import python.fail
 import python.ok
 
 data object PandasImport : ImportStruct {
     override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
         when (identifier) {
-            "merge" -> PandasFunction.MergeFunc.ok()
-            "DataFrame" -> PandasFunction.DataFrameFunc.ok()
+            "merge" -> PandasMergeFunc.ok()
+            "DataFrame" -> PandasDataframeFunc.ok()
             "Series" -> PandasFunction.SeriesFunc.ok()
             "concat" -> PandasFunction.ConcatFunc.ok()
             "groupby" -> PandasFunction.GroupByFunc.ok()
