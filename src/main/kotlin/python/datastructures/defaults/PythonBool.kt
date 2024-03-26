@@ -20,4 +20,6 @@ value class PythonBool(val value: Boolean) : PythonDataStructure {
         } else {
             fail("Cannot do 'or' on $typeName and ${other.typeName}")
         }
+
+    override fun clone(): PythonDataStructure = PythonBool(value)
 }

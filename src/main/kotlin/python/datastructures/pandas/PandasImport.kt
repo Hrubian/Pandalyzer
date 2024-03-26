@@ -20,4 +20,6 @@ data object PandasImport : ImportStruct {
             "read_csv" -> PandasFunction.ReadCsvFunc.ok()
             else -> fail("Unknown pandas identifier $identifier.")
         }
+
+    override fun clone(): PythonDataStructure = this
 }

@@ -2,14 +2,18 @@ package python.arguments
 
 import analyzer.AnalysisContext
 import analyzer.Identifier
-import analyzer.Pandalyzer.foldExpressions
+import analyzer.Pandalyzer.analyzeWith
 import python.OperationResult
 import python.PythonType
+import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
+import python.datastructures.UnresolvedStructure
 import python.datastructures.defaults.PythonList
+import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
 import python.fail
 import python.ok
+import python.orElse
 
 data class ResolvedArguments(
     val positionalArgs: List<PythonType.Arg>,
@@ -21,9 +25,11 @@ data class ResolvedArguments(
     val defaults: List<PythonDataStructure>,
 ) {
     companion object {
-        fun PythonType.Arguments.resolve(context: AnalysisContext): Pair<ResolvedArguments, AnalysisContext> {
-            val (resolved, newContext) = defaults.foldExpressions(context)
-            val (resolvedKeywords, finalContext) = keywordDefaults.foldExpressions(newContext)
+        fun PythonType.Arguments.resolve(context: AnalysisContext): ResolvedArguments {
+            val resolved = defaults.map { expr -> expr.analyzeWith(context).orElse { UnresolvedStructure(it) } }
+            val resolvedKeywords =
+                keywordDefaults.map { expr -> expr?.analyzeWith(context)?.orElse { UnresolvedStructure(it) } ?: PythonNone}
+
             return ResolvedArguments(
                 positionalArgs = positionalArgs,
                 arguments = arguments,
@@ -32,7 +38,7 @@ data class ResolvedArguments(
                 keywordOnlyArgs = keywordOnlyArgs,
                 keywordDefaults = resolvedKeywords.toList(),
                 defaults = resolved.toList(),
-            ) to finalContext
+            )
         }
     }
 }

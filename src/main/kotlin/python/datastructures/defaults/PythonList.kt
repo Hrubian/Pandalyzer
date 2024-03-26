@@ -16,6 +16,8 @@ value class PythonList(
             else -> fail("unknown attributes $identifier")
         }
 
+    override fun clone(): PythonDataStructure = PythonList(items.map { it.clone() }.toMutableList())
+
     override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> {
         if (key is PythonInt) {
             val item = items.getOrNull(key.value.toInt())

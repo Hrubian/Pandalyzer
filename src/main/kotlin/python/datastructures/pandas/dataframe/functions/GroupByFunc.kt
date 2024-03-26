@@ -33,12 +33,14 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
         }
     }
 
+    override fun clone(): PythonDataStructure = DataFrame_GroupByFunc(dataFrame.clone() as DataFrame)
+
     private fun groupBy(
         dataFrame: DataFrame,
         by: PythonString,
     ): OperationResult<PythonDataStructure> {
         return if (by.value in dataFrame.fields) {
-            DataFrameGroupBy(dataFrame, listOf(by.value)).ok()
+            DataFrameGroupBy(dataFrame, mutableListOf(by.value)).ok()
         } else {
             fail("The dataframe does not contain the field $by. Dataframe columns: ${dataFrame.fields.keys}")
         }
@@ -58,7 +60,7 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
             )
         }
 
-        return DataFrameGroupBy(dataFrame, by.items.map { (it as PythonString).value }).ok()
+        return DataFrameGroupBy(dataFrame, by.items.map { (it as PythonString).value }.toMutableList()).ok()
     }
 
     private val argumentSchema =

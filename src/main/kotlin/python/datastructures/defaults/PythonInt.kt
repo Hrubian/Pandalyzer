@@ -1,6 +1,5 @@
 package python.datastructures.defaults
 
-import analyzer.Identifier
 import python.OperationResult
 import python.datastructures.PythonDataStructure
 import python.fail
@@ -9,9 +8,7 @@ import java.math.BigInteger
 
 @JvmInline
 value class PythonInt(val value: BigInteger) : PythonDataStructure {
-    override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> {
-        TODO("Not yet implemented")
-    }
+    override fun clone(): PythonDataStructure = PythonInt(value)
 
     override operator fun plus(other: PythonDataStructure): OperationResult<PythonDataStructure> {
         return if (other is PythonInt) {

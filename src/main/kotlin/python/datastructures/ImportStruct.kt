@@ -12,7 +12,6 @@ fun createImportStruct(
     return if (libName == "pandas") {
         PandasImport
     } else {
-        UnresolvedStructure
-//        error("Unknown import $libName")
+        UnresolvedStructure("Unknown import $libName")
     }
 }

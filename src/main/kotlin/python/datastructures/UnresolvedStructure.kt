@@ -1,3 +1,5 @@
 package python.datastructures
 
-data object UnresolvedStructure : PythonDataStructure
+data class UnresolvedStructure(val reason: String) : PythonDataStructure {
+    override fun clone(): PythonDataStructure = this
+}

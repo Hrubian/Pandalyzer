@@ -13,4 +13,6 @@ data class SeriesGroupBy(
     }
 
     fun sum() {}
+
+    override fun clone(): PythonDataStructure = SeriesGroupBy(series.clone() as Series, by)
 }

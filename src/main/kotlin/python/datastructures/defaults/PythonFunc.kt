@@ -1,21 +1,26 @@
 package python.datastructures.defaults
 
 import analyzer.AnalysisContext
-import analyzer.ContextBuilder
 import analyzer.Identifier
-import analyzer.Pandalyzer
-import analyzer.map
+import analyzer.Pandalyzer.analyze
+import analyzer.Pandalyzer.analyzeWith
+import analyzer.StatementAnalysisResult
+import analyzer.StatementAnalysisResult.NondeterministicResult
+import analyzer.analyzeStatements
 import python.OperationResult
 import python.PythonType
 import python.arguments.ArgumentMatcher
 import python.arguments.MatchedFunctionSchema
 import python.arguments.ResolvedArguments
+import python.datastructures.NondeterministicDataStructure
+import python.datastructures.NondeterministicDataStructure.Companion.combineResults
 import python.datastructures.PythonDataStructure
 import python.fail
 import python.ok
+import python.orElse
 
 data class PythonFunc(
-    val name: Identifier?,
+    val name: Identifier,
     val body: List<PythonType.Statement>,
     val arguments: ResolvedArguments,
 ) : PythonDataStructure {
@@ -24,33 +29,30 @@ data class PythonFunc(
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
         outerContext: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
-        val initialContext = ContextBuilder.buildEmpty(outerContext)
-        val matchedArguments = ArgumentMatcher.match(arguments, args, keywordArgs.toMap())
+        val functionContext = AnalysisContext.buildForFunction(outerContext)
+        val matchedArguments = ArgumentMatcher.match(arguments, args, keywordArgs.toMap()).orElse { return fail(it) }
 
-        val contextWithArgs =
-            initialContext.map {
-                when (matchedArguments) {
-                    is OperationResult.Error -> fail(matchedArguments.reason)
-                    is OperationResult.Warning -> {
-                        addWarning(matchedArguments.message)
-                        addArgs(matchedArguments.result)
-                    }
-                    is OperationResult.Ok -> addArgs(matchedArguments.result)
-                }
-            }
+        functionContext.addArgs(matchedArguments)
 
-        with(Pandalyzer) {
-            return when (val resultContext = body.foldStatements(contextWithArgs)) {
-                is AnalysisContext.OK -> PythonNone.ok()
-                is AnalysisContext.Returned -> resultContext.value.ok()
-                is AnalysisContext.Error -> fail("The function $name failed with reason: ${resultContext.reason}")
-            }
-        }
+        return analyzeStatements(body, functionContext).extractOperationResult()
     }
 
+    override fun clone(): PythonDataStructure = this
+
     private companion object {
-        fun ContextBuilder.addArgs(args: MatchedFunctionSchema) {
-            args.matchedArguments.forEach { addStruct(it.key, it.value) }
+        fun AnalysisContext.addArgs(args: MatchedFunctionSchema) {
+            args.matchedArguments.forEach { upsertStruct(it.key, it.value)}
         }
+
+        fun StatementAnalysisResult.extractOperationResult(): OperationResult<PythonDataStructure> =
+            when (this) {
+                StatementAnalysisResult.Breaked -> fail("Break outside the loop")
+                StatementAnalysisResult.Continued -> fail("Continue outside the loop")
+                StatementAnalysisResult.Ended -> PythonNone.ok()
+                is NondeterministicResult ->
+                    combineResults(leftResult.extractOperationResult(), rightResult.extractOperationResult())
+                is StatementAnalysisResult.Returned -> returnValue
+            }
+
     }
 }

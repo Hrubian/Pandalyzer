@@ -51,7 +51,7 @@ object PandasMergeFunc : PandasFunction {
         if (leftJoin != rightJoin) {
             return fail("The types of $leftOn and $rightOn are different")
         }
-        return DataFrame(left.fields + right.fields).ok()
+        return DataFrame((left.fields + right.fields).toMutableMap()).ok()
     }
 
     private val allowedHowValues = setOf("inner", "outer", "left", "right", "cross")

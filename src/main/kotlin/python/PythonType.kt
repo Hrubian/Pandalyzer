@@ -75,6 +75,7 @@ sealed interface PythonType {
         data class IfStatement(
             val test: Expression,
             val body: List<Statement>,
+            @SerialName("orelse")
             val orElse: List<Statement>,
         ) : Statement
 
@@ -150,9 +151,7 @@ sealed interface PythonType {
 
             @Serializable
             @SerialName("NoneConstant")
-            data class NoneConstant(
-                val value: Boolean,
-            ) : Constant
+            data object NoneConstant : Constant
         }
 
         @Serializable

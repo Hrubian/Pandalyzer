@@ -33,14 +33,16 @@ object PandasDataframeFunc : PythonDataStructure {
             }
         }
 
+    override fun clone(): PythonDataStructure = this
+
     // we want to support also constructs like: pd.DataFrame.from_dict(...)
     override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
         when (identifier) {
-            "from_dict" -> fromDictFunc.ok()
+            "from_dict" -> fromDictFunction.ok()
             else -> fail("Unknown identifier $identifier")
         }
 
-    private val fromDictFunc =
+    private val fromDictFunction =
         PythonInvokable { args, _, _ ->
             val data = args.firstOrNull() ?: return@PythonInvokable fail("")
             if (data is PythonDict) {
@@ -76,7 +78,7 @@ object PandasDataframeFunc : PythonDataStructure {
                     else -> return fail("The column of a dataframe has be either a list or a dictionary")
                 }
             columnName to columnType
-        }.let { return DataFrame(it.toMap()).ok() }
+        }.let { return DataFrame(it.toMap().toMutableMap()).ok() }
     }
 
     private val argumentSchema =

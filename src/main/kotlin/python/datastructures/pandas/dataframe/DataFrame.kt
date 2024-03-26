@@ -14,7 +14,7 @@ import python.fail
 import python.ok
 
 data class DataFrame(
-    val fields: Map<FieldName, FieldType>,
+    val fields: MutableMap<FieldName, FieldType>,
 ) : PythonDataStructure {
     override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
         when (identifier) {
@@ -22,6 +22,8 @@ data class DataFrame(
             "merge" -> DataFrame_MergeFunc(this).ok()
             else -> fail("Unknown identifier on dataframe: $identifier")
         }
+
+    override fun clone(): PythonDataStructure = DataFrame(fields.toMutableMap())
 
     override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> =
         when (key) {
@@ -34,7 +36,9 @@ data class DataFrame(
             }
             is PythonList -> {
                 if (key.items.all { it is PythonString && it.value in fields }) {
-                    DataFrame(fields.filterKeys { it in key.items.map { it as PythonString}.map { it.value} }).ok() //todo this is disgusting :)
+                    DataFrame(
+                        fields.filterKeys { it in key.items.map { it as PythonString}.map { it.value} }.toMutableMap()
+                    ).ok() //todo this is disgusting :)
                 } else {
                     fail("TODO") // todo
                 }

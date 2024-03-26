@@ -32,6 +32,8 @@ data class DataFrame_MergeFunc(override val dataFrame: DataFrame) : DataFrameFun
         }
     }
 
+    override fun clone(): PythonDataStructure = DataFrame_MergeFunc(dataFrame.copy())
+
     private fun merge(
         left: DataFrame,
         right: DataFrame,

@@ -14,4 +14,6 @@ value class PythonString(val value: String) : PythonDataStructure {
             fail("Cannot sum $typeName with ${other.typeName}")
         }
     }
+
+    override fun clone(): PythonDataStructure = PythonString(value)
 }

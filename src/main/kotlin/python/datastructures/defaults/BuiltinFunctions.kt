@@ -8,6 +8,8 @@ import python.fail
 import python.ok
 
 fun interface PythonInvokable : PythonDataStructure {
+    override fun clone(): PythonDataStructure = this
+
     override fun invoke(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,

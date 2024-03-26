@@ -2,16 +2,16 @@ package python.datastructures.pandas
 
 import analyzer.AnalysisContext
 import analyzer.Identifier
-import analyzer.map
 import python.OperationResult
 import python.datastructures.PythonDataStructure
-import python.datastructures.defaults.PythonString
 import python.datastructures.pandas.dataframe.DataFrame
 import python.datastructures.pandas.series.Series
 import python.fail
 import python.ok
 
 interface PandasFunction : PythonDataStructure {
+
+    override fun clone(): PythonDataStructure = this
     object SeriesFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
@@ -60,15 +60,7 @@ interface PandasFunction : PythonDataStructure {
             args: List<PythonDataStructure>,
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
             outerContext: AnalysisContext,
-        ): OperationResult<PythonDataStructure> = outerContext.map {
-            val csvFileName = (args.firstOrNull() as? PythonString)
-            val newDataFrame = extractDataframe()
+        ): OperationResult<PythonDataStructure> = TODO()
 
-
-        }
-
-        private fun extractDataframe(): OperationResult<DataFrame> {
-
-        }
     }
 }
