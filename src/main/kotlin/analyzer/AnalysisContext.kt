@@ -16,6 +16,8 @@ sealed interface AnalysisContext {
 
     fun getRetValue(): PythonDataStructure
 
+    fun summarize(): String
+
     data class Error(
         val reason: String,
     ) : AnalysisContext {
@@ -24,6 +26,8 @@ sealed interface AnalysisContext {
         override fun getStructure(name: Identifier): PythonDataStructure? = null
 
         override fun getRetValue(): PythonDataStructure = UnresolvedStructure // todo really?
+
+        override fun summarize(): String = "Error occured. Reason: $reason"
     }
 
     data class Returned(
@@ -34,22 +38,25 @@ sealed interface AnalysisContext {
         override fun getStructure(name: Identifier): PythonDataStructure? = null
 
         override fun getRetValue(): PythonDataStructure = value // todo really?
+
+        override fun summarize(): String = error("Returned should never be the last context")
     }
 
     data class OK(
         val pythonDataStructures: Map<Identifier, PythonDataStructure>,
         val returnValue: PythonDataStructure,
         val outerContext: AnalysisContext?, // todo there should probably be a globalContext
+        val globalContext: AnalysisContext?,
         val warnings: List<String>,
     ) : AnalysisContext {
-        fun summarize(): AnalysisResult {
-            TODO()
-        }
+        override fun summarize(): String =
+            if (warnings.isEmpty()) "OK, last return value: $returnValue"
+            else "There were following warnings: $warnings"
 
         override fun fail(reason: String): AnalysisContext = Error(reason)
 
         override fun getStructure(name: Identifier): PythonDataStructure? =
-            pythonDataStructures.getOrElse(name) { outerContext?.getStructure(name) }
+            pythonDataStructures.getOrElse(name) { globalContext?.getStructure(name) }
 
         override fun getRetValue(): PythonDataStructure = returnValue
     }
@@ -76,6 +83,7 @@ sealed interface AnalysisContext {
                         outerContext = first.outerContext.also { check(first.outerContext == second.outerContext) },
                         returnValue = NondeterministicDataStructure(first.returnValue, second.returnValue),
                         warnings = first.warnings + second.warnings, // todo
+                        globalContext = first.globalContext ?: first.outerContext
                     )
                 else -> TODO()
             }
@@ -136,6 +144,7 @@ class ContextBuilder(private val previousContext: AnalysisContext.OK) {
             warnings = previousContext.warnings + newWarnings,
             outerContext = previousContext.outerContext,
             pythonDataStructures = previousContext.pythonDataStructures + upsertedDataStructures,
+            globalContext = null,
         )
 
     fun fail(reason: String) {
@@ -149,6 +158,7 @@ class ContextBuilder(private val previousContext: AnalysisContext.OK) {
                 returnValue = PythonNone,
                 warnings = emptyList(),
                 outerContext = outerContext,
+                globalContext = null,
             )
 
         fun buildWithBuiltins() = buildEmpty().map { builtinFunctions.forEach { addStruct(it.key, it.value) } }

@@ -25,12 +25,12 @@ object PandasMergeFunc : PandasFunction {
             val left = it.matchedArguments["left"] as? DataFrame ?: return@map fail("Incorrect left argument to merge")
             val right = it.matchedArguments["right"] as? DataFrame ?: return@map fail("Incorrect right argument to merge")
             val how = it.matchedArguments["how"] as? PythonString ?: return@map fail("Incorrect how argument to merge")
-            val on = it.matchedArguments["on"] as? PythonString // todo the on, left_on, right_on can be also PythonList
+            val on = it.matchedArguments["on"] as? PythonString
             val leftOn = it.matchedArguments["left_on"] as? PythonString
             val rightOn = it.matchedArguments["right_on"] as? PythonString
 
             if (allowedHowValues.contains(how.value).not()) {
-                return@map fail("Incorrect how value: ${how.value}")
+                return@map fail("Incorrect 'how' value: ${how.value}")
             }
 
             return@map when {
@@ -40,19 +40,18 @@ object PandasMergeFunc : PandasFunction {
             }
         }
 
-    private fun merge(
+    private fun merge( // TODO suffixes and lists
         left: DataFrame,
         right: DataFrame,
         leftOn: String,
         rightOn: String,
     ): OperationResult<PythonDataStructure> {
-        if (left.fields.keys.contains(leftOn).not()) {
-            return fail("The left dataframe does not contain the column $leftOn")
+        val leftJoin = left.fields[leftOn] ?: return fail("The left dataframe does not contain the column $leftOn")
+        val rightJoin = right.fields[rightOn] ?: return fail("The right dataframe does not contain the column $rightOn")
+        if (leftJoin != rightJoin) {
+            return fail("The types of $leftOn and $rightOn are different")
         }
-        if (right.fields.keys.contains(rightOn).not()) {
-            return fail("The right dataframe does not contain the column $rightOn")
-        }
-        return DataFrame(left.fields + right.fields).ok() // todo is this alright?
+        return DataFrame(left.fields + right.fields).ok()
     }
 
     private val allowedHowValues = setOf("inner", "outer", "left", "right", "cross")

@@ -29,7 +29,7 @@ data class DataFrame(
                 if (key.value in fields.keys) {
                     Series(fields[key.value]!!).ok()
                 } else {
-                    fail("The key ${key.value} does note exist in the dataframe")
+                    fail("The key ${key.value} does not exist in the dataframe")
                 }
             }
             is PythonList -> {

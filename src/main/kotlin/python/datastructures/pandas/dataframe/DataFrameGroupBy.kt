@@ -1,4 +1,4 @@
-package python.datastructures.pandas
+package python.datastructures.pandas.dataframe
 
 import python.datastructures.FieldName
 import python.datastructures.PythonDataStructure

@@ -2,8 +2,10 @@ package python.datastructures.pandas
 
 import analyzer.AnalysisContext
 import analyzer.Identifier
+import analyzer.map
 import python.OperationResult
 import python.datastructures.PythonDataStructure
+import python.datastructures.defaults.PythonString
 import python.datastructures.pandas.dataframe.DataFrame
 import python.datastructures.pandas.series.Series
 import python.fail
@@ -58,6 +60,15 @@ interface PandasFunction : PythonDataStructure {
             args: List<PythonDataStructure>,
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
             outerContext: AnalysisContext,
-        ): OperationResult<PythonDataStructure> = fail("not implemented")
+        ): OperationResult<PythonDataStructure> = outerContext.map {
+            val csvFileName = (args.firstOrNull() as? PythonString)
+            val newDataFrame = extractDataframe()
+
+
+        }
+
+        private fun extractDataframe(): OperationResult<DataFrame> {
+
+        }
     }
 }

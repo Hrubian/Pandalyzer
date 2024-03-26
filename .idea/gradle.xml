@@ -12,6 +12,16 @@
           </set>
         </option>
       </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/Pandalyzer_alternative" />
+        <option name="gradleHome" value="" />
+        <option name="gradleJvm" value="corretto-18" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/Pandalyzer_alternative" />
+          </set>
+        </option>
+      </GradleProjectSettings>
     </option>
   </component>
 </project>
