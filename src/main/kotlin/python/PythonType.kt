@@ -40,7 +40,7 @@ sealed interface PythonType {
         @Serializable
         @SerialName("Return")
         data class Return(
-            val value: Expression,
+            val value: Expression?,
         ) : Statement
 
         @Serializable

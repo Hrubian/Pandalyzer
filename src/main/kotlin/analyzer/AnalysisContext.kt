@@ -1,6 +1,8 @@
 package analyzer
 
+import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
+import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.builtinFunctions
 
 typealias Identifier = String
@@ -62,7 +64,17 @@ data class GlobalAnalysisContext(
         val otherGlobal = other as GlobalAnalysisContext
         warnings.addAll(otherGlobal.warnings)
         errors.addAll(otherGlobal.errors)
-        TODO("merge python structs")
+        (pythonDataStructures.keys + other.pythonDataStructures.keys).associateWithTo(pythonDataStructures) { key ->
+            val first = pythonDataStructures[key]
+            val second = other.pythonDataStructures[key]
+            if (first != null && second != null) {
+                if (first == second) first else NondeterministicDataStructure(first, second)
+            } else if (first != null) { // second is null
+                NondeterministicDataStructure(first, PythonNone)
+            } else { //first is null
+                NondeterministicDataStructure(second!!, PythonNone)
+            }
+        }
     }
 
     fun summarize(): String = buildString {
@@ -113,6 +125,49 @@ data class FunctionAnalysisContext(
 
     override fun merge(other: AnalysisContext) {
         outerContext.merge((other as FunctionAnalysisContext).outerContext)
-        TODO("merge python structs")
+        (pythonDataStructures.keys + other.pythonDataStructures.keys).associateWithTo(pythonDataStructures) { key ->
+            val first = pythonDataStructures[key]
+            val second = other.pythonDataStructures[key]
+            if (first != null && second != null) {
+                if (first == second) first else NondeterministicDataStructure(first, second)
+            } else if (first != null) { // second is null
+                NondeterministicDataStructure(first, PythonNone)
+            } else { //first is null
+                NondeterministicDataStructure(second!!, PythonNone)
+            }
+        }
+    }
+}
+
+data class NondeterministicAnalysisContext(
+    private val left: AnalysisContext,
+    private val right: AnalysisContext
+) : AnalysisContext {
+    override fun upsertStruct(name: Identifier, value: PythonDataStructure): PythonDataStructure? {
+        TODO("Not yet implemented")
+    }
+
+    override fun getStruct(name: Identifier): PythonDataStructure? {
+        TODO("Not yet implemented")
+    }
+
+    override fun addWarning(message: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun addError(message: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getGlobalContext(): AnalysisContext {
+        TODO("Not yet implemented")
+    }
+
+    override fun clone(): AnalysisContext {
+        TODO("Not yet implemented")
+    }
+
+    override fun merge(other: AnalysisContext) {
+        TODO("Not yet implemented")
     }
 }

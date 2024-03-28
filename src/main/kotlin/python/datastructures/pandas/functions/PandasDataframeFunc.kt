@@ -38,11 +38,11 @@ object PandasDataframeFunc : PythonDataStructure {
     // we want to support also constructs like: pd.DataFrame.from_dict(...)
     override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
         when (identifier) {
-            "from_dict" -> fromDictFunction.ok()
+            "from_dict" -> createFromDictionary.ok()
             else -> fail("Unknown identifier $identifier")
         }
 
-    private val fromDictFunction =
+    private val createFromDictionary =
         PythonInvokable { args, _, _ ->
             val data = args.firstOrNull() ?: return@PythonInvokable fail("")
             if (data is PythonDict) {
