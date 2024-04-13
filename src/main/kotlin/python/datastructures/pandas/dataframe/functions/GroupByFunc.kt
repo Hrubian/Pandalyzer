@@ -61,7 +61,7 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
         if (dataFrame.fields == null) {
             return DataFrameGroupBy(null, null).withWarn("The fields of the dataframe are unknown")
         }
-        val keys = by.items.map { it as? PythonString ?: return fail("Cannot group a dataframe by ${it.typeCode}") }
+        val keys = by.items.map { it as? PythonString ?: return fail("Cannot group a dataframe by ${it.typeName}") }
 
         val missingKeys = keys.filterNot { it.value in dataFrame.fields }
         if (missingKeys.isNotEmpty()) {

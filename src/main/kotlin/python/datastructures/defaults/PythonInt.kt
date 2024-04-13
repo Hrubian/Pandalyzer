@@ -4,6 +4,7 @@ import python.OperationResult
 import python.datastructures.PythonDataStructure
 import python.fail
 import python.ok
+import python.withWarn
 import java.math.BigInteger
 
 @JvmInline
@@ -15,7 +16,7 @@ value class PythonInt(val value: BigInteger?) : PythonDataStructure {
             if (value == null || other.value == null) return PythonInt(null).ok()
             PythonInt(this.value + other.value).ok()
         } else {
-            fail("Cannot sum a $typeCode with ${other.typeCode}")
+            fail("Cannot sum a $typeName with ${other.typeName}")
         }
     }
 
@@ -24,7 +25,7 @@ value class PythonInt(val value: BigInteger?) : PythonDataStructure {
             if (value == null || other.value == null) return PythonInt(null).ok()
             PythonInt(this.value - other.value).ok()
         } else {
-            fail("Cannot subtract a ${other.typeCode} from $typeCode")
+            fail("Cannot subtract a ${other.typeName} from $typeName")
         }
     }
 
@@ -33,18 +34,55 @@ value class PythonInt(val value: BigInteger?) : PythonDataStructure {
             if (value == null || other.value == null) return PythonInt(null).ok()
             PythonInt(this.value * other.value).ok()
         } else {
-            fail("Cannot multiply a $typeCode with $typeCode")
+            fail("Cannot multiply a $typeName with $typeName")
         }
     }
 
     override operator fun div(other: PythonDataStructure): OperationResult<PythonDataStructure> {
         return if (other is PythonInt && other.value != BigInteger.ZERO) {
             if (value == null || other.value == null) return PythonInt(null).ok()
+            TODO("implement floats!!!")
+//            PythonInt(BigDecimal(this.value) / other.value).ok()
+        } else {
+            fail("Cannot divide $typeName by ${other.typeName}")
+        }
+    }
+
+    override fun floorDiv(other: PythonDataStructure): OperationResult<PythonDataStructure> {
+        return if (other is PythonInt && other.value != BigInteger.ZERO) {
+            if (value == null || other.value == null) return PythonInt(null).ok()
             PythonInt(this.value / other.value).ok()
         } else {
-            fail("Cannot divide $typeCode by ${other.typeCode}")
+            fail("Cannot floor-dive $typeName by ${other.typeName}")
         }
     }
 
     override fun boolValue(): Boolean? = if (value == null) null else value != BigInteger.ZERO
+
+    override infix fun equal(other: PythonDataStructure): OperationResult<PythonDataStructure> = compare(other) { a, b -> a == b }
+
+    override infix fun greaterThan(other: PythonDataStructure): OperationResult<PythonDataStructure> = compare(other) { a, b -> a > b }
+
+    override infix fun greaterThanEqual(other: PythonDataStructure): OperationResult<PythonDataStructure> =
+        compare(other) { a, b -> a >= b }
+
+    override infix fun lessThan(other: PythonDataStructure): OperationResult<PythonDataStructure> = compare(other) { a, b -> a < b }
+
+    override infix fun lessThanEqual(other: PythonDataStructure): OperationResult<PythonDataStructure> = compare(other) { a, b -> a <= b }
+
+    override infix fun notEqual(other: PythonDataStructure): OperationResult<PythonDataStructure> = compare(other) { a, b -> a != b }
+
+    private fun compare(
+        other: PythonDataStructure,
+        operation: (BigInteger, BigInteger) -> Boolean,
+    ): OperationResult<PythonDataStructure> =
+        if (other is PythonInt) {
+            if (value != null && other.value != null) {
+                PythonBool(operation(value, other.value)).ok()
+            } else {
+                PythonBool(null).withWarn("unable to get the values of integers for comparing")
+            }
+        } else {
+            PythonBool(false).withWarn("Comparing different types: $typeName and ${other.typeName}")
+        }
 }

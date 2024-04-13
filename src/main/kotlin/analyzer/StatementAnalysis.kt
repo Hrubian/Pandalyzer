@@ -16,7 +16,7 @@ fun analyzeStatements(
             is PythonType.Statement.Break -> return StatementAnalysisResult.Breaked
             is PythonType.Statement.Continue -> return StatementAnalysisResult.Continued
             is PythonType.Statement.Return -> return StatementAnalysisResult.Returned(stmt.value?.analyzeWith(context) ?: PythonNone.ok())
-            else -> stmt.analyzeWith(context).anotherFun(statements.drop(index + 1), context)?.let { return it } // todo refactor
+            else -> stmt.analyzeWith(context).anotherFun(statements.drop(index + 1), context)?.let { return it } // todo refactor }
         }
     }.let { StatementAnalysisResult.Ended }
 
@@ -24,27 +24,30 @@ private fun StatementAnalysisResult.anotherFun( // todo rename me :)
     remainingStatements: List<PythonType.Statement>,
     context: AnalysisContext,
 ): StatementAnalysisResult? {
-    if (this is StatementAnalysisResult.NondeterministicResult) {
-        return StatementAnalysisResult.NondeterministicResult(
-            leftResult =
-                when (leftResult) {
-                    StatementAnalysisResult.Breaked -> leftResult
-                    StatementAnalysisResult.Continued -> leftResult
-                    StatementAnalysisResult.Ended -> analyzeStatements(remainingStatements, context)
-                    is StatementAnalysisResult.NondeterministicResult -> leftResult.anotherFun(remainingStatements, context) ?: return null
-                    is StatementAnalysisResult.Returned -> leftResult
-                },
-            rightResult =
-                when (rightResult) {
-                    StatementAnalysisResult.Breaked -> rightResult
-                    StatementAnalysisResult.Continued -> rightResult
-                    StatementAnalysisResult.Ended -> analyzeStatements(remainingStatements, context)
-                    is StatementAnalysisResult.NondeterministicResult -> rightResult.anotherFun(remainingStatements, context) ?: return null
-                    is StatementAnalysisResult.Returned -> rightResult
-                },
-        )
-    } else {
-        return null
+    when (this) {
+        is StatementAnalysisResult.NondeterministicResult ->
+            return StatementAnalysisResult.NondeterministicResult(
+                leftResult =
+                    when (leftResult) {
+                        StatementAnalysisResult.Breaked -> leftResult
+                        StatementAnalysisResult.Continued -> leftResult
+                        StatementAnalysisResult.Ended -> analyzeStatements(remainingStatements, context)
+                        is StatementAnalysisResult.NondeterministicResult -> leftResult.anotherFun(remainingStatements, context) ?: return null
+                        is StatementAnalysisResult.Returned -> leftResult
+                    },
+                rightResult =
+                    when (rightResult) {
+                        StatementAnalysisResult.Breaked -> rightResult
+                        StatementAnalysisResult.Continued -> rightResult
+                        StatementAnalysisResult.Ended -> analyzeStatements(remainingStatements, context)
+                        is StatementAnalysisResult.NondeterministicResult -> rightResult.anotherFun(remainingStatements, context) ?: return null
+                        is StatementAnalysisResult.Returned -> rightResult
+                    },
+            )
+        StatementAnalysisResult.Breaked -> return this
+        StatementAnalysisResult.Continued -> return this
+        StatementAnalysisResult.Ended -> return null
+        is StatementAnalysisResult.Returned -> return this
     }
 }
 

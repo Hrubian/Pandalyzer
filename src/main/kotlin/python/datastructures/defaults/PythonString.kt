@@ -11,7 +11,7 @@ value class PythonString(val value: String?) : PythonDataStructure {
         return if (other is PythonString) {
             PythonString(value + other.value).ok()
         } else {
-            fail("Cannot sum $typeCode with ${other.typeCode}")
+            fail("Cannot sum $typeName with ${other.typeName}")
         }
     }
 

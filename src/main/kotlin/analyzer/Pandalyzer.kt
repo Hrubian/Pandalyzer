@@ -2,6 +2,7 @@ package analyzer
 
 import python.OperationResult
 import python.PythonType
+import python.PythonType.CompareOperator
 import python.PythonType.Expression.Attribute
 import python.PythonType.Expression.BinaryOperation
 import python.PythonType.Expression.BoolOperation
@@ -20,6 +21,7 @@ import python.PythonType.ExpressionContext.Load
 import python.PythonType.Mod.Module
 import python.PythonType.Operator.Add
 import python.PythonType.Operator.Div
+import python.PythonType.Operator.FloorDiv
 import python.PythonType.Operator.Mult
 import python.PythonType.Operator.Sub
 import python.PythonType.Statement.Assign
@@ -94,7 +96,7 @@ object Pandalyzer {
             ifStatement.test.analyzeWith(context).orElse {
                 context.addError(it)
                 return StatementAnalysisResult.Ended
-            }.also { it as? PythonBool ?: context.addWarning("If statement with test value of type ${it.typeCode}") }.boolValue()
+            }.also { it as? PythonBool ?: context.addWarning("If statement with test value of type ${it.typeName}") }.boolValue()
 
         return if (ifResult != null) {
             if (ifResult) {
@@ -160,6 +162,7 @@ object Pandalyzer {
             Div -> left / right
             Mult -> left * right
             Sub -> left - right
+            FloorDiv -> left floorDiv right
         }
     }
 
@@ -184,29 +187,41 @@ object Pandalyzer {
         context: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
         check(compare.comparators.size == compare.operators.size)
+        var left = compare.left.analyzeWith(context).orElse { return fail(it) }
+        var op = compare.operators.first()
+        var right = compare.comparators.first().analyzeWith(context).orElse { return fail(it) }
+        var rightIndex = 0
 
-//        val
-        TODO("compare not implemented")
-//        var resultContext = compare.left.analyzeWith(context)
-//        for (index: Int in 0..<compare.comparators.size) {
-//            val left = resultContext.getRetValue()
-//            resultContext = compare.comparators[index].analyzeWith(resultContext)
-//            val right = resultContext.getRetValue()
-//            when (compare.operators[index]) {
-//                CompareOperator.Equal -> TODO()
-//                CompareOperator.GreaterThan -> TODO()
-//                CompareOperator.GreaterThanEqual -> TODO()
-//                CompareOperator.In -> TODO()
-//                CompareOperator.Is -> TODO()
-//                CompareOperator.IsNot -> TODO()
-//                CompareOperator.LessThan -> TODO()
-//                CompareOperator.LessThanEqual -> TODO()
-//                CompareOperator.NotEqual -> TODO()
-//                CompareOperator.NotIn -> TODO()
-//                CompareOperator.GreaterThan -> TODO()
-//            }.let { }
-//        }
-//        return resultContext
+        while (true) {
+            val result =
+                when (op) {
+                    CompareOperator.Equal -> left equal right
+                    CompareOperator.GreaterThan -> left greaterThan right
+                    CompareOperator.GreaterThanEqual -> left greaterThanEqual right
+                    CompareOperator.In -> left inn right
+                    CompareOperator.Is -> left iss right
+                    CompareOperator.IsNot -> left isNot right
+                    CompareOperator.LessThan -> left lessThan right
+                    CompareOperator.LessThanEqual -> left lessThanEqual right
+                    CompareOperator.NotEqual -> left notEqual right
+                    CompareOperator.NotIn -> left notIn right
+                }
+            val boolResult = result.orElse { return fail(it) }.boolValue()
+            if (boolResult != null) {
+                if (boolResult) {
+                    left = right
+                    rightIndex++
+                    op = compare.operators.getOrNull(rightIndex) ?: break
+                    right = compare.comparators[rightIndex].analyzeWith(context).orElse { return fail(it) }
+                } else {
+                    return PythonBool(false).ok() // short-circuit
+                }
+            } else {
+                TODO("implement non-determinism on Compare")
+            }
+        }
+
+        return PythonBool(true).ok()
     }
 
     fun analyze(

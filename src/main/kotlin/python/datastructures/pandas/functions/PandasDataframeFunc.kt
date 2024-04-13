@@ -9,7 +9,6 @@ import python.arguments.ResolvedArguments
 import python.datastructures.FieldType
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonDict
-import python.datastructures.defaults.PythonInvokable
 import python.datastructures.defaults.PythonList
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
@@ -29,7 +28,7 @@ object PandasDataframeFunc : PythonDataStructure {
             when (data) {
                 is PythonDict -> dataFrameFromDict(data)
                 is DataFrame -> data.ok() // we are assuming that the dataframe is immutable
-                else -> fail("Cannot create a Dataframe from ${data?.typeCode ?: "a None"}")
+                else -> fail("Cannot create a Dataframe from ${data?.typeName ?: "a None"}")
             }
         }
 
@@ -38,19 +37,26 @@ object PandasDataframeFunc : PythonDataStructure {
     // we want to support also constructs like: pd.DataFrame.from_dict(...)
     override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
         when (identifier) {
-            "from_dict" -> todoChangeFunctionNameError.ok()
+            "from_dict" -> FromDict.ok()
             else -> fail("Unknown identifier $identifier")
         }
 
-    private val todoChangeFunctionNameError =
-        PythonInvokable { args, _, _ ->
-            val data = args.firstOrNull() ?: return@PythonInvokable fail("")
-            if (data is PythonDict) {
-                return@PythonInvokable dataFrameFromDict(data)
+    object FromDict : PythonDataStructure {
+        override fun clone(): PythonDataStructure = this
+
+        override fun invoke(
+            args: List<PythonDataStructure>,
+            keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+            outerContext: AnalysisContext,
+        ): OperationResult<PythonDataStructure> {
+            val data = args.firstOrNull() ?: return fail("")
+            return if (data is PythonDict) {
+                dataFrameFromDict(data)
             } else {
-                fail("from_dict does not accept argument of type ") // todo resolve illegal name ${data.typeCode}")
+                fail("from_dict does not accept argument of type ${data.typeName}")
             }
         }
+    }
 
     private fun dataFrameFromDict(dict: PythonDict): OperationResult<DataFrame> {
         dict.values?.map { (column, values) ->
@@ -61,7 +67,7 @@ object PandasDataframeFunc : PythonDataStructure {
                         TODO()
                     }
                     is PythonList -> {
-                        val types = values.items?.map { it.typeCode }?.distinct()
+                        val types = values.items?.map { it.typeName }?.distinct()
                         when (types?.size) {
                             0 -> TODO()
                             1 ->

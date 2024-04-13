@@ -66,7 +66,7 @@ sealed interface PythonType {
         @SerialName("While")
         data class WhileLoop(
             val test: Expression,
-            val body: Statement,
+            val body: List<Statement>,
             val orElse: Statement,
         ) : Statement
 
@@ -244,6 +244,10 @@ sealed interface PythonType {
         @Serializable
         @SerialName("Div")
         data object Div : Operator
+
+        @Serializable
+        @SerialName("FloorDiv")
+        data object FloorDiv : Operator
     }
 
     @Serializable

@@ -58,6 +58,6 @@ data class DataFrame(
                     else -> fail("Boolean series expected, got ${key.type.name}")
                 }
             }
-            else -> fail("Cannot subscript with ${key.typeCode} on dataframe")
+            else -> fail("Cannot subscript with ${key.typeName} on dataframe")
         }
 }

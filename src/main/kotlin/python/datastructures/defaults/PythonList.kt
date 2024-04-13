@@ -30,7 +30,7 @@ value class PythonList(
             val item = items.getOrNull(key.value.toInt())
             return item?.ok() ?: fail("Index out of bounds")
         } else {
-            return fail("Cannot subscript a ${key.typeCode} to a list.")
+            return fail("Cannot subscript a ${key.typeName} to a list.")
         }
     }
 
