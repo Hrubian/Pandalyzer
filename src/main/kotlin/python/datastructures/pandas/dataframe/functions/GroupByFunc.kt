@@ -16,6 +16,7 @@ import python.datastructures.pandas.dataframe.DataFrame
 import python.fail
 import python.map
 import python.ok
+import python.withWarn
 
 data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameFunction {
     override fun invoke(
@@ -39,7 +40,11 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
         dataFrame: DataFrame,
         by: PythonString,
     ): OperationResult<PythonDataStructure> {
-        return if (by.value in dataFrame.fields) {
+        return if (by.value == null) {
+            DataFrameGroupBy(null, null).withWarn("The 'by' is unknown")
+        } else if (dataFrame.fields == null) {
+            DataFrameGroupBy(null, null).withWarn("The fields of dataframe are unknown")
+        } else if (by.value in dataFrame.fields) {
             DataFrameGroupBy(dataFrame, mutableListOf(by.value)).ok()
         } else {
             fail("The dataframe does not contain the field $by. Dataframe columns: ${dataFrame.fields.keys}")
