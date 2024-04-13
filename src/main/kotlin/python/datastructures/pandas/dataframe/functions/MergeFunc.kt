@@ -39,11 +39,10 @@ data class DataFrame_MergeFunc(override val dataFrame: DataFrame) : DataFrameFun
         right: DataFrame,
         how: PythonList,
         leftOn: PythonString,
-        rightOn: PythonString
+        rightOn: PythonString,
     ): OperationResult<PythonDataStructure> {
         TODO()
     }
-
 
     private val argumentSchema =
         ResolvedArguments(

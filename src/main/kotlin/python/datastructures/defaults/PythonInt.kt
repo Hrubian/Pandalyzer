@@ -2,7 +2,6 @@ package python.datastructures.defaults
 
 import python.OperationResult
 import python.datastructures.PythonDataStructure
-import python.datastructures.UnresolvedStructure
 import python.fail
 import python.ok
 import java.math.BigInteger

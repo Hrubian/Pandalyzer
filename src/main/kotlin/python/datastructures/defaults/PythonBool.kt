@@ -1,9 +1,6 @@
 package python.datastructures.defaults
 
-import python.OperationResult
 import python.datastructures.PythonDataStructure
-import python.fail
-import python.ok
 
 @JvmInline
 value class PythonBool(val value: Boolean?) : PythonDataStructure {

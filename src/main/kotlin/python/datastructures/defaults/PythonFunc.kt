@@ -2,8 +2,6 @@ package python.datastructures.defaults
 
 import analyzer.AnalysisContext
 import analyzer.Identifier
-import analyzer.Pandalyzer.analyze
-import analyzer.Pandalyzer.analyzeWith
 import analyzer.StatementAnalysisResult
 import analyzer.StatementAnalysisResult.NondeterministicResult
 import analyzer.analyzeStatements
@@ -12,7 +10,6 @@ import python.PythonType
 import python.arguments.ArgumentMatcher
 import python.arguments.MatchedFunctionSchema
 import python.arguments.ResolvedArguments
-import python.datastructures.NondeterministicDataStructure
 import python.datastructures.NondeterministicDataStructure.Companion.combineResults
 import python.datastructures.PythonDataStructure
 import python.fail
@@ -41,7 +38,7 @@ data class PythonFunc(
 
     private companion object {
         fun AnalysisContext.addArgs(args: MatchedFunctionSchema) {
-            args.matchedArguments.forEach { upsertStruct(it.key, it.value)}
+            args.matchedArguments.forEach { upsertStruct(it.key, it.value) }
         }
 
         fun StatementAnalysisResult.extractOperationResult(): OperationResult<PythonDataStructure> =
@@ -53,6 +50,5 @@ data class PythonFunc(
                     combineResults(leftResult.extractOperationResult(), rightResult.extractOperationResult())
                 is StatementAnalysisResult.Returned -> returnValue
             }
-
     }
 }

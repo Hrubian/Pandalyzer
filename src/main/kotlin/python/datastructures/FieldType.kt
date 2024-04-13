@@ -20,4 +20,7 @@ enum class FieldType {
     NullFloat,
     StringType,
     NABoolean,
+
+    // unknwon type
+    Unknown,
 }

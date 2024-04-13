@@ -15,8 +15,7 @@ data class PythonDict(val values: MutableMap<PythonDataStructure, PythonDataStru
         }
     }
 
-    override fun clone(): PythonDataStructure =
-        PythonDict(values?.map { it.key.clone() to it.value.clone() }?.toMap()?.toMutableMap())
+    override fun clone(): PythonDataStructure = PythonDict(values?.map { it.key.clone() to it.value.clone() }?.toMap()?.toMutableMap())
 
     override fun boolValue(): Boolean? = values?.isNotEmpty()
 }

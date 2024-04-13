@@ -60,11 +60,12 @@ object Pandalyzer {
         context: AnalysisContext,
     ): StatementAnalysisResult {
         val resolvedArgs = functionDef.args.resolve(context)
-        val func = PythonFunc(
-            name = functionDef.name,
-            body = functionDef.body,
-            arguments = resolvedArgs
-        )
+        val func =
+            PythonFunc(
+                name = functionDef.name,
+                body = functionDef.body,
+                arguments = resolvedArgs,
+            )
         context.upsertStruct(functionDef.name, func)
         return StatementAnalysisResult.Ended
     }
@@ -75,10 +76,11 @@ object Pandalyzer {
     ): StatementAnalysisResult {
         // todo check if the assignment is type hint
         val identifier = (assign.targets.first() as Name).identifier
-        val value = assign.value.analyzeWith(context).orElse {
-            context.addError(it)
-            return StatementAnalysisResult.Ended
-        }
+        val value =
+            assign.value.analyzeWith(context).orElse {
+                context.addError(it)
+                return StatementAnalysisResult.Ended
+            }
 
         context.upsertStruct(identifier, value)
         return StatementAnalysisResult.Ended
@@ -88,10 +90,11 @@ object Pandalyzer {
         ifStatement: IfStatement,
         context: AnalysisContext,
     ): StatementAnalysisResult {
-        val ifResult = ifStatement.test.analyzeWith(context).orElse {
-            context.addError(it)
-            return StatementAnalysisResult.Ended
-        }.also { it as? PythonBool ?: context.addWarning("If statement with test value of type ${it.typeCode}")}.boolValue()
+        val ifResult =
+            ifStatement.test.analyzeWith(context).orElse {
+                context.addError(it)
+                return StatementAnalysisResult.Ended
+            }.also { it as? PythonBool ?: context.addWarning("If statement with test value of type ${it.typeCode}") }.boolValue()
 
         return if (ifResult != null) {
             if (ifResult) {
@@ -119,15 +122,19 @@ object Pandalyzer {
         return StatementAnalysisResult.Ended
     }
 
-    fun analyze(importFrom: ImportFrom, context: AnalysisContext): StatementAnalysisResult {
-        val importStruct = createImportStruct(importFrom.module!!, importFrom.module) //todo resolve "!!"
+    fun analyze(
+        importFrom: ImportFrom,
+        context: AnalysisContext,
+    ): StatementAnalysisResult {
+        val importStruct = createImportStruct(importFrom.module!!, importFrom.module) // todo resolve "!!"
         importFrom.names.forEach { (aliasName, name) ->
             when (val result = importStruct.attribute(name)) {
                 is OperationResult.Ok -> context.upsertStruct(aliasName ?: name, result.result)
-                is OperationResult.Warning -> context.upsertStruct(aliasName ?: name, result.result)
-                    .also { context.addWarning(result.message) }
+                is OperationResult.Warning ->
+                    context.upsertStruct(aliasName ?: name, result.result)
+                        .also { context.addWarning(result.message) }
                 is OperationResult.Error ->
-                    context.addError("The package ${importFrom.module} does not contain $name.",)
+                    context.addError("The package ${importFrom.module} does not contain $name.")
             }
         }
         return StatementAnalysisResult.Ended
@@ -145,7 +152,7 @@ object Pandalyzer {
         binaryOperation: BinaryOperation,
         context: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
-        val left = binaryOperation.left.analyzeWith(context).orElse { return fail(it)}
+        val left = binaryOperation.left.analyzeWith(context).orElse { return fail(it) }
         val right = binaryOperation.right.analyzeWith(context).orElse { return fail(it) }
 
         return when (binaryOperation.operator) {
@@ -169,7 +176,8 @@ object Pandalyzer {
     fun analyze(
         name: Name,
         context: AnalysisContext,
-    ) = context.getStruct(name.identifier)?.ok() ?: fail("The name $name is not known.")
+    ) = context.getStruct(name.identifier)?.ok()
+        ?: fail("The name $name is not known.")
 
     fun analyze(
         compare: Compare,
@@ -207,7 +215,7 @@ object Pandalyzer {
     ): OperationResult<PythonDataStructure> {
         when (pythonList.context) {
             is Load -> {
-                val elements = pythonList.elements.map { el -> el.analyzeWith(context).orElse { return fail(it)} }
+                val elements = pythonList.elements.map { el -> el.analyzeWith(context).orElse { return fail(it) } }
                 return python.datastructures.defaults.PythonList(elements.toMutableList()).ok()
             }
             is ExpressionContext.Store -> {
@@ -223,9 +231,10 @@ object Pandalyzer {
         dictionary: Dictionary,
         context: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
-        val map = dictionary.keys.zip(dictionary.values).associate { (key, value) ->
-            key.analyzeWith(context).orElse { return fail(it) } to value.analyzeWith(context).orElse { return fail(it) }
-        }
+        val map =
+            dictionary.keys.zip(dictionary.values).associate { (key, value) ->
+                key.analyzeWith(context).orElse { return fail(it) } to value.analyzeWith(context).orElse { return fail(it) }
+            }
         return PythonDict(map.toMutableMap()).ok()
     }
 
@@ -237,7 +246,7 @@ object Pandalyzer {
 //            is And -> {
 //                boolOp.values.fold(PythonBool(true)) { acc, expr ->
 //                    // short circuit
-////                    if (acc.value.not()) return acc.ok()
+// //                    if (acc.value.not()) return acc.ok()
 //                    val bool = acc.boolValue()
 //                    if (bool != null) {
 //                        if (bool.not()) {
@@ -246,15 +255,15 @@ object Pandalyzer {
 //
 //                        }
 //                    } else {
-////                        context.addWarning("Unable to recognize the bool value in the if statement test - branching.")
-////                        val clonedContext = context.clone()
-////                        val bodyResult = analyzeStatements(ifStatement.body, context)
-////                        val orElseResult = analyzeStatements(ifStatement.orElse, clonedContext)
-////                        context.merge(clonedContext)
-////                        StatementAnalysisResult.NondeterministicResult(bodyResult, orElseResult)
+// //                        context.addWarning("Unable to recognize the bool value in the if statement test - branching.")
+// //                        val clonedContext = context.clone()
+// //                        val bodyResult = analyzeStatements(ifStatement.body, context)
+// //                        val orElseResult = analyzeStatements(ifStatement.orElse, clonedContext)
+// //                        context.merge(clonedContext)
+// //                        StatementAnalysisResult.NondeterministicResult(bodyResult, orElseResult)
 //
 //                    }
-////                    if (acc.boolValue()?.not()) // todo non-deterministic short-circuiting
+// //                    if (acc.boolValue()?.not()) // todo non-deterministic short-circuiting
 //
 //                    val res = expr.analyzeWith(context).orElse { return fail(it) }
 //                    ((acc and res).orElse { return fail(it) } as? PythonBool
@@ -287,9 +296,10 @@ object Pandalyzer {
             is StringConstant -> PythonString(this.value).ok()
             is Dictionary -> analyze(this, context)
             is PythonList -> analyze(this, context)
-            is Subscript -> value.analyzeWith(context).map { vlu ->
-                slice.analyzeWith(context).map { slc -> vlu.subscript(slc) }
-            }
+            is Subscript ->
+                value.analyzeWith(context).map { vlu ->
+                    slice.analyzeWith(context).map { slc -> vlu.subscript(slc) }
+                }
         }
 
     fun PythonType.Statement.analyzeWith(context: AnalysisContext): StatementAnalysisResult =

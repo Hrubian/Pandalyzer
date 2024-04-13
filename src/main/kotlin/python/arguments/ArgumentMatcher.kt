@@ -5,7 +5,6 @@ import analyzer.Identifier
 import analyzer.Pandalyzer.analyzeWith
 import python.OperationResult
 import python.PythonType
-import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
 import python.datastructures.UnresolvedStructure
 import python.datastructures.defaults.PythonList
@@ -16,19 +15,19 @@ import python.ok
 import python.orElse
 
 data class ResolvedArguments(
-    val positionalArgs: List<PythonType.Arg>,
-    val arguments: List<PythonType.Arg>,
-    val variadicArg: PythonType.Arg?,
-    val keywordVariadicArg: PythonType.Arg?,
-    val keywordOnlyArgs: List<PythonType.Arg>,
-    val keywordDefaults: List<PythonDataStructure>,
-    val defaults: List<PythonDataStructure>,
+    val positionalArgs: List<PythonType.Arg> = emptyList(),
+    val arguments: List<PythonType.Arg> = emptyList(),
+    val variadicArg: PythonType.Arg? = null,
+    val keywordVariadicArg: PythonType.Arg? = null,
+    val keywordOnlyArgs: List<PythonType.Arg> = emptyList(),
+    val keywordDefaults: List<PythonDataStructure> = emptyList(),
+    val defaults: List<PythonDataStructure> = emptyList(),
 ) {
     companion object {
         fun PythonType.Arguments.resolve(context: AnalysisContext): ResolvedArguments {
             val resolved = defaults.map { expr -> expr.analyzeWith(context).orElse { UnresolvedStructure(it) } }
             val resolvedKeywords =
-                keywordDefaults.map { expr -> expr?.analyzeWith(context)?.orElse { UnresolvedStructure(it) } ?: PythonNone}
+                keywordDefaults.map { expr -> expr?.analyzeWith(context)?.orElse { UnresolvedStructure(it) } ?: PythonNone }
 
             return ResolvedArguments(
                 positionalArgs = positionalArgs,
@@ -60,7 +59,7 @@ object ArgumentMatcher {
             for (argDef in resolvedArguments.positionalArgs) {
                 if (argIndex == calledPositionalArguments.size) {
                     return fail("Missing positional argument ${argDef.identifier}")
-                }
+                } // todo should the positional take defaults too?
                 resultArgs[argDef.identifier] = calledPositionalArguments[argIndex]
                 argIndex++
             }

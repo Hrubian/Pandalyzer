@@ -23,15 +23,16 @@ fun <T1, T2> OperationResult<T1>.map(func: (T1) -> OperationResult<T2>): Operati
         is OperationResult.Error -> OperationResult.Error(this.reason)
     }
 
-fun <T> OperationResult<T>.orElse(default: T) = when (this) {
-    is OperationResult.Error -> default
-    is OperationResult.Ok -> this.result
-    is OperationResult.Warning -> this.result //todo don't drop the warning :)
-}
+fun <T> OperationResult<T>.orElse(default: T) =
+    when (this) {
+        is OperationResult.Error -> default
+        is OperationResult.Ok -> this.result
+        is OperationResult.Warning -> this.result // todo don't drop the warning :)
+    }
 
 inline fun <T> OperationResult<T>.orElse(func: (String) -> T) =
     when (this) {
         is OperationResult.Error -> func(this.reason)
         is OperationResult.Ok -> this.result
-        is OperationResult.Warning -> this.result //todo dropping messages
+        is OperationResult.Warning -> this.result // todo dropping messages
     }

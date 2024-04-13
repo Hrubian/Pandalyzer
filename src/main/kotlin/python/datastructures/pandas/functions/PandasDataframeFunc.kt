@@ -48,12 +48,12 @@ object PandasDataframeFunc : PythonDataStructure {
             if (data is PythonDict) {
                 return@PythonInvokable dataFrameFromDict(data)
             } else {
-                fail("from_dict does not accept argument of type ${data.typeCode}")
+                fail("from_dict does not accept argument of type ") // todo resolve illegal name ${data.typeCode}")
             }
         }
 
     private fun dataFrameFromDict(dict: PythonDict): OperationResult<DataFrame> {
-        dict.values.map { (column, values) ->
+        dict.values?.map { (column, values) ->
             val columnName = (column as? PythonString)?.value ?: return fail("The column name has to be a string")
             val columnType =
                 when (values) {
@@ -61,8 +61,8 @@ object PandasDataframeFunc : PythonDataStructure {
                         TODO()
                     }
                     is PythonList -> {
-                        val types = values.items.map { it.typeCode }.distinct()
-                        when (types.size) {
+                        val types = values.items?.map { it.typeCode }?.distinct()
+                        when (types?.size) {
                             0 -> TODO()
                             1 ->
                                 when (types.single()) {
@@ -72,13 +72,14 @@ object PandasDataframeFunc : PythonDataStructure {
                                     "PythonNone" -> FieldType.NullInt // todo
                                     else -> return fail("todo dataframe fromdict")
                                 }
+                            null -> FieldType.Unknown
                             else -> TODO()
                         }
                     }
                     else -> return fail("The column of a dataframe has be either a list or a dictionary")
                 }
             columnName to columnType
-        }.let { return DataFrame(it.toMap().toMutableMap()).ok() }
+        }.let { return DataFrame(it?.toMap()?.toMutableMap()).ok() } // todo warning on null?
     }
 
     private val argumentSchema =

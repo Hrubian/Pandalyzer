@@ -8,8 +8,10 @@ import python.datastructures.defaults.builtinFunctions
 typealias Identifier = String
 
 sealed interface AnalysisContext {
-
-    fun upsertStruct(name: Identifier, value: PythonDataStructure): PythonDataStructure?
+    fun upsertStruct(
+        name: Identifier,
+        value: PythonDataStructure,
+    ): PythonDataStructure?
 
     fun getStruct(name: Identifier): PythonDataStructure?
 
@@ -28,28 +30,34 @@ sealed interface AnalysisContext {
             GlobalAnalysisContext(
                 pythonDataStructures = mutableMapOf(),
                 errors = mutableListOf(),
-                warnings = mutableListOf()
+                warnings = mutableListOf(),
             )
 
         fun buildWithBuiltins(): GlobalAnalysisContext = buildEmpty().apply { builtinFunctions.forEach { upsertStruct(it.key, it.value) } }
 
-        fun buildForFunction(outerContext: AnalysisContext): FunctionAnalysisContext =
-            FunctionAnalysisContext(outerContext)
+        fun buildForFunction(outerContext: AnalysisContext): FunctionAnalysisContext = FunctionAnalysisContext(outerContext)
     }
 }
 
 data class GlobalAnalysisContext(
     private val pythonDataStructures: MutableMap<Identifier, PythonDataStructure>,
     private val warnings: MutableList<String>,
-    private val errors: MutableList<String>
-    ): AnalysisContext {
-    override fun upsertStruct(name: Identifier, value: PythonDataStructure) = pythonDataStructures.put(name, value)
+    private val errors: MutableList<String>,
+) : AnalysisContext {
+    override fun upsertStruct(
+        name: Identifier,
+        value: PythonDataStructure,
+    ) = pythonDataStructures.put(name, value)
 
     override fun getStruct(name: Identifier) = pythonDataStructures[name]
 
-    override fun addWarning(message: String) { warnings.add(message) }
+    override fun addWarning(message: String) {
+        warnings.add(message)
+    }
 
-    override fun addError(message: String) { errors.add(message) }
+    override fun addError(message: String) {
+        errors.add(message)
+    }
 
     override fun getGlobalContext(): AnalysisContext = this
 
@@ -57,7 +65,7 @@ data class GlobalAnalysisContext(
         GlobalAnalysisContext(
             pythonDataStructures = pythonDataStructures.map { it.key to it.value.clone() }.toMap().toMutableMap(),
             warnings = mutableListOf(),
-            errors = mutableListOf()
+            errors = mutableListOf(),
         )
 
     override fun merge(other: AnalysisContext) {
@@ -71,41 +79,43 @@ data class GlobalAnalysisContext(
                 if (first == second) first else NondeterministicDataStructure(first, second)
             } else if (first != null) { // second is null
                 NondeterministicDataStructure(first, PythonNone)
-            } else { //first is null
+            } else { // first is null
                 NondeterministicDataStructure(second!!, PythonNone)
             }
         }
     }
 
-    fun summarize(): String = buildString {
-        append("Summary of analysis: ")
-        append(if (errors.isEmpty()) "OK" else "NOT OK")
-        append('\n')
+    fun summarize(): String =
+        buildString {
+            append("Summary of analysis: ")
+            append(if (errors.isEmpty()) "OK" else "NOT OK")
+            append('\n')
 
-        append("Global data structures (${pythonDataStructures.size}):\n")
-        pythonDataStructures.forEach { (ident, struct) -> append("$ident: $struct \n") }
-        append('\n')
+            append("Global data structures (${pythonDataStructures.size}):\n")
+            pythonDataStructures.forEach { (ident, struct) -> append("$ident: $struct \n") }
+            append('\n')
 
-        append("Warnings (${warnings.size}):\n")
-        warnings.forEachIndexed { i, warn -> append("$i: $warn\n") }
-        append('\n')
+            append("Warnings (${warnings.size}):\n")
+            warnings.forEachIndexed { i, warn -> append("$i: $warn\n") }
+            append('\n')
 
-        append("Errors (${errors.size}):\n")
-        errors.forEachIndexed { i, error -> append("$i: $error\n") }
-    }
+            append("Errors (${errors.size}):\n")
+            errors.forEachIndexed { i, error -> append("$i: $error\n") }
+        }
 }
 
 data class FunctionAnalysisContext(
     private val outerContext: AnalysisContext,
-    private val pythonDataStructures: MutableMap<Identifier, PythonDataStructure> = mutableMapOf()
-): AnalysisContext {
+    private val pythonDataStructures: MutableMap<Identifier, PythonDataStructure> = mutableMapOf(),
+) : AnalysisContext {
     private val globalContext = getGlobalContext()
 
-    override fun upsertStruct(name: Identifier, value: PythonDataStructure): PythonDataStructure? =
-        pythonDataStructures.put(name, value)
+    override fun upsertStruct(
+        name: Identifier,
+        value: PythonDataStructure,
+    ): PythonDataStructure? = pythonDataStructures.put(name, value)
 
-    override fun getStruct(name: Identifier): PythonDataStructure? =
-        pythonDataStructures[name] ?: globalContext.getStruct(name)
+    override fun getStruct(name: Identifier): PythonDataStructure? = pythonDataStructures[name] ?: globalContext.getStruct(name)
 
     override fun addWarning(message: String) {
         outerContext.addWarning(message)
@@ -120,7 +130,7 @@ data class FunctionAnalysisContext(
     override fun clone(): AnalysisContext =
         FunctionAnalysisContext(
             outerContext = outerContext.clone(),
-            pythonDataStructures = pythonDataStructures.map { it.key to it.value.clone() }.toMap().toMutableMap()
+            pythonDataStructures = pythonDataStructures.map { it.key to it.value.clone() }.toMap().toMutableMap(),
         )
 
     override fun merge(other: AnalysisContext) {
@@ -132,7 +142,7 @@ data class FunctionAnalysisContext(
                 if (first == second) first else NondeterministicDataStructure(first, second)
             } else if (first != null) { // second is null
                 NondeterministicDataStructure(first, PythonNone)
-            } else { //first is null
+            } else { // first is null
                 NondeterministicDataStructure(second!!, PythonNone)
             }
         }
@@ -141,9 +151,12 @@ data class FunctionAnalysisContext(
 
 data class NondeterministicAnalysisContext(
     private val left: AnalysisContext,
-    private val right: AnalysisContext
+    private val right: AnalysisContext,
 ) : AnalysisContext {
-    override fun upsertStruct(name: Identifier, value: PythonDataStructure): PythonDataStructure? {
+    override fun upsertStruct(
+        name: Identifier,
+        value: PythonDataStructure,
+    ): PythonDataStructure? {
         TODO("Not yet implemented")
     }
 

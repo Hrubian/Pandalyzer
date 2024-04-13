@@ -11,8 +11,8 @@ import python.fail
 import python.ok
 
 interface PandasFunction : PythonDataStructure {
-
     override fun clone(): PythonDataStructure = this
+
     object SeriesFunc : PandasFunction {
         override fun invoke(
             args: List<PythonDataStructure>,
@@ -64,7 +64,6 @@ interface PandasFunction : PythonDataStructure {
         ): OperationResult<PythonDataStructure> = TODO()
 
         private fun readCsv(filename: PythonString) {
-
         }
     }
 }

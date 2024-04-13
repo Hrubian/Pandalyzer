@@ -10,7 +10,8 @@ data class Series(
     val indexType: FieldType? = null,
 ) : PythonDataStructure {
     override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> = TODO()
-    override fun clone(): PythonDataStructure = this //todo really?
+
+    override fun clone(): PythonDataStructure = this // todo really?
 //        when (key) {
 //            is PythonList ->
 //            is PythonString ->

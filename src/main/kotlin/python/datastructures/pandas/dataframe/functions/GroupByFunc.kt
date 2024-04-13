@@ -11,8 +11,8 @@ import python.datastructures.defaults.PythonBool
 import python.datastructures.defaults.PythonList
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
-import python.datastructures.pandas.dataframe.DataFrameGroupBy
 import python.datastructures.pandas.dataframe.DataFrame
+import python.datastructures.pandas.dataframe.DataFrameGroupBy
 import python.fail
 import python.map
 import python.ok
@@ -55,6 +55,12 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
         dataFrame: DataFrame,
         by: PythonList,
     ): OperationResult<PythonDataStructure> {
+        if (by.items == null) {
+            return DataFrameGroupBy(null, null).withWarn("The 'by' is unknown")
+        }
+        if (dataFrame.fields == null) {
+            return DataFrameGroupBy(null, null).withWarn("The fields of the dataframe are unknown")
+        }
         val keys = by.items.map { it as? PythonString ?: return fail("Cannot group a dataframe by ${it.typeCode}") }
 
         val missingKeys = keys.filterNot { it.value in dataFrame.fields }

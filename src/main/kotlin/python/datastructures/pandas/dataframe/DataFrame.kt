@@ -45,8 +45,8 @@ data class DataFrame(
                     DataFrame(null).withWarn("The key for subscripting data frame is unknown")
                 } else if (key.items.all { it is PythonString && it.value in fields }) {
                     DataFrame(
-                        fields.filterKeys { it in key.items.map { it as PythonString}.map { it.value} }.toMutableMap()
-                    ).ok() //todo this is disgusting :)
+                        fields.filterKeys { it in key.items.map { it as PythonString }.map { it.value } }.toMutableMap(),
+                    ).ok() // todo this is disgusting :)
                 } else {
                     fail("TODO") // todo
                 }

@@ -45,8 +45,7 @@ data class NondeterministicDataStructure(
             result2 = right.invoke(args, keywordArgs, outerContext),
         )
 
-    override fun clone(): PythonDataStructure =
-        NondeterministicDataStructure(left.clone(), right.clone())
+    override fun clone(): PythonDataStructure = NondeterministicDataStructure(left.clone(), right.clone())
 
     override fun boolValue(): Boolean? {
         val l = left.boolValue() ?: return null

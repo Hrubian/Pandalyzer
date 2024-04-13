@@ -1,7 +1,6 @@
 import analyzer.AnalysisContext
 import analyzer.Pandalyzer
 import python.PythonTree
-import kotlin.system.exitProcess
 
 fun main(args: Array<String>): Unit =
     with(ProgramArguments.parse(args)) {
@@ -16,8 +15,8 @@ fun main(args: Array<String>): Unit =
             }
     }
 
-//fun AnalysisContext.getExitValue(): Int = when(this) {
+// fun AnalysisContext.getExitValue(): Int = when(this) {
 //    is AnalysisContext.OK -> 0
 //    is AnalysisContext.Error -> 1
 //    is AnalysisContext.Returned -> -1
-//}
+// }
