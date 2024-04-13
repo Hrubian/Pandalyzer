@@ -27,7 +27,7 @@ data class DataFrame_MergeFunc(override val dataFrame: DataFrame) : DataFrameFun
             when (val how = argumentSchema.matchedArguments["how"]!!) {
                 is PythonString -> TODO() // merge(dataFrame, right, how, )
                 is PythonList -> TODO()
-                else -> fail("The 'how' argument of merge function cannot be of type ${how.typeName}")
+                else -> fail("The 'how' argument of merge function cannot be of type ${how.typeCode}")
             }
         }
     }
@@ -37,20 +37,13 @@ data class DataFrame_MergeFunc(override val dataFrame: DataFrame) : DataFrameFun
     private fun merge(
         left: DataFrame,
         right: DataFrame,
-        how: PythonString,
-        on: PythonList,
+        how: PythonList,
+        leftOn: PythonString,
+        rightOn: PythonString
     ): OperationResult<PythonDataStructure> {
         TODO()
     }
 
-    private fun merge(
-        left: DataFrame,
-        right: DataFrame,
-        how: PythonString,
-        on: PythonString,
-    ): OperationResult<PythonDataStructure> {
-        TODO()
-    }
 
     private val argumentSchema =
         ResolvedArguments(

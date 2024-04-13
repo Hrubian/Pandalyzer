@@ -29,8 +29,8 @@ val builtinFunctions =
         "len" to
             PythonInvokable { args, _, _ ->
                 when (val arg = args.singleOrNull()) {
-                    is PythonString -> PythonInt(arg.value.length.toBigInteger()).ok()
-                    is PythonList -> PythonInt(arg.items.size.toBigInteger()).ok()
+                    is PythonString -> PythonInt(arg.value?.length?.toBigInteger()).ok()
+                    is PythonList -> PythonInt(arg.items?.size?.toBigInteger()).ok()
                     else -> fail("Cannot apply len function to $args")
                 }
             },

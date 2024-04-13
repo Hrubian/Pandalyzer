@@ -9,7 +9,6 @@ import python.arguments.ResolvedArguments
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
-import python.datastructures.pandas.PandasFunction
 import python.datastructures.pandas.dataframe.DataFrame
 import python.fail
 import python.map

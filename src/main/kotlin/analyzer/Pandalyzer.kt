@@ -2,8 +2,6 @@ package analyzer
 
 import python.OperationResult
 import python.PythonType
-import python.PythonType.BoolOperator.And
-import python.PythonType.BoolOperator.Or
 import python.PythonType.Expression.Attribute
 import python.PythonType.Expression.BinaryOperation
 import python.PythonType.Expression.BoolOperation
@@ -37,7 +35,6 @@ import python.PythonType.Statement.Return
 import python.PythonType.Statement.WhileLoop
 import python.arguments.ResolvedArguments.Companion.resolve
 import python.datastructures.PythonDataStructure
-import python.datastructures.UnresolvedStructure
 import python.datastructures.createImportStruct
 import python.datastructures.defaults.PythonBool
 import python.datastructures.defaults.PythonDict
@@ -93,17 +90,17 @@ object Pandalyzer {
     ): StatementAnalysisResult {
         val ifResult = ifStatement.test.analyzeWith(context).orElse {
             context.addError(it)
-            return StatementAnalysisResult.Ended //todo really?
-        }
+            return StatementAnalysisResult.Ended
+        }.also { it as? PythonBool ?: context.addWarning("If statement with test value of type ${it.typeCode}")}.boolValue()
 
-        return if (ifResult is PythonBool) {
-            if (ifResult.value) {
+        return if (ifResult != null) {
+            if (ifResult) {
                 analyzeStatements(ifStatement.body, context)
             } else {
                 analyzeStatements(ifStatement.orElse, context)
             }
         } else {
-            context.addError("The if test does not contain a bool")
+            context.addWarning("Unable to recognize the bool value in the if statement test - branching.")
             val clonedContext = context.clone()
             val bodyResult = analyzeStatements(ifStatement.body, context)
             val orElseResult = analyzeStatements(ifStatement.orElse, clonedContext)
@@ -179,6 +176,7 @@ object Pandalyzer {
         context: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
         check(compare.comparators.size == compare.operators.size)
+
 //        val
         TODO("compare not implemented")
 //        var resultContext = compare.left.analyzeWith(context)
@@ -234,29 +232,46 @@ object Pandalyzer {
     fun analyze(
         boolOp: BoolOperation,
         context: AnalysisContext,
-    ): OperationResult<PythonDataStructure> =
-        when (boolOp.operator) {
-            is And -> {
-                boolOp.values.fold(
-                    initial = PythonBool(true),
-                    operation = { prev, expr ->
-                        val new = expr.analyzeWith(context).orElse { return fail(it) }
-                        // todo shortcircuit
-                        TODO()
-                    }
-                )
-                TODO()
-            }
-            is Or -> {
-                boolOp.values.fold(
-                    initial = PythonBool(false),
-                    operation = { prev, expr ->
-                        TODO()
-                    }
-                )
-                TODO()
-            }
-        }
+    ): OperationResult<PythonDataStructure> = TODO("boolOp not implemented")
+//        when (boolOp.operator) {
+//            is And -> {
+//                boolOp.values.fold(PythonBool(true)) { acc, expr ->
+//                    // short circuit
+////                    if (acc.value.not()) return acc.ok()
+//                    val bool = acc.boolValue()
+//                    if (bool != null) {
+//                        if (bool.not()) {
+//                            return acc.ok() // short-circuit
+//                        } else {
+//
+//                        }
+//                    } else {
+////                        context.addWarning("Unable to recognize the bool value in the if statement test - branching.")
+////                        val clonedContext = context.clone()
+////                        val bodyResult = analyzeStatements(ifStatement.body, context)
+////                        val orElseResult = analyzeStatements(ifStatement.orElse, clonedContext)
+////                        context.merge(clonedContext)
+////                        StatementAnalysisResult.NondeterministicResult(bodyResult, orElseResult)
+//
+//                    }
+////                    if (acc.boolValue()?.not()) // todo non-deterministic short-circuiting
+//
+//                    val res = expr.analyzeWith(context).orElse { return fail(it) }
+//                    ((acc and res).orElse { return fail(it) } as? PythonBool
+//                        ?: return fail("Wrong type in if statement"))
+//                }
+//            }
+//            is Or -> {
+//                boolOp.values.fold(PythonBool(false)) { acc, expr ->
+//                    // short circuit
+//                    if (acc.value) return acc.ok()
+//
+//                    val res = expr.analyzeWith(context).orElse { return fail(it) }
+//                    (acc or res).orElse { return fail(it) } as? PythonBool
+//                        ?: return fail("Wrong type in if statement")
+//                }
+//            }
+//        }.ok()
 
     fun PythonType.Expression.analyzeWith(context: AnalysisContext): OperationResult<PythonDataStructure> =
         when (this) {

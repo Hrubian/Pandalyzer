@@ -1,9 +1,10 @@
-package python.datastructures.pandas
+package python.datastructures.pandas.functions
 
 import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
 import python.datastructures.PythonDataStructure
+import python.datastructures.defaults.PythonString
 import python.datastructures.pandas.dataframe.DataFrame
 import python.datastructures.pandas.series.Series
 import python.fail
@@ -62,5 +63,8 @@ interface PandasFunction : PythonDataStructure {
             outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> = TODO()
 
+        private fun readCsv(filename: PythonString) {
+
+        }
     }
 }

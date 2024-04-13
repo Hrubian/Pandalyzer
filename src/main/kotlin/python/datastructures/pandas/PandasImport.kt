@@ -5,6 +5,7 @@ import python.OperationResult
 import python.datastructures.ImportStruct
 import python.datastructures.PythonDataStructure
 import python.datastructures.pandas.functions.PandasDataframeFunc
+import python.datastructures.pandas.functions.PandasFunction
 import python.datastructures.pandas.functions.PandasMergeFunc
 import python.fail
 import python.ok

@@ -6,7 +6,7 @@ import python.datastructures.PythonDataStructure
 
 data class Series(
 //    val name: FieldName,
-    val type: FieldType,
+    val type: FieldType?,
     val indexType: FieldType? = null,
 ) : PythonDataStructure {
     override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> = TODO()

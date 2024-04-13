@@ -50,7 +50,7 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
         dataFrame: DataFrame,
         by: PythonList,
     ): OperationResult<PythonDataStructure> {
-        val keys = by.items.map { it as? PythonString ?: return fail("Cannot group a dataframe by ${it.typeName}") }
+        val keys = by.items.map { it as? PythonString ?: return fail("Cannot group a dataframe by ${it.typeCode}") }
 
         val missingKeys = keys.filterNot { it.value in dataFrame.fields }
         if (missingKeys.isNotEmpty()) {

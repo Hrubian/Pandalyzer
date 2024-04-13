@@ -13,7 +13,7 @@ fun analyzeStatements(statements: List<PythonType.Statement>, context: AnalysisC
             is PythonType.Statement.Break -> return StatementAnalysisResult.Breaked
             is PythonType.Statement.Continue -> return StatementAnalysisResult.Continued
             is PythonType.Statement.Return -> return StatementAnalysisResult.Returned(stmt.value?.analyzeWith(context) ?: PythonNone.ok())
-            else -> stmt.analyzeWith(context).anotherFun(statements.drop(index + 1), context)?.let { return it }
+            else -> stmt.analyzeWith(context).anotherFun(statements.drop(index + 1), context)?.let { return it } //todo refactor
         }
     }.let { StatementAnalysisResult.Ended }
 
@@ -38,7 +38,6 @@ private fun StatementAnalysisResult.anotherFun( //todo rename me :)
                 is StatementAnalysisResult.Returned -> rightResult
             }
         )
-
     } else return null
 }
 
