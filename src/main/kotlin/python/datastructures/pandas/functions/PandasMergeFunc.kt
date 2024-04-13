@@ -13,6 +13,7 @@ import python.datastructures.pandas.dataframe.DataFrame
 import python.fail
 import python.map
 import python.ok
+import python.withWarn
 
 object PandasMergeFunc : PandasFunction {
     override fun invoke(
@@ -33,8 +34,23 @@ object PandasMergeFunc : PandasFunction {
             }
 
             return@map when {
-                on != null && leftOn == null && rightOn == null -> merge(left, right, on.value, on.value)
-                on == null && leftOn != null && rightOn != null -> merge(left, right, leftOn.value, rightOn.value)
+                on != null && leftOn == null && rightOn == null -> {
+                    if (on.value == null) {
+                        DataFrame(null).withWarn("The value of on is unknown")
+                    } else {
+                        merge(left, right, on.value, on.value)
+                    }
+                }
+
+                on == null && leftOn != null && rightOn != null -> {
+                    if (leftOn.value == null) {
+                        DataFrame(null).withWarn("the leftOn is unknown")
+                    } else if (rightOn.value == null) {
+                        DataFrame(null).withWarn("the rightOn is unknown")
+                    } else {
+                        merge(left, right, leftOn.value, rightOn.value)
+                    }
+                }
                 else -> fail("Incorrect combination of 'on', 'left_on' and 'right_on' arguments to merge")
             }
         }
@@ -45,6 +61,12 @@ object PandasMergeFunc : PandasFunction {
         leftOn: String,
         rightOn: String,
     ): OperationResult<PythonDataStructure> {
+        if (left.fields == null) {
+            return DataFrame(null).withWarn("The fields of the left dataframe are unknown")
+        }
+        if (right.fields == null) {
+            return DataFrame(null).withWarn("The fields of the right dataframe are unknown")
+        }
         val leftJoin = left.fields[leftOn] ?: return fail("The left dataframe does not contain the column $leftOn")
         val rightJoin = right.fields[rightOn] ?: return fail("The right dataframe does not contain the column $rightOn")
         if (leftJoin != rightJoin) {
