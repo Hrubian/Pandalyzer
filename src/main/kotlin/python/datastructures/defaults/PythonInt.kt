@@ -57,6 +57,15 @@ value class PythonInt(val value: BigInteger?) : PythonDataStructure {
         }
     }
 
+    override fun negate(): OperationResult<PythonDataStructure> =
+        if (value == null) {
+            PythonInt(null).withWarn("Could not determine the negative value of unknown number")
+        } else {
+            PythonInt(-value).ok()
+        }
+
+    override fun positive(): OperationResult<PythonDataStructure> = this.ok()
+
     override fun boolValue(): Boolean? = if (value == null) null else value != BigInteger.ZERO
 
     override infix fun equal(other: PythonDataStructure): OperationResult<PythonDataStructure> = compare(other) { a, b -> a == b }

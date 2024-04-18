@@ -116,8 +116,17 @@ sealed interface PythonType {
         @Serializable
         @SerialName("BoolOp")
         data class BoolOperation(
+            @SerialName("op")
             val operator: BoolOperator,
             val values: List<Expression>,
+        ) : Expression
+
+        @Serializable
+        @SerialName("UnaryOp")
+        data class UnaryOperation(
+            @SerialName("op")
+            val operator: UnaryOperator,
+            val operand: Expression
         ) : Expression
 
         @Serializable
@@ -248,6 +257,25 @@ sealed interface PythonType {
         @Serializable
         @SerialName("FloorDiv")
         data object FloorDiv : Operator
+    }
+
+    @Serializable
+    sealed interface UnaryOperator : PythonType {
+        @Serializable
+        @SerialName("Invert")
+        data object Invert : UnaryOperator
+
+        @Serializable
+        @SerialName("Not")
+        data object Not : UnaryOperator
+
+        @Serializable
+        @SerialName("UAdd")
+        data object UnaryPlus : UnaryOperator
+
+        @Serializable
+        @SerialName("USub")
+        data object UnaryMinus : UnaryOperator
     }
 
     @Serializable

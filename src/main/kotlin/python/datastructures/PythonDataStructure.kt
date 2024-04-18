@@ -38,6 +38,10 @@ interface PythonDataStructure {
 
     fun boolValue(): Boolean? = null
 
+    fun negate(): OperationResult<PythonDataStructure> = fail("Cannot negate $typeName")
+
+    fun positive(): OperationResult<PythonDataStructure> = fail("Cannot apply unary plus on $typeName")
+
     infix fun equal(other: PythonDataStructure): OperationResult<PythonDataStructure> =
         fail("Cannot perform equal on $typeName and ${other.typeName}")
 
