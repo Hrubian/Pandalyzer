@@ -1,5 +1,6 @@
 package analyzer
 
+import python.PythonType
 import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonNone
@@ -15,9 +16,15 @@ sealed interface AnalysisContext {
 
     fun getStruct(name: Identifier): PythonDataStructure?
 
-    fun addWarning(message: String)
+    fun addWarning(
+        message: String,
+        sourceStatement: PythonType.Statement,
+    )
 
-    fun addError(message: String)
+    fun addError(
+        message: String,
+        sourceStatement: PythonType.Statement,
+    )
 
     fun getGlobalContext(): AnalysisContext
 
@@ -39,10 +46,18 @@ sealed interface AnalysisContext {
     }
 }
 
+data class Message(val text: String, val sourceStatement: PythonType.Statement) {
+    fun summarize(): String =
+        "${sourceStatement.javaClass.simpleName} " +
+            "from line ${sourceStatement.startLine} " +
+            "to line ${sourceStatement.endLine} " +
+            "columns ${sourceStatement.columnStart} - ${sourceStatement.columnEnd}: $text"
+}
+
 data class GlobalAnalysisContext(
     private val pythonDataStructures: MutableMap<Identifier, PythonDataStructure>,
-    private val warnings: MutableList<String>,
-    private val errors: MutableList<String>,
+    private val warnings: MutableList<Message>,
+    private val errors: MutableList<Message>,
 ) : AnalysisContext {
     override fun upsertStruct(
         name: Identifier,
@@ -51,12 +66,18 @@ data class GlobalAnalysisContext(
 
     override fun getStruct(name: Identifier) = pythonDataStructures[name]
 
-    override fun addWarning(message: String) {
-        warnings.add(message)
+    override fun addWarning(
+        message: String,
+        sourceStatement: PythonType.Statement,
+    ) {
+        warnings.add(Message(message, sourceStatement))
     }
 
-    override fun addError(message: String) {
-        errors.add(message)
+    override fun addError(
+        message: String,
+        sourceStatement: PythonType.Statement,
+    ) {
+        errors.add(Message(message, sourceStatement))
     }
 
     override fun getGlobalContext(): AnalysisContext = this
@@ -96,11 +117,11 @@ data class GlobalAnalysisContext(
             append('\n')
 
             append("Warnings (${warnings.size}):\n")
-            warnings.forEachIndexed { i, warn -> append("$i: $warn\n") }
+            warnings.forEachIndexed { i, warn -> append("$i: ${warn.summarize()}\n") }
             append('\n')
 
             append("Errors (${errors.size}):\n")
-            errors.forEachIndexed { i, error -> append("$i: $error\n") }
+            errors.forEachIndexed { i, error -> append("$i: ${error.summarize()}\n") }
         }
 }
 
@@ -117,12 +138,18 @@ data class FunctionAnalysisContext(
 
     override fun getStruct(name: Identifier): PythonDataStructure? = pythonDataStructures[name] ?: globalContext.getStruct(name)
 
-    override fun addWarning(message: String) {
-        outerContext.addWarning(message)
+    override fun addWarning(
+        message: String,
+        sourceStatement: PythonType.Statement,
+    ) {
+        outerContext.addWarning(message, sourceStatement)
     }
 
-    override fun addError(message: String) {
-        outerContext.addError(message)
+    override fun addError(
+        message: String,
+        sourceStatement: PythonType.Statement,
+    ) {
+        outerContext.addError(message, sourceStatement)
     }
 
     override fun getGlobalContext(): AnalysisContext = outerContext.getGlobalContext()
@@ -146,41 +173,5 @@ data class FunctionAnalysisContext(
                 NondeterministicDataStructure(second!!, PythonNone)
             }
         }
-    }
-}
-
-data class NondeterministicAnalysisContext(
-    private val left: AnalysisContext,
-    private val right: AnalysisContext,
-) : AnalysisContext {
-    override fun upsertStruct(
-        name: Identifier,
-        value: PythonDataStructure,
-    ): PythonDataStructure? {
-        TODO("Not yet implemented")
-    }
-
-    override fun getStruct(name: Identifier): PythonDataStructure? {
-        TODO("Not yet implemented")
-    }
-
-    override fun addWarning(message: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun addError(message: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun getGlobalContext(): AnalysisContext {
-        TODO("Not yet implemented")
-    }
-
-    override fun clone(): AnalysisContext {
-        TODO("Not yet implemented")
-    }
-
-    override fun merge(other: AnalysisContext) {
-        TODO("Not yet implemented")
     }
 }

@@ -27,6 +27,18 @@ sealed interface PythonType {
 
     @Serializable
     sealed interface Statement : PythonType {
+        @SerialName("lineno")
+        val startLine: Int
+
+        @SerialName("end_lineno")
+        val endLine: Int
+
+        @SerialName("col_offset")
+        val columnStart: Int
+
+        @SerialName("end_col_offset")
+        val columnEnd: Int
+
         @Serializable
         @SerialName("FunctionDef")
         data class FunctionDef(
@@ -34,6 +46,14 @@ sealed interface PythonType {
             val args: Arguments,
 //            val args: List //todo arguments
             val body: List<Statement>,
+            @SerialName("lineno")
+            override val startLine: Int,
+            @SerialName("end_lineno")
+            override val endLine: Int,
+            @SerialName("col_offset")
+            override val columnStart: Int,
+            @SerialName("end_col_offset")
+            override val columnEnd: Int,
             // todo others
         ) : Statement
 
@@ -41,6 +61,14 @@ sealed interface PythonType {
         @SerialName("Return")
         data class Return(
             val value: Expression?,
+            @SerialName("lineno")
+            override val startLine: Int,
+            @SerialName("end_lineno")
+            override val endLine: Int,
+            @SerialName("col_offset")
+            override val columnStart: Int,
+            @SerialName("end_col_offset")
+            override val columnEnd: Int,
         ) : Statement
 
         @Serializable
@@ -48,7 +76,14 @@ sealed interface PythonType {
         data class Assign(
             val targets: List<Expression>,
             val value: Expression,
-            // todo type_comment?
+            @SerialName("lineno")
+            override val startLine: Int,
+            @SerialName("end_lineno")
+            override val endLine: Int,
+            @SerialName("col_offset")
+            override val columnStart: Int,
+            @SerialName("end_col_offset")
+            override val columnEnd: Int,
         ) : Statement
 
         @Serializable
@@ -59,7 +94,14 @@ sealed interface PythonType {
             val iterator: Expression,
             val body: Statement,
             val orElse: Statement,
-            // todo type_comment?
+            @SerialName("lineno")
+            override val startLine: Int,
+            @SerialName("end_lineno")
+            override val endLine: Int,
+            @SerialName("col_offset")
+            override val columnStart: Int,
+            @SerialName("end_col_offset")
+            override val columnEnd: Int,
         ) : Statement
 
         @Serializable
@@ -67,7 +109,15 @@ sealed interface PythonType {
         data class WhileLoop(
             val test: Expression,
             val body: List<Statement>,
-            val orElse: Statement,
+            val orElse: Statement? = null,
+            @SerialName("lineno")
+            override val startLine: Int,
+            @SerialName("end_lineno")
+            override val endLine: Int,
+            @SerialName("col_offset")
+            override val columnStart: Int,
+            @SerialName("end_col_offset")
+            override val columnEnd: Int,
         ) : Statement
 
         @Serializable
@@ -77,12 +127,28 @@ sealed interface PythonType {
             val body: List<Statement>,
             @SerialName("orelse")
             val orElse: List<Statement>,
+            @SerialName("lineno")
+            override val startLine: Int,
+            @SerialName("end_lineno")
+            override val endLine: Int,
+            @SerialName("col_offset")
+            override val columnStart: Int,
+            @SerialName("end_col_offset")
+            override val columnEnd: Int,
         ) : Statement
 
         @Serializable
         @SerialName("Import")
         data class Import(
             val names: List<Alias>,
+            @SerialName("lineno")
+            override val startLine: Int,
+            @SerialName("end_lineno")
+            override val endLine: Int,
+            @SerialName("col_offset")
+            override val columnStart: Int,
+            @SerialName("end_col_offset")
+            override val columnEnd: Int,
         ) : Statement
 
         @Serializable
@@ -90,7 +156,15 @@ sealed interface PythonType {
         data class ImportFrom(
             val module: String?,
             val names: List<Alias>,
-            val level: Int, // todo do we need it?
+            val level: Int,
+            @SerialName("lineno")
+            override val startLine: Int,
+            @SerialName("end_lineno")
+            override val endLine: Int,
+            @SerialName("col_offset")
+            override val columnStart: Int,
+            @SerialName("end_col_offset")
+            override val columnEnd: Int,
         ) : Statement
 
         @Serializable
@@ -98,15 +172,41 @@ sealed interface PythonType {
         data class ExpressionStatement(
             @SerialName("value")
             val expression: Expression,
+            @SerialName("lineno")
+            override val startLine: Int,
+            @SerialName("end_lineno")
+            override val endLine: Int,
+            @SerialName("col_offset")
+            override val columnStart: Int,
+            @SerialName("end_col_offset")
+            override val columnEnd: Int,
         ) : Statement
 
         @Serializable
         @SerialName("Break")
-        data object Break : Statement
+        data class Break(
+            @SerialName("lineno")
+            override val startLine: Int,
+            @SerialName("end_lineno")
+            override val endLine: Int,
+            @SerialName("col_offset")
+            override val columnStart: Int,
+            @SerialName("end_col_offset")
+            override val columnEnd: Int,
+        ) : Statement
 
         @Serializable
         @SerialName("Continue")
-        data object Continue : Statement
+        data class Continue(
+            @SerialName("lineno")
+            override val startLine: Int,
+            @SerialName("end_lineno")
+            override val endLine: Int,
+            @SerialName("col_offset")
+            override val columnStart: Int,
+            @SerialName("end_col_offset")
+            override val columnEnd: Int,
+        ) : Statement
     }
 
     @Serializable
@@ -126,7 +226,7 @@ sealed interface PythonType {
         data class UnaryOperation(
             @SerialName("op")
             val operator: UnaryOperator,
-            val operand: Expression
+            val operand: Expression,
         ) : Expression
 
         @Serializable
