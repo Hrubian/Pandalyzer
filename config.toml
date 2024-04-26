@@ -1,0 +1,19 @@
+[kamaradi.csv]
+id = "int"
+nickname = "string"
+fullname = "string"
+vyska = "int"
+bydliste = "string"
+
+[mesta.csv]
+name = "string"
+vzdalenost_od_prahy = "int"
+datum_zalozeni = "datetime" # todo
+
+[test.csv]
+column1 = "string"
+column2 = "int"
+
+#[*_info.csv]
+#anything = "string"
+

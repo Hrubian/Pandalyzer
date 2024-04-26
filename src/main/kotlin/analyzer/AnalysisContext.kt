@@ -5,6 +5,7 @@ import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.builtinFunctions
+import python.datastructures.pandas.dataframe.DataFrame
 
 typealias Identifier = String
 
@@ -20,6 +21,8 @@ sealed interface AnalysisContext {
         message: String,
         sourceStatement: PythonType.Statement,
     )
+    fun addWarnings(messages: List<String>, sourceStatement: PythonType.Statement) =
+        messages.forEach { addWarning(it, sourceStatement) }
 
     fun addError(
         message: String,
@@ -32,15 +35,19 @@ sealed interface AnalysisContext {
 
     fun merge(other: AnalysisContext)
 
+    fun getDataframeFromMetadata(filename: String): DataFrame?
+
     companion object {
-        fun buildEmpty(): GlobalAnalysisContext =
+        fun buildEmpty(metadata: AnalyzerMetadata): GlobalAnalysisContext =
             GlobalAnalysisContext(
                 pythonDataStructures = mutableMapOf(),
                 errors = mutableListOf(),
+                metadata = metadata,
                 warnings = mutableListOf(),
             )
 
-        fun buildWithBuiltins(): GlobalAnalysisContext = buildEmpty().apply { builtinFunctions.forEach { upsertStruct(it.key, it.value) } }
+        fun buildWithBuiltins(metadata: AnalyzerMetadata): GlobalAnalysisContext =
+            buildEmpty(metadata).apply { builtinFunctions.forEach { upsertStruct(it.key, it.value) } }
 
         fun buildForFunction(outerContext: AnalysisContext): FunctionAnalysisContext = FunctionAnalysisContext(outerContext)
     }
@@ -57,6 +64,7 @@ data class Message(val text: String, val sourceStatement: PythonType.Statement) 
 data class GlobalAnalysisContext(
     private val pythonDataStructures: MutableMap<Identifier, PythonDataStructure>,
     private val warnings: MutableList<Message>,
+    private val metadata: AnalyzerMetadata,
     private val errors: MutableList<Message>,
 ) : AnalysisContext {
     override fun upsertStruct(
@@ -86,6 +94,7 @@ data class GlobalAnalysisContext(
         GlobalAnalysisContext(
             pythonDataStructures = pythonDataStructures.map { it.key to it.value.clone() }.toMap().toMutableMap(),
             warnings = mutableListOf(),
+            metadata = metadata,
             errors = mutableListOf(),
         )
 
@@ -105,6 +114,8 @@ data class GlobalAnalysisContext(
             }
         }
     }
+
+    override fun getDataframeFromMetadata(filename: String): DataFrame? = metadata.getDataFrameOrNull(filename)
 
     fun summarize(): String =
         buildString {
@@ -174,4 +185,6 @@ data class FunctionAnalysisContext(
             }
         }
     }
+
+    override fun getDataframeFromMetadata(filename: String): DataFrame? = globalContext.getDataframeFromMetadata(filename)
 }

@@ -1,5 +1,6 @@
 import analyzer.AnalyzerMetadata
 import org.apache.commons.cli.DefaultParser
+import org.apache.commons.cli.HelpFormatter
 import org.apache.commons.cli.Options
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -11,7 +12,6 @@ data class ProgramArguments(
     val outputStream: OutputStream,
     val outputFormat: OutputFormat,
     val metadata: AnalyzerMetadata,
-    val printHelp: Boolean,
     val treatWarningsAsErrors: Boolean,
     val verbose: Boolean,
 ) {
@@ -23,25 +23,34 @@ data class ProgramArguments(
                 addOption("o", "output", true, "Output file path")
                 addOption("f", "format", true, "Output file format")
                 addOption("w", "werr", false, "Treat warnings as errors")
+                addOption("c", "config", true, "Config file location (default is $defaultConfigFile")
+                addOption("h", "help", false, "Prints this info")
             }
         private val parser = DefaultParser()
 
         fun parse(args: Array<String>): ProgramArguments {
             try {
                 val commandLine = parser.parse(options, args)
+                if (commandLine.hasOption("help")) {
+                    val helpFormatter = HelpFormatter()
+                    helpFormatter.printHelp("pandalyzer", options)
+                    exitProcess(ExitWays.OK.exitCode)
+                }
                 return ProgramArguments(
                     inputFile = commandLine.getOptionValue("input"),
                     outputStream = commandLine.getOptionValue("output")?.let { FileOutputStream(it) } ?: System.out,
                     outputFormat = OutputFormat.fromString(commandLine.getOptionValue("format")),
-                    metadata = AnalyzerMetadata(emptyMap()),
-                    printHelp = false, // todo how does it work
+                    metadata = AnalyzerMetadata.fromConfigFile(commandLine.getOptionValue("help") ?: defaultConfigFile),
                     treatWarningsAsErrors = commandLine.hasOption("verbose"),
                     verbose = commandLine.hasOption("verbose"),
                 )
             } catch (ex: Exception) {
+                println("Error while loading program arguments: ${ex.message}")
                 exitProcess(ExitWays.BadArgs.exitCode)
             }
         }
+
+        private const val defaultConfigFile = "./config.toml"
     }
 }
 

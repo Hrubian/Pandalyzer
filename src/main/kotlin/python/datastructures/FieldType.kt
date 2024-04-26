@@ -21,6 +21,6 @@ enum class FieldType {
     StringType,
     NABoolean,
 
-    // unknwon type
+    // unknown type
     Unknown,
 }

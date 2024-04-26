@@ -1,21 +1,27 @@
-def bin_search_inner(array, item, l, r):
-    if l + 1 < r:
-        #mid = (l + r) // 2
-        mid = l + (r - l) // 2
-        if array[mid] > item:
-            return bin_search_inner(array, item, l, mid)
-        else:
-            return bin_search_inner(array, item, mid, r)
-    else:
-        if len(array) > 0 and array[l] == item:
-            return l
-        else:
-            return -1
+# def bin_search_inner(array, item, l, r):
+#     if l + 1 < r:
+#         #mid = (l + r) // 2
+#         mid = l + (r - l) // 2
+#         if array[mid] > item:
+#             return bin_search_inner(array, item, l, mid)
+#         else:
+#             return bin_search_inner(array, item, mid, r)
+#     else:
+#         if len(array) > 0 and array[l] == item:
+#             return l
+#         else:
+#             return -1
+#
+#
+# def bin_search(array, item):
+#     return bin_search_inner(array, item, 0, len(array))
+#
+#
+# not_found = bin_search([1,3,4,5,7,23,56], 6)
+# empty = bin_search([], 1)
 
+import pandas as pd
 
-def bin_search(array, item):
-    return bin_search_inner(array, item, 0, len(array))
-
-
-not_found = bin_search([1,3,4,5,7,23,56], 6)
-empty = bin_search([], 1)
+df = pd.read_csv("test.csv")
+print(df["column1"])
+print(df["column3"])

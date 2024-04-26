@@ -88,7 +88,7 @@ object Pandalyzer {
         // todo check if the assignment is type hint
         val identifier = (assign.targets.first() as Name).identifier
         val value =
-            assign.value.analyzeWith(context).orElse {
+            assign.value.analyzeWith(context).orElse { //todo dropping warnings
                 context.addError(it, assign)
                 return StatementAnalysisResult.Ended
             }
@@ -144,8 +144,8 @@ object Pandalyzer {
                 is OperationResult.Ok -> context.upsertStruct(aliasName ?: name, result.result)
                 is OperationResult.Warning ->
                     context.upsertStruct(aliasName ?: name, result.result)
-                        .also { context.addWarning(result.message, importFrom) }
-                is OperationResult.Error ->
+                        .also { context.addWarnings(result.messages, importFrom) }
+                is OperationResult.Error -> // todo dropping the original warning
                     context.addError("The package ${importFrom.module} does not contain $name.", importFrom)
             }
         }
@@ -156,7 +156,11 @@ object Pandalyzer {
         expressionStatement: ExpressionStatement,
         context: AnalysisContext,
     ): StatementAnalysisResult {
-        expressionStatement.expression.analyzeWith(context)
+        when (val result = expressionStatement.expression.analyzeWith(context)) {
+            is OperationResult.Error -> context.addError(result.reason, expressionStatement)
+            is OperationResult.Ok -> {}
+            is OperationResult.Warning -> context.addWarnings(result.messages, expressionStatement)
+        }
         return StatementAnalysisResult.Ended
     }
 
@@ -164,7 +168,7 @@ object Pandalyzer {
         binaryOperation: BinaryOperation,
         context: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
-        val left = binaryOperation.left.analyzeWith(context).orElse { return fail(it) }
+        val left = binaryOperation.left.analyzeWith(context).orElse { return fail(it) } //todo dropping warnings
         val right = binaryOperation.right.analyzeWith(context).orElse { return fail(it) }
 
         return when (binaryOperation.operator) {
@@ -203,19 +207,18 @@ object Pandalyzer {
         var rightIndex = 0
 
         while (true) {
-            val result =
-                when (op) {
-                    CompareOperator.Equal -> left equal right
-                    CompareOperator.GreaterThan -> left greaterThan right
-                    CompareOperator.GreaterThanEqual -> left greaterThanEqual right
-                    CompareOperator.In -> left inn right
-                    CompareOperator.Is -> left iss right
-                    CompareOperator.IsNot -> left isNot right
-                    CompareOperator.LessThan -> left lessThan right
-                    CompareOperator.LessThanEqual -> left lessThanEqual right
-                    CompareOperator.NotEqual -> left notEqual right
-                    CompareOperator.NotIn -> left notIn right
-                }
+            val result = when (op) {
+                CompareOperator.Equal -> left equal right
+                CompareOperator.GreaterThan -> left greaterThan right
+                CompareOperator.GreaterThanEqual -> left greaterThanEqual right
+                CompareOperator.In -> left inn right
+                CompareOperator.Is -> left iss right
+                CompareOperator.IsNot -> left isNot right
+                CompareOperator.LessThan -> left lessThan right
+                CompareOperator.LessThanEqual -> left lessThanEqual right
+                CompareOperator.NotEqual -> left notEqual right
+                CompareOperator.NotIn -> left notIn right
+            }
             val boolResult = result.orElse { return fail(it) }.boolValue()
             if (boolResult != null) {
                 if (boolResult) {

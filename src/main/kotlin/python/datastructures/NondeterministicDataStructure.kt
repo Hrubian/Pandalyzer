@@ -26,12 +26,6 @@ data class NondeterministicDataStructure(
     override operator fun div(other: PythonDataStructure): OperationResult<PythonDataStructure> =
         combineResults(left.div(other), right.div(other))
 
-//    override infix fun and(other: PythonDataStructure): OperationResult<PythonDataStructure> =
-//        combineResults(left.and(other), right.and(other))
-//
-//    override infix fun or(other: PythonDataStructure): OperationResult<PythonDataStructure> =
-//        combineResults(left.or(other), right.or(other))
-
     override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
         combineResults(left.attribute(identifier), right.attribute(identifier))
 

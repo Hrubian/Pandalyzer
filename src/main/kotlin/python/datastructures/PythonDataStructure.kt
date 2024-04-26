@@ -9,21 +9,23 @@ interface PythonDataStructure {
     val typeName: String
         get() = javaClass.simpleName
 
-    fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> = fail("Cannot subscript a value of type $typeName")
+    fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> =
+        fail("Cannot subscript a value of type $typeName")
 
-    operator fun plus(other: PythonDataStructure): OperationResult<PythonDataStructure> = fail("Cannot add a value of type $typeName")
+    operator fun plus(other: PythonDataStructure): OperationResult<PythonDataStructure> =
+        fail("Cannot add a value of type $typeName")
 
     operator fun minus(other: PythonDataStructure): OperationResult<PythonDataStructure> =
         fail("Cannot subtract from a value of type $typeName")
 
-    operator fun times(other: PythonDataStructure): OperationResult<PythonDataStructure> = fail("Cannot multiply a value of type $typeName")
+    operator fun times(other: PythonDataStructure): OperationResult<PythonDataStructure> =
+        fail("Cannot multiply a value of type $typeName")
 
-    operator fun div(other: PythonDataStructure): OperationResult<PythonDataStructure> = fail("Cannot divide a value of type $typeName")
+    operator fun div(other: PythonDataStructure): OperationResult<PythonDataStructure> =
+        fail("Cannot divide a value of type $typeName")
 
     infix fun floorDiv(other: PythonDataStructure): OperationResult<PythonDataStructure> =
-        fail(
-            "Cannot floor-divide a value of type $typeName",
-        )
+        fail("Cannot floor-divide a value of type $typeName",)
 
     fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
         fail("the attribute $identifier of $typeName does not exist")
