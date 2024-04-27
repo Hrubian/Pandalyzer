@@ -16,18 +16,19 @@ import python.map
 import python.ok
 import python.withWarn
 
-data class DataFrame_RenameFunc(override val dataFrame: DataFrame): DataFrameFunction {
+data class DataFrame_RenameFunc(override val dataFrame: DataFrame) : DataFrameFunction {
     override fun clone(): PythonDataStructure = this
 
     override fun invoke(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-        outerContext: AnalysisContext
+        outerContext: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
         val matchedArguments = ArgumentMatcher.match(argumentSchema, args, keywordArgs.toMap())
         return matchedArguments.map { arguments ->
-            val columns = arguments.matchedArguments["columns"] as? PythonDict
-                ?: return@map fail("The rename func only accepts a dictionary")
+            val columns =
+                arguments.matchedArguments["columns"] as? PythonDict
+                    ?: return@map fail("The rename func only accepts a dictionary")
             rename(columns)
         }
     }
@@ -68,10 +69,13 @@ data class DataFrame_RenameFunc(override val dataFrame: DataFrame): DataFrameFun
         // check that the new values are not colliding with any old values
         val collidingValues = mapping.filter { it.value in dataFrame.fields }
         if (collidingValues.isNotEmpty()) {
-            val message = collidingValues
-                .map { "Cannot rename a dataframe column ${it.key} to ${it.value} " +
-                        "since ${it.value} already exists in the dataframe" }
-                .joinToString("\n")
+            val message =
+                collidingValues
+                    .map {
+                        "Cannot rename a dataframe column ${it.key} to ${it.value} " +
+                            "since ${it.value} already exists in the dataframe"
+                    }
+                    .joinToString("\n")
             return fail(message)
         }
 
@@ -84,8 +88,9 @@ data class DataFrame_RenameFunc(override val dataFrame: DataFrame): DataFrameFun
         return DataFrame(fields = dataFrame.fields.mapKeys { mapping[it.key] ?: it.key }.toMutableMap()).ok()
     }
 
-    private val argumentSchema = ResolvedArguments(
-        arguments = listOf(PythonType.Arg("columns")), //todo the structure is bigger
-        defaults = listOf(PythonNone)
-    )
+    private val argumentSchema =
+        ResolvedArguments(
+            arguments = listOf(PythonType.Arg("columns")), // todo the structure is bigger
+            defaults = listOf(PythonNone),
+        )
 }

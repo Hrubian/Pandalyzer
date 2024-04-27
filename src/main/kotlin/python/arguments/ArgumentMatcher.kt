@@ -24,10 +24,12 @@ data class ResolvedArguments(
     val defaults: List<PythonDataStructure> = emptyList(),
 ) {
     companion object {
-        fun PythonType.Arguments.resolve(context: AnalysisContext): ResolvedArguments {
-            val resolved = defaults.map { expr -> expr.analyzeWith(context).orElse { UnresolvedStructure(it) } }
-            val resolvedKeywords =
-                keywordDefaults.map { expr -> expr?.analyzeWith(context)?.orElse { UnresolvedStructure(it) } ?: PythonNone }
+        fun PythonType.Arguments.resolve(context: AnalysisContext): Pair<ResolvedArguments, List<String>> {
+            val (resolved, warns) = defaults.map { expr -> expr.analyzeWith(context).orElse { UnresolvedStructure(it) } }.unzip()
+            val (resolvedKeywords, kwWarns) =
+                keywordDefaults.map { expr ->
+                    expr?.analyzeWith(context)?.orElse { UnresolvedStructure(it) } ?: (PythonNone to emptyList())
+                }.unzip()
 
             return ResolvedArguments(
                 positionalArgs = positionalArgs,
@@ -37,7 +39,7 @@ data class ResolvedArguments(
                 keywordOnlyArgs = keywordOnlyArgs,
                 keywordDefaults = resolvedKeywords.toList(),
                 defaults = resolved.toList(),
-            )
+            ) to (warns.flatten() + kwWarns.flatten())
         }
     }
 }

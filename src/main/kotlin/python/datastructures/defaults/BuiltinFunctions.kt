@@ -4,13 +4,13 @@ import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
 import python.PythonType
+import python.addWarnings
 import python.arguments.ArgumentMatcher
 import python.arguments.ResolvedArguments
 import python.datastructures.PythonDataStructure
 import python.fail
 import python.ok
 import python.orElse
-import python.toBigIntegerOrNull
 import python.withWarn
 import java.math.BigInteger
 
@@ -51,7 +51,7 @@ val builtinFunctions =
                         arguments = listOf(PythonType.Arg("base")),
                         defaults = listOf(PythonInt(BigInteger.TEN)),
                     )
-                val matchedArgs =
+                val (matchedArgs, matchWarnings) =
                     ArgumentMatcher.match(schema, args, kwArgs.toMap())
                         .orElse { return@PythonInvokable fail("Unable to resolve 'int' function arguments.") }
 
@@ -62,18 +62,20 @@ val builtinFunctions =
 
                 if (base.value == null) {
                     return@PythonInvokable PythonInt(null).withWarn("Unable to determine the base for int function.")
+                        .addWarnings(matchWarnings)
                 }
 
-                when (x) {
+                return@PythonInvokable when (x) {
                     is PythonInt -> PythonInt(x.value).ok()
                     is PythonString -> {
                         if (x.value == null) {
-                            return@PythonInvokable PythonInt(null).withWarn("Unable to determine the string value for int function")
+                            PythonInt(null).withWarn("Unable to determine the string value for int function")
+                        } else {
+                            val intValue = x.value.toBigIntegerOrNull() ?: return@PythonInvokable fail("Invalid number ${x.value}")
+                            PythonInt(intValue).ok()
                         }
-                        val intValue = x.value.toBigIntegerOrNull() ?: return@PythonInvokable fail("Invalid number ${x.value}")
-                        return@PythonInvokable PythonInt(intValue).ok()
                     }
-                    else -> return@PythonInvokable fail("Invalid argument type for int function")
-                }
+                    else -> fail("Invalid argument type for int function")
+                }.addWarnings(matchWarnings)
             },
     )

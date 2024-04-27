@@ -74,12 +74,15 @@ interface PandasFunction : PythonDataStructure {
             }
         }
 
-        private fun readCsv(filename: PythonString, context: AnalysisContext): OperationResult<PythonDataStructure> {
+        private fun readCsv(
+            filename: PythonString,
+            context: AnalysisContext,
+        ): OperationResult<PythonDataStructure> {
             return if (filename.value == null) {
                 DataFrame(null).withWarn("Unable to resolve filename of unknown string for read_csv")
             } else {
-                context.getDataframeFromMetadata(filename.value)?.ok() ?:
-                    fail("Unknown file with name: ${filename.value}")
+                context.getDataframeFromMetadata(filename.value)?.ok()
+                    ?: fail("Unknown file with name: ${filename.value}")
             }
         }
     }

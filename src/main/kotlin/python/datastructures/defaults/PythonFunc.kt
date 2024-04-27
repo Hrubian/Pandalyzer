@@ -20,6 +20,7 @@ data class PythonFunc(
     val name: Identifier,
     val body: List<PythonType.Statement>,
     val arguments: ResolvedArguments,
+    val functionDef: PythonType.Statement.FunctionDef,
 ) : PythonDataStructure {
     override fun invoke(
         args: List<PythonDataStructure>,
@@ -27,8 +28,8 @@ data class PythonFunc(
         outerContext: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
         val functionContext = AnalysisContext.buildForFunction(outerContext)
-        val matchedArguments = ArgumentMatcher.match(arguments, args, keywordArgs.toMap()).orElse { return fail(it) }
-
+        val (matchedArguments, warns) = ArgumentMatcher.match(arguments, args, keywordArgs.toMap()).orElse { return fail(it) }
+        outerContext.addWarnings(warns, functionDef)
         functionContext.addArgs(matchedArguments)
 
         return analyzeStatements(body, functionContext).extractOperationResult()

@@ -21,8 +21,11 @@ sealed interface AnalysisContext {
         message: String,
         sourceStatement: PythonType.Statement,
     )
-    fun addWarnings(messages: List<String>, sourceStatement: PythonType.Statement) =
-        messages.forEach { addWarning(it, sourceStatement) }
+
+    fun addWarnings(
+        messages: List<String>,
+        sourceStatement: PythonType.Statement,
+    ) = messages.forEach { addWarning(it, sourceStatement) }
 
     fun addError(
         message: String,
@@ -31,9 +34,9 @@ sealed interface AnalysisContext {
 
     fun getGlobalContext(): AnalysisContext
 
-    fun clone(): AnalysisContext
+    fun fork(): AnalysisContext
 
-    fun merge(other: AnalysisContext)
+    fun join(other: AnalysisContext)
 
     fun getDataframeFromMetadata(filename: String): DataFrame?
 
@@ -56,8 +59,11 @@ sealed interface AnalysisContext {
 data class Message(val text: String, val sourceStatement: PythonType.Statement) {
     fun summarize(): String =
         "${sourceStatement.javaClass.simpleName} " +
-            if (sourceStatement.startLine == sourceStatement.endLine) { "on line ${sourceStatement.startLine} " }
-            else { "from line ${sourceStatement.startLine} to line ${sourceStatement.endLine} " } +
+            if (sourceStatement.startLine == sourceStatement.endLine) {
+                "on line ${sourceStatement.startLine} "
+            } else {
+                "from line ${sourceStatement.startLine} to line ${sourceStatement.endLine} "
+            } +
             "columns ${sourceStatement.columnStart} - ${sourceStatement.columnEnd}: $text"
 }
 
@@ -90,7 +96,7 @@ data class GlobalAnalysisContext(
 
     override fun getGlobalContext(): AnalysisContext = this
 
-    override fun clone(): AnalysisContext =
+    override fun fork(): AnalysisContext =
         GlobalAnalysisContext(
             pythonDataStructures = pythonDataStructures.map { it.key to it.value.clone() }.toMap().toMutableMap(),
             warnings = mutableListOf(),
@@ -98,7 +104,7 @@ data class GlobalAnalysisContext(
             errors = mutableListOf(),
         )
 
-    override fun merge(other: AnalysisContext) {
+    override fun join(other: AnalysisContext) {
         val otherGlobal = other as GlobalAnalysisContext
         warnings.addAll(otherGlobal.warnings)
         errors.addAll(otherGlobal.errors)
@@ -165,14 +171,14 @@ data class FunctionAnalysisContext(
 
     override fun getGlobalContext(): AnalysisContext = outerContext.getGlobalContext()
 
-    override fun clone(): AnalysisContext =
+    override fun fork(): AnalysisContext =
         FunctionAnalysisContext(
-            outerContext = outerContext.clone(),
+            outerContext = outerContext.fork(),
             pythonDataStructures = pythonDataStructures.map { it.key to it.value.clone() }.toMap().toMutableMap(),
         )
 
-    override fun merge(other: AnalysisContext) {
-        outerContext.merge((other as FunctionAnalysisContext).outerContext)
+    override fun join(other: AnalysisContext) {
+        outerContext.join((other as FunctionAnalysisContext).outerContext)
         (pythonDataStructures.keys + other.pythonDataStructures.keys).associateWithTo(pythonDataStructures) { key ->
             val first = pythonDataStructures[key]
             val second = other.pythonDataStructures[key]

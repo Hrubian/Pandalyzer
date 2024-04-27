@@ -1,4 +1,3 @@
 package analyzer
 
-class ConfigParser {
-}
+class ConfigParser

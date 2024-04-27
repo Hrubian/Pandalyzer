@@ -1,7 +1,5 @@
 package python
 
-import analyzer.AnalysisContext
-
 sealed interface OperationResult<out T> {
     @JvmInline
     value class Ok<T>(val result: T) : OperationResult<T>
@@ -12,7 +10,23 @@ sealed interface OperationResult<out T> {
     value class Error<T>(val reason: String) : OperationResult<T>
 }
 
-fun <T> T.ok() = OperationResult.Ok(this)
+fun <T> OperationResult<T>.addWarnings(warnings: List<String>): OperationResult<T> =
+    if (warnings.isEmpty()) {
+        this
+    } else {
+        when (this) {
+            is OperationResult.Ok -> OperationResult.Warning(this.result, warnings)
+            is OperationResult.Warning -> OperationResult.Warning(this.result, this.messages + warnings)
+            is OperationResult.Error -> this
+        }
+    }
+
+fun <T> T.ok(cumulatedWarnings: List<String> = emptyList()) =
+    if (cumulatedWarnings.isEmpty()) {
+        OperationResult.Ok(this)
+    } else {
+        OperationResult.Warning(this, cumulatedWarnings)
+    }
 
 fun <T> T.withWarn(message: String) = OperationResult.Warning(this, listOf(message))
 
@@ -21,20 +35,13 @@ fun <T> fail(reason: String) = OperationResult.Error<T>(reason)
 fun <T1, T2> OperationResult<T1>.map(func: (T1) -> OperationResult<T2>): OperationResult<T2> =
     when (this) {
         is OperationResult.Ok -> func(this.result)
-        is OperationResult.Warning -> func(this.result) // todo don't lose the previous warning
+        is OperationResult.Warning -> func(this.result).addWarnings(this.messages)
         is OperationResult.Error -> OperationResult.Error(this.reason)
     }
 
-fun <T> OperationResult<T>.orElse(default: T) =
+inline fun <T> OperationResult<T>.orElse(func: (String) -> T): Pair<T, List<String>> =
     when (this) {
-        is OperationResult.Error -> default
-        is OperationResult.Ok -> this.result
-        is OperationResult.Warning -> this.result // todo don't drop the warning :)
-    }
-
-inline fun <T> OperationResult<T>.orElse(func: (String) -> T): T =
-    when (this) {
-        is OperationResult.Error -> func(this.reason)
-        is OperationResult.Ok -> this.result
-        is OperationResult.Warning -> this.result // todo dropping messages
+        is OperationResult.Error -> func(this.reason) to emptyList()
+        is OperationResult.Ok -> this.result to emptyList()
+        is OperationResult.Warning -> this.result to messages
     }

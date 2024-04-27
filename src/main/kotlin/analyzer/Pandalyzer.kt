@@ -42,6 +42,7 @@ import python.PythonType.UnaryOperator.Invert
 import python.PythonType.UnaryOperator.Not
 import python.PythonType.UnaryOperator.UnaryMinus
 import python.PythonType.UnaryOperator.UnaryPlus
+import python.addWarnings
 import python.arguments.ResolvedArguments.Companion.resolve
 import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
@@ -70,14 +71,16 @@ object Pandalyzer {
         functionDef: FunctionDef,
         context: AnalysisContext,
     ): StatementAnalysisResult {
-        val resolvedArgs = functionDef.args.resolve(context)
+        val (resolvedArgs, warnings) = functionDef.args.resolve(context)
         val func =
             PythonFunc(
                 name = functionDef.name,
                 body = functionDef.body,
                 arguments = resolvedArgs,
+                functionDef = functionDef,
             )
         context.upsertStruct(functionDef.name, func)
+        context.addWarnings(warnings, functionDef)
         return StatementAnalysisResult.Ended
     }
 
@@ -85,15 +88,15 @@ object Pandalyzer {
         assign: Assign,
         context: AnalysisContext,
     ): StatementAnalysisResult {
-        // todo check if the assignment is type hint
         val identifier = (assign.targets.first() as Name).identifier
-        val value =
-            assign.value.analyzeWith(context).orElse { //todo dropping warnings
+        val (value, warn) =
+            assign.value.analyzeWith(context).orElse {
                 context.addError(it, assign)
                 return StatementAnalysisResult.Ended
             }
 
         context.upsertStruct(identifier, value)
+        context.addWarnings(warn, assign)
         return StatementAnalysisResult.Ended
     }
 
@@ -101,25 +104,29 @@ object Pandalyzer {
         ifStatement: IfStatement,
         context: AnalysisContext,
     ): StatementAnalysisResult {
-        val ifResult =
+        val (ifResult, warn) =
             ifStatement.test.analyzeWith(context).orElse {
                 context.addError(it, ifStatement)
                 return StatementAnalysisResult.Ended
-            }.also { it as? PythonBool ?: context.addWarning("If statement with test value of type ${it.typeName}", ifStatement) }
-                .boolValue()
+            }
+        context.addWarnings(warn, ifStatement)
+        if ((ifResult is PythonBool).not()) {
+            context.addWarning("If statement with test value of type ${ifResult.typeName}", ifStatement)
+        }
+        val ifValue = ifResult.boolValue()
 
-        return if (ifResult != null) {
-            if (ifResult) {
+        return if (ifValue != null) {
+            if (ifValue) {
                 analyzeStatements(ifStatement.body, context)
             } else {
                 analyzeStatements(ifStatement.orElse, context)
             }
         } else {
             context.addWarning("Unable to recognize the bool value in the if statement test - branching.", ifStatement)
-            val clonedContext = context.clone()
+            val clonedContext = context.fork()
             val bodyResult = analyzeStatements(ifStatement.body, context)
             val orElseResult = analyzeStatements(ifStatement.orElse, clonedContext)
-            context.merge(clonedContext)
+            context.join(clonedContext)
             StatementAnalysisResult.NondeterministicResult(bodyResult, orElseResult)
         }
     }
@@ -145,7 +152,7 @@ object Pandalyzer {
                 is OperationResult.Warning ->
                     context.upsertStruct(aliasName ?: name, result.result)
                         .also { context.addWarnings(result.messages, importFrom) }
-                is OperationResult.Error -> // todo dropping the original warning
+                is OperationResult.Error ->
                     context.addError("The package ${importFrom.module} does not contain $name.", importFrom)
             }
         }
@@ -168,8 +175,8 @@ object Pandalyzer {
         binaryOperation: BinaryOperation,
         context: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
-        val left = binaryOperation.left.analyzeWith(context).orElse { return fail(it) } //todo dropping warnings
-        val right = binaryOperation.right.analyzeWith(context).orElse { return fail(it) }
+        val (left, lWarn) = binaryOperation.left.analyzeWith(context).orElse { return fail(it) }
+        val (right, rWarn) = binaryOperation.right.analyzeWith(context).orElse { return fail(it) }
 
         return when (binaryOperation.operator) {
             Add -> left + right
@@ -177,7 +184,7 @@ object Pandalyzer {
             Mult -> left * right
             Sub -> left - right
             FloorDiv -> left floorDiv right
-        }
+        }.addWarnings(lWarn + rWarn)
     }
 
     fun analyze(
@@ -185,9 +192,21 @@ object Pandalyzer {
         context: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
         val callable = call.func.analyzeWith(context)
-        val args = call.arguments.map { arg -> arg.analyzeWith(context).orElse { return fail(it) } }
-        val keywords = call.keywords.map { arg -> arg.identifier to arg.value.analyzeWith(context).orElse { return fail(it) } }
-        return callable.map { it.invoke(args, keywords, context) }
+        val (args, aWarn) = call.arguments.map { arg -> arg.analyzeWith(context).orElse { return fail(it) } }.unzip()
+        val (keywords, kWarn) =
+            call.keywords.map { arg ->
+                arg.identifier to
+                    arg.value.analyzeWith(context)
+                        .orElse { return fail(it) }
+            }
+                .unzip()
+                .let {
+                    val identifiers = it.first
+                    val (values, warnings) = it.second.unzip()
+                    identifiers.zip(values) to warnings.flatten()
+                }
+
+        return callable.map { it.invoke(args, keywords, context) }.addWarnings(aWarn.flatten() + kWarn)
     }
 
     fun analyze(
@@ -200,14 +219,22 @@ object Pandalyzer {
         compare: Compare,
         context: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
-        check(compare.comparators.size == compare.operators.size)
-        var left  = compare.left.analyzeWith(context).orElse { return fail(it) }
-        var op = compare.operators.first()
-        var right = compare.comparators.first().analyzeWith(context).orElse { return fail(it) }
-        var rightIndex = 0
+        val (firstLeft, warnings) = compare.left.analyzeWith(context).orElse { return fail(it) }
+        return analyzeInner(firstLeft, compare.comparators, compare.operators, context)
+            .addWarnings(warnings)
+    }
 
-        while (true) {
-            val result = when (op) {
+    private fun analyzeInner(
+        left: PythonDataStructure,
+        rightRest: List<PythonType.Expression>,
+        operators: List<CompareOperator>,
+        context: AnalysisContext,
+    ): OperationResult<PythonDataStructure> {
+        val rightExpr = rightRest.first()
+        val (right, warnings) = rightExpr.analyzeWith(context).orElse { return fail(it) }
+
+        val (result, resultWarnings) =
+            when (operators.first()) {
                 CompareOperator.Equal -> left equal right
                 CompareOperator.GreaterThan -> left greaterThan right
                 CompareOperator.GreaterThanEqual -> left greaterThanEqual right
@@ -218,23 +245,25 @@ object Pandalyzer {
                 CompareOperator.LessThanEqual -> left lessThanEqual right
                 CompareOperator.NotEqual -> left notEqual right
                 CompareOperator.NotIn -> left notIn right
-            }
-            val boolResult = result.orElse { return fail(it) }.boolValue()
-            if (boolResult != null) {
-                if (boolResult) {
-                    left = right
-                    rightIndex++
-                    op = compare.operators.getOrNull(rightIndex) ?: break
-                    right = compare.comparators[rightIndex].analyzeWith(context).orElse { return fail(it) }
-                } else {
-                    return PythonBool(false).ok() // short-circuit
-                }
-            } else {
-                TODO("implement non-determinism on Compare")
-            }
+            }.orElse { return fail(it) }
+        if (rightRest.size == 1) {
+            return result.ok().addWarnings(warnings + resultWarnings)
         }
 
-        return PythonBool(true).ok()
+        return when (result.boolValue()) {
+            true -> analyzeInner(right, rightRest.drop(1), operators.drop(1), context)
+            false -> PythonBool(false).ok()
+            null -> {
+                val forkedContext = context.fork()
+                val (forkedResult, forkWarnings) =
+                    analyzeInner(right, rightRest.drop(1), operators.drop(1), forkedContext)
+                        .orElse { return fail(it) }
+                context.join(forkedContext)
+                NondeterministicDataStructure(PythonBool(false), forkedResult)
+                    .withWarn("Unable to recognize the bool value in the bool operation - branching.")
+                    .addWarnings(forkWarnings)
+            }
+        }.addWarnings(warnings + resultWarnings)
     }
 
     fun analyze(
@@ -243,11 +272,11 @@ object Pandalyzer {
     ): OperationResult<PythonDataStructure> {
         when (pythonList.context) {
             is Load -> {
-                val elements = pythonList.elements.map { el -> el.analyzeWith(context).orElse { return fail(it) } }
-                return python.datastructures.defaults.PythonList(elements.toMutableList()).ok()
+                val (elements, warns) = pythonList.elements.map { el -> el.analyzeWith(context).orElse { return fail(it) } }.unzip()
+                return python.datastructures.defaults.PythonList(elements.toMutableList()).ok().addWarnings(warns.flatten())
             }
             is ExpressionContext.Store -> {
-                TODO("Not implemented yet")
+                TODO("Store not implemented")
             }
             is ExpressionContext.Delete -> {
                 TODO("Del not implemented")
@@ -259,54 +288,49 @@ object Pandalyzer {
         dictionary: Dictionary,
         context: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
-        val map =
+        val result =
             dictionary.keys.zip(dictionary.values).associate { (key, value) ->
                 key.analyzeWith(context).orElse { return fail(it) } to value.analyzeWith(context).orElse { return fail(it) }
             }
-        return PythonDict(map.toMutableMap()).ok()
+        val warnings = result.flatMap { it.key.second + it.value.second }
+        val map = result.map { it.key.first to it.value.first }.toMap()
+        return PythonDict(map.toMutableMap()).ok().addWarnings(warnings)
     }
 
     fun analyze(
         boolOp: BoolOperation,
         context: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
-        val first = boolOp.values.getOrNull(0) ?: return fail("")
-        val second = boolOp.values.getOrNull(1) ?: return fail("")
-        if (boolOp.values.size != 2) {
-            return fail("Only binary bool operations are supported")
-        }
-        val firstResult = first.analyzeWith(context).orElse { return fail(it) }.boolValue()
+        val expr = boolOp.values.firstOrNull() ?: return PythonBool(true).ok()
+        val (result, warnings) = expr.analyzeWith(context).orElse { return fail(it) }
+        val nextBoolOp = boolOp.copy(values = boolOp.values.drop((1)))
 
         return when (boolOp.operator) {
             is And -> {
-                when (firstResult) {
-                    true -> {
-                        val secondResult = second.analyzeWith(context).orElse { return fail(it) }.boolValue()
-                        PythonBool(secondResult).ok()
-                    }
-                    false -> return PythonBool(false).ok()
+                when (result.boolValue()) {
+                    true -> analyze(nextBoolOp, context)
+                    false -> PythonBool(false).ok().addWarnings(warnings)
                     null -> {
-                        val clonedContext = context.clone()
-                        val secondResult = second.analyzeWith(clonedContext).orElse { return fail(it) }
-                        context.merge(clonedContext)
-                        NondeterministicDataStructure(PythonBool(false), PythonBool(secondResult.boolValue()))
-                            .withWarn("\"Unable to recognize the bool value in the bool and operation - branching.\"")
+                        val forkedContext = context.fork()
+                        val (forkedResult, forkedWarns) = analyze(nextBoolOp, forkedContext).orElse { return fail(it) }
+                        context.join(forkedContext)
+                        NondeterministicDataStructure(PythonBool(false), PythonBool(forkedResult.boolValue()))
+                            .withWarn("Unable to recognize the bool value in the bool operation - branching.")
+                            .addWarnings(warnings + forkedWarns)
                     }
                 }
             }
             is Or -> {
-                when (firstResult) {
-                    true -> return PythonBool(true).ok()
-                    false -> {
-                        val secondResult = second.analyzeWith(context).orElse { return fail(it) }.boolValue()
-                        PythonBool(secondResult).ok()
-                    }
+                when (result.boolValue()) {
+                    true -> PythonBool(true).ok().addWarnings(warnings)
+                    false -> analyze(nextBoolOp, context)
                     null -> {
-                        val clonedContext = context.clone()
-                        val secondResult = second.analyzeWith(clonedContext).orElse { return fail(it) }
-                        context.merge(clonedContext)
-                        NondeterministicDataStructure(PythonBool(true), PythonBool(secondResult.boolValue()))
-                            .withWarn("Unable to recognize the bool value in the bool and operation - branching.")
+                        val forkedContext = context.fork()
+                        val (forkedResult, forkedWarns) = analyze(nextBoolOp, forkedContext).orElse { return fail(it) }
+                        context.join(forkedContext)
+                        NondeterministicDataStructure(PythonBool(true), PythonBool(forkedResult.boolValue()))
+                            .withWarn("\"Unable to recognize the bool value in the bool operation - branching.\"")
+                            .addWarnings(warnings + forkedWarns)
                     }
                 }
             }
@@ -317,13 +341,13 @@ object Pandalyzer {
         unaryOperation: UnaryOperation,
         context: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
-        val result = unaryOperation.operand.analyzeWith(context).orElse { return fail(it) }
+        val (result, warns) = unaryOperation.operand.analyzeWith(context).orElse { return fail(it) }
         return when (unaryOperation.operator) {
             Invert -> TODO("Invert operator not implemented")
             Not -> PythonBool(result.boolValue()?.not()).ok()
             UnaryMinus -> result.negate()
             UnaryPlus -> result.positive()
-        }
+        }.addWarnings(warns)
     }
 
     fun PythonType.Expression.analyzeWith(context: AnalysisContext): OperationResult<PythonDataStructure> =

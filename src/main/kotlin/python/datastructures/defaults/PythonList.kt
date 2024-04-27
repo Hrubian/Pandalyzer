@@ -49,10 +49,11 @@ value class PythonList(
         override fun invoke(
             args: List<PythonDataStructure>,
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-            outerContext: AnalysisContext
+            outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> {
-            val elem = args.singleOrNull() ?: keywordArgs.singleOrNull { it.first == "elem" }?.second
-                ?: return fail("Missing 'elem' argument in list append function.")
+            val elem =
+                args.singleOrNull() ?: keywordArgs.singleOrNull { it.first == "elem" }?.second
+                    ?: return fail("Missing 'elem' argument in list append function.")
             if (list.items != null) {
                 list.items.add(elem)
                 return PythonNone.ok()
@@ -66,7 +67,7 @@ value class PythonList(
         override fun invoke(
             args: List<PythonDataStructure>,
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-            outerContext: AnalysisContext
+            outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> {
             TODO("Not yet implemented")
         }
@@ -76,10 +77,9 @@ value class PythonList(
         override fun invoke(
             args: List<PythonDataStructure>,
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-            outerContext: AnalysisContext
+            outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> {
             TODO("Not yet implemented")
         }
     }
-
 }
