@@ -56,8 +56,8 @@ sealed interface AnalysisContext {
 data class Message(val text: String, val sourceStatement: PythonType.Statement) {
     fun summarize(): String =
         "${sourceStatement.javaClass.simpleName} " +
-            "from line ${sourceStatement.startLine} " +
-            "to line ${sourceStatement.endLine} " +
+            if (sourceStatement.startLine == sourceStatement.endLine) { "on line ${sourceStatement.startLine} " }
+            else { "from line ${sourceStatement.startLine} to line ${sourceStatement.endLine} " } +
             "columns ${sourceStatement.columnStart} - ${sourceStatement.columnEnd}: $text"
 }
 

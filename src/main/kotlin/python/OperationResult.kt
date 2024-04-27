@@ -32,7 +32,7 @@ fun <T> OperationResult<T>.orElse(default: T) =
         is OperationResult.Warning -> this.result // todo don't drop the warning :)
     }
 
-inline fun <T> OperationResult<T>.orElse(func: (String) -> T) =
+inline fun <T> OperationResult<T>.orElse(func: (String) -> T): T =
     when (this) {
         is OperationResult.Error -> func(this.reason)
         is OperationResult.Ok -> this.result

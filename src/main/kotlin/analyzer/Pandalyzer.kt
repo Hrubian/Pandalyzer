@@ -201,7 +201,7 @@ object Pandalyzer {
         context: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
         check(compare.comparators.size == compare.operators.size)
-        var left = compare.left.analyzeWith(context).orElse { return fail(it) }
+        var left  = compare.left.analyzeWith(context).orElse { return fail(it) }
         var op = compare.operators.first()
         var right = compare.comparators.first().analyzeWith(context).orElse { return fail(it) }
         var rightIndex = 0

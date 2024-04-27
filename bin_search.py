@@ -23,5 +23,8 @@
 import pandas as pd
 
 df = pd.read_csv("test.csv")
-print(df["column1"])
-print(df["column3"])
+# df.groupby("ahoj").mean()
+df2 = df.rename({"column1": "col2", "column2": "col2"})
+# df.groupby("column2").mean()
+# print(df["column1"])
+# print(df["column3"])

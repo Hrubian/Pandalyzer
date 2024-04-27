@@ -47,7 +47,7 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
         } else if (by.value in dataFrame.fields) {
             DataFrameGroupBy(dataFrame, mutableListOf(by.value)).ok()
         } else {
-            fail("The dataframe does not contain the field $by. Dataframe columns: ${dataFrame.fields.keys}")
+            fail("The dataframe does not contain the field ${by.value}. Dataframe columns: ${dataFrame.fields.keys}")
         }
     }
 
