@@ -24,7 +24,8 @@ import pandas as pd
 
 df = pd.read_csv("test.csv")
 # df.groupby("ahoj").mean()
-df2 = df.rename({"column1": "col2", "column2": "col2"})
+df2 = df.rename({"column1": "col1", "column2": "col3"})
 df.groupby("column2").mean()
 print(df["column1"])
 print(df["column3"])
+df2.to_csv("some_file.csv")

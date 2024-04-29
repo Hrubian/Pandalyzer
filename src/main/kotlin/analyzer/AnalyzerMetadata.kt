@@ -1,15 +1,45 @@
 package analyzer
 
+import python.OperationResult
 import python.datastructures.FieldName
 import python.datastructures.FieldType
+import python.datastructures.defaults.PythonNone
 import python.datastructures.pandas.dataframe.DataFrame
+import python.ok
+import python.withWarn
 import java.io.File
 
 data class AnalyzerMetadata(
-    val data: List<Pair<Regex, Map<FieldName, FieldType>>>,
+    private val data: List<Pair<Regex, Map<FieldName, FieldType>>>,
+    private val storedData: MutableMap<String, Map<FieldName, FieldType>> = mutableMapOf(),
 ) {
     fun getDataFrameOrNull(filename: String): DataFrame? =
         data.singleOrNull { it.first.matches(filename) }?.let { DataFrame(it.second.toMutableMap()) }
+
+    fun storeDataframe(filename: String, dataFrame: DataFrame): OperationResult<PythonNone> {
+        if (dataFrame.fields == null) {
+            return PythonNone.withWarn("Unable to store a dataframe to a csv file $filename as the structure is not known")
+        }
+        if (filename in storedData) {
+            storedData[filename] = dataFrame.fields
+            return PythonNone.withWarn("Writting a dataframe to a file where we have already written before.")
+        }
+        storedData[filename] = dataFrame.fields
+        return PythonNone.ok()
+    }
+
+    fun summarize(): String = buildString {
+        append("Output files (${storedData.size} summary\n")
+        storedData.forEach { (filename, dataframe) ->
+            append("File $filename: \n")
+            dataframe.forEach { (columnName, columnType) ->
+                append("    $columnName: $columnType\n")
+            }
+            append('\n')
+        }
+    }
+
+
 
     companion object {
         fun fromConfigFile(configFileName: String): AnalyzerMetadata {

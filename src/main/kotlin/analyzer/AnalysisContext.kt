@@ -1,5 +1,6 @@
 package analyzer
 
+import python.OperationResult
 import python.PythonType
 import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
@@ -39,6 +40,8 @@ sealed interface AnalysisContext {
     fun join(other: AnalysisContext)
 
     fun getDataframeFromMetadata(filename: String): DataFrame?
+
+    fun storeDataframeToMetadata(filename: String, dataFrame: DataFrame): OperationResult<PythonNone>
 
     companion object {
         fun buildEmpty(metadata: AnalyzerMetadata): GlobalAnalysisContext =
@@ -123,6 +126,9 @@ data class GlobalAnalysisContext(
 
     override fun getDataframeFromMetadata(filename: String): DataFrame? = metadata.getDataFrameOrNull(filename)
 
+    override fun storeDataframeToMetadata(filename: String, dataFrame: DataFrame): OperationResult<PythonNone> =
+        metadata.storeDataframe(filename, dataFrame)
+
     fun summarize(): String =
         buildString {
             append("Summary of analysis: ")
@@ -139,6 +145,9 @@ data class GlobalAnalysisContext(
 
             append("Errors (${errors.size}):\n")
             errors.forEachIndexed { i, error -> append("$i: ${error.summarize()}\n") }
+            append('\n')
+
+            append(metadata.summarize())
         }
 }
 
@@ -193,4 +202,7 @@ data class FunctionAnalysisContext(
     }
 
     override fun getDataframeFromMetadata(filename: String): DataFrame? = globalContext.getDataframeFromMetadata(filename)
+
+    override fun storeDataframeToMetadata(filename: String, dataFrame: DataFrame) =
+        globalContext.storeDataframeToMetadata(filename, dataFrame)
 }
