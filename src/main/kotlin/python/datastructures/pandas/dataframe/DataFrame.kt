@@ -35,7 +35,9 @@ data class DataFrame(
         when (key) {
             is PythonString -> {
                 if (fields == null) {
-                    Series(null).withWarn("The key for subscripting data frame is unknown")
+                    Series(null).withWarn("Unable to subscript a dataframe since the fields of the data frame are unknown")
+                } else if (key.value == null) {
+                    Series(null).withWarn("The key for subscript of dataframe is not known")
                 } else if (key.value in fields.keys) {
                     Series(fields[key.value]!!).ok()
                 } else {

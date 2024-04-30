@@ -1,0 +1,9 @@
+[de.csv]
+germany_specific_column = "string"
+common_column = "int"
+
+[au.csv]
+common_column = "int"
+
+[world.csv]
+common_column = "int"

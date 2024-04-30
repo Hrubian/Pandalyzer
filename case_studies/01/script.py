@@ -19,5 +19,4 @@ top_two_per_age_per_match_df = scores_with_age_df\
     .head(2)\
     .drop(columns=["match_id"])
 
-
 top_two_per_age_per_match_df.to_csv("top_two_per_age_per_match.csv")

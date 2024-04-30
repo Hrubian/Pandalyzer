@@ -7,12 +7,22 @@ import python.PythonTree
 class CaseStudies {
 
     @Test
-    fun `01`() = runCaseStudy(1){ context ->
+    fun `01`() = runCaseStudy(1) { context ->
 
     }
 
     @Test
-    fun `02`() = runCaseStudy(2){ context ->
+    fun `02`() = runCaseStudy(2) { context ->
+
+    }
+
+    @Test
+    fun `03`() = runCaseStudy(3) { context ->
+
+    }
+
+    @Test
+    fun `04`() = runCaseStudy(4) { context ->
 
     }
 
