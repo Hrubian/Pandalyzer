@@ -45,6 +45,38 @@ value class PythonList(
         TODO()
     }
 
+    override fun storeSubscript(
+        slice: PythonDataStructure,
+        value: PythonDataStructure
+    ): OperationResult<PythonDataStructure> {
+        if (slice !is PythonInt) {
+            return fail("Cannot subscript to list with type ${slice.typeName}")
+        }
+        if (slice.value == null) {
+            return UnresolvedStructure("The subscript value is not known").ok()
+        }
+        if (items == null) {
+            return UnresolvedStructure("The values of the list are not known").ok()
+        }
+        val index = slice.value.toInt()
+        if (index > items.size || index < -items.size) {
+            return fail("The index of list subscript out of bounds")
+        }
+        if (index == items.size) {
+            items.add(value)
+            return PythonNone.ok()
+        }
+        if (index in 0..< items.size) {
+            items[index] = value
+            return PythonNone.ok()
+        }
+        if (index in -items.size ..< 0) {
+            items[items.size + index] = value
+            return PythonNone.ok()
+        }
+        return fail("TODO")
+    }
+
     data class Append(val list: PythonList) : PythonInvokable {
         override fun invoke(
             args: List<PythonDataStructure>,

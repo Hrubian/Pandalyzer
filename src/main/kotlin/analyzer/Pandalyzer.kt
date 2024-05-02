@@ -88,15 +88,38 @@ object Pandalyzer {
         assign: Assign,
         context: AnalysisContext,
     ): StatementAnalysisResult {
-        val identifier = (assign.targets.first() as Name).identifier
         val (value, warn) =
-            assign.value.analyzeWith(context).orElse {
-                context.addError(it, assign)
-                return StatementAnalysisResult.Ended
-            }
-
-        context.upsertStruct(identifier, value)
+        assign.value.analyzeWith(context).orElse {
+            context.addError(it, assign)
+            return StatementAnalysisResult.Ended
+        }
         context.addWarnings(warn, assign)
+        when (val target = assign.targets.single()) {
+            is Name -> context.upsertStruct(target.identifier, value)
+            is Attribute -> {
+                val (_, warns) = target.value.analyzeWith(context).map { it.storeAttribute(target.attr, it) }.orElse {
+                    context.addError(it, assign)
+                    return StatementAnalysisResult.Ended
+                }
+                context.addWarnings(warns, assign)
+            }
+            is Subscript -> {
+                val (subscriptTarget, warns) = target.value.analyzeWith(context).orElse {
+                    context.addError(it, assign)
+                    return StatementAnalysisResult.Ended
+                }
+                context.addWarnings(warns, assign)
+                val (_, sliceWarns) = target.slice.analyzeWith(context).map { subscriptTarget.storeSubscript(it, value) }
+                    .orElse {
+                        context.addError(it, assign)
+                        return StatementAnalysisResult.Ended
+                    }
+                context.addWarnings(sliceWarns, assign)
+            }
+            else -> {
+                context.addError("Unsupported assign target $target", assign)
+            }
+        }
         return StatementAnalysisResult.Ended
     }
 

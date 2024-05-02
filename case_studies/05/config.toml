@@ -1,0 +1,4 @@
+[attendees.csv]
+name = "string"
+surname = "string"
+age = "int"

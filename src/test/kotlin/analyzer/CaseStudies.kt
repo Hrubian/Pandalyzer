@@ -26,6 +26,11 @@ class CaseStudies {
 
     }
 
+    @Test
+    fun `05`() = runCaseStudy(5) { context ->
+
+    }
+
     private fun runCaseStudy(caseStudyNumber: Int, assertBlock: (AnalysisContext) -> Unit) {
         val basePath = "./case_studies/${caseStudyNumber.toString().padStart(2, '0')}"
         val scriptPath = "$basePath/script.py"

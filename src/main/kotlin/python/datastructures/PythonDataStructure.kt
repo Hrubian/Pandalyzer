@@ -69,4 +69,10 @@ interface PythonDataStructure {
 
     infix fun notIn(other: PythonDataStructure): OperationResult<PythonDataStructure> =
         fail("Cannot perform notIn on $typeName and ${other.typeName}")
+
+    fun storeAttribute(attribute: Identifier, value: PythonDataStructure): OperationResult<PythonDataStructure> =
+        fail("Cannot store attribute on type $typeName")
+
+    fun storeSubscript(slice: PythonDataStructure, value: PythonDataStructure): OperationResult<PythonDataStructure> =
+        fail("Cannot subscript-assing on type $typeName")
 }

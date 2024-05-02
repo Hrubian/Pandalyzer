@@ -29,7 +29,7 @@ data class AnalyzerMetadata(
     }
 
     fun summarize(): String = buildString {
-        append("Output files (${storedData.size} summary\n")
+        append("Output files (${storedData.size}) summary\n")
         storedData.forEach { (filename, dataframe) ->
             append("File $filename: \n")
             dataframe.forEach { (columnName, columnType) ->
@@ -39,12 +39,10 @@ data class AnalyzerMetadata(
         }
     }
 
-
-
     companion object {
         fun fromConfigFile(configFileName: String): AnalyzerMetadata {
-            val resultData: MutableMap<String, Map<FieldName, FieldType>> = mutableMapOf()
-            var currentFile: String? = null
+            val resultData: MutableMap<Regex, Map<FieldName, FieldType>> = mutableMapOf()
+            var currentFile: Regex? = null
             val currentColumns: MutableMap<FieldName, FieldType> = mutableMapOf()
             val file = File(configFileName).also { check(it.isFile) { "The file $configFileName does not exist" } }
 
@@ -56,7 +54,7 @@ data class AnalyzerMetadata(
                         .dropLastWhile { it.isWhitespace() }
 
                 when {
-                    line.startsWith('[') && line.endsWith(']') -> {
+                    line.startsWith("[") && line.endsWith(']') -> {
                         if (currentFile != null) {
                             check(resultData.put(currentFile!!, currentColumns.toMap()) == null)
                             currentColumns.clear()
@@ -64,6 +62,18 @@ data class AnalyzerMetadata(
                         currentFile =
                             line.drop(1).dropLast(1)
                                 .also { check(it.isNotBlank()) { "The filename should not be blank" } }
+                                .let { Regex.fromLiteral(it) }
+
+                    }
+                    line.startsWith("r[")&& line.endsWith(']') -> {
+                        if (currentFile != null) {
+                            check(resultData.put(currentFile!!, currentColumns.toMap()) == null)
+                            currentColumns.clear()
+                        }
+                        currentFile =
+                            line.drop(2).dropLast(1)
+                                .also { check(it.isNotBlank()) { "The filename should not be blank" } }
+                                .let { Regex(it) }
                     }
                     line.isNotEmpty() -> {
                         val (key, value) =
@@ -81,7 +91,7 @@ data class AnalyzerMetadata(
             if (currentFile != null && resultData.contains(currentFile).not()) {
                 resultData[currentFile!!] = currentColumns.toMap()
             }
-            return AnalyzerMetadata(resultData.toMap().mapKeys { Regex(it.key) }.toList())
+            return AnalyzerMetadata(resultData.toMap().mapKeys { it.key }.toList())
         }
 
         private fun String.toFieldType(): FieldType =

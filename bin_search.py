@@ -28,4 +28,10 @@ df2 = df.rename({"column1": "col1", "column2": "col3"})
 df.groupby("column2").mean()
 print(df["column1"])
 print(df["column3"])
+df2["ahoj"] = df2["col1"]
 df2.to_csv("some_file.csv")
+
+x = pd.read_csv("x.csv")
+y = pd.read_csv("yxcsv")
+x.to_csv("x_output")
+y.to_csv("y_output")

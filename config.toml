@@ -14,6 +14,13 @@ datum_zalozeni = "datetime" # todo
 column1 = "string"
 column2 = "int"
 
+[x.csv]
+name = "string"
+
+r[y.csv]
+surname = "string"
+
+
 #[*_info.csv]
 #anything = "string"
 

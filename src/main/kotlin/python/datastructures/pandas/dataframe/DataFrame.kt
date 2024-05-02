@@ -7,6 +7,7 @@ import python.datastructures.FieldType
 import python.datastructures.PythonDataStructure
 import python.datastructures.UnresolvedStructure
 import python.datastructures.defaults.PythonList
+import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
 import python.datastructures.pandas.dataframe.functions.DataFrame_GroupByFunc
 import python.datastructures.pandas.dataframe.functions.DataFrame_MergeFunc
@@ -66,4 +67,40 @@ data class DataFrame(
             }
             else -> fail("Cannot subscript with ${key.typeName} on dataframe")
         }
+
+    override fun storeSubscript(
+        slice: PythonDataStructure,
+        value: PythonDataStructure
+    ): OperationResult<PythonDataStructure> { //wrong!!! acts like normal subscript
+        when (slice) {
+            is PythonString -> {
+                if (slice.value == null) {
+                    return PythonNone.withWarn("Unable to subscript by an unknown string type")
+                }
+                if (fields == null) {
+                    return PythonNone.withWarn("Unable to subscript to an unknown dataframe")
+                }
+                fields[slice.value] = FieldType.fromPythonDataStructure(value)
+                    ?: return fail("Unable to convert type ${value.typeName} to pandas value")
+                return PythonNone.ok()
+            }
+            is PythonList -> {
+                if (fields == null) {
+                    return DataFrame(null).withWarn("Unable to subscript to an unknown dataframe")
+                }
+                if (slice.items == null) {
+                    return DataFrame(null).withWarn("Unable to subscript by an unknown list type")
+                }
+                val columns = slice.items.map {
+                    it as? PythonString ?: return fail("All items of subscript list must be strings")
+                }.map {
+                    it.value ?: return DataFrame(null).withWarn("Unable to subscript by a list with unknown values")
+                }
+                TODO()
+//                return DataFrame(fields = columns.associateWith {
+//                    (fields[it] ?: return fail("The column $it is not in the dataframe")) }.toMutableMap()).ok()
+            }
+            else -> return fail("Cannot subscript to value of type ${value.typeName}")
+        }
+    }
 }
