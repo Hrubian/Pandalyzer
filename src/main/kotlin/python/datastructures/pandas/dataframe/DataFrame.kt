@@ -9,6 +9,7 @@ import python.datastructures.UnresolvedStructure
 import python.datastructures.defaults.PythonList
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
+import python.datastructures.nondeterministically
 import python.datastructures.pandas.dataframe.functions.DataFrame_DropFunc
 import python.datastructures.pandas.dataframe.functions.DataFrame_GroupByFunc
 import python.datastructures.pandas.dataframe.functions.DataFrame_MergeFunc
@@ -36,10 +37,10 @@ data class DataFrame(
 
     override fun clone(): PythonDataStructure = DataFrame(columns?.toMutableMap())
 
-    override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> {
+    override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> = nondeterministically {
         when (key) {
             is PythonString -> {
-                return if (columns == null) {
+                return@nondeterministically if (columns == null) {
                     Series(null)
                         .withWarn("Unable to subscript a dataframe since the fields of the data frame are unknown")
                 } else if (key.value == null) {
@@ -53,33 +54,35 @@ data class DataFrame(
 
             is PythonList -> {
                 if (columns == null) {
-                    return DataFrame(null).withWarn("The data frame structure is unknown")
+                    return@nondeterministically DataFrame(null).withWarn("The data frame structure is unknown")
                 } else if (key.items == null) {
-                    return DataFrame(null).withWarn("The key for subscripting data frame is unknown")
+                    return@nondeterministically DataFrame(null)
+                        .withWarn("The key for subscripting data frame is unknown")
                 } else {//if (key.items.all { it is PythonString && it.value in fields }) {
                     val nonStringKeys = key.items.filterNot { it is PythonString }
                     if (nonStringKeys.isNotEmpty()) {
-                        return fail("The items in the subscript list for dataframe must be all strings")
+                        return@nondeterministically fail("The items in the subscript list for dataframe must be all strings")
                     }
 
                     val unknownKeys = key.items.filter { (it as PythonString).value == null }
                     if (unknownKeys.isNotEmpty()) {
-                        return DataFrame(null).withWarn("Unable to resolve some items for subscript of dataframe")
+                        return@nondeterministically DataFrame(null)
+                            .withWarn("Unable to resolve some items for subscript of dataframe")
                     }
 
                     val actualKeys = key.items.map { (it as PythonString).value!! }.toSet()
 
-                    return DataFrame(columns.filterKeys { it in actualKeys }.toMutableMap()).ok()
+                    return@nondeterministically DataFrame(columns.filterKeys { it in actualKeys }.toMutableMap()).ok()
                 }
             }
             is Series -> {
-                return when (key.type) {
+                return@nondeterministically when (key.type) {
                     FieldType.BoolType -> clone().ok()
                     null -> UnresolvedStructure("Unknown type of series items").ok()
                     else -> fail("Boolean series expected, got ${key.type.name}")
                 }
             }
-            else -> return fail("Cannot subscript with ${key.typeName} on dataframe")
+            else -> return@nondeterministically fail("Cannot subscript with ${key.typeName} on dataframe")
         }
     }
 

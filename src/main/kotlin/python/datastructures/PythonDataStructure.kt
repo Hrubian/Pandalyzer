@@ -97,6 +97,20 @@ fun invokeNondeterministic(
     return result!!
 }
 
+fun PythonDataStructure.nondeterministically(
+    block: () -> OperationResult<PythonDataStructure>
+): OperationResult<PythonDataStructure> =
+    when (this) {
+        is NondeterministicDataStructure -> {
+            NondeterministicDataStructure.combineResults(
+                result1 = left.nondeterministically(block),
+                result2 = right.nondeterministically(block)
+            )
+        }
+        else -> block()
+    }
+
+
 private suspend fun SequenceScope<Pair<
         List<PythonDataStructure>,
         List<Pair<Identifier, PythonDataStructure>>
