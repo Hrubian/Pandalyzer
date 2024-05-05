@@ -7,9 +7,6 @@ import python.datastructures.FieldName
 import python.datastructures.FieldType
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonInvokable
-import python.datastructures.defaults.PythonList
-import python.datastructures.defaults.PythonString
-import python.datastructures.pandas.series.SeriesGroupBy
 import python.fail
 import python.ok
 import python.withWarn
@@ -65,7 +62,7 @@ data class DataFrameGroupBy(
                 return DataFrame(null).withWarn("Cannot resolve 'by' of groupby -> not able to check mean operation")
             }
             val nonNumerics =
-                dfGroupBy.dataFrame?.fields
+                dfGroupBy.dataFrame?.columns
                     ?.filter { it.key !in dfGroupBy.by }
                     ?.filter { it.value !in setOf(FieldType.IntType, FieldType.FloatType) }
                     ?: return dfGroupBy.dataFrame?.clone()?.ok() ?: return DataFrame(null).ok() // todo mesage?
@@ -92,7 +89,7 @@ data class DataFrameGroupBy(
                 return DataFrame(null).withWarn("Cannot resolve 'by' of groupby -> not able to check sum operation")
             }
             val nonNumerics = //wrong
-                dfGroupBy.dataFrame?.fields
+                dfGroupBy.dataFrame?.columns
                     ?.filter { it.key !in dfGroupBy.by }
                     ?.filter { it.value !in setOf(FieldType.IntType, FieldType.FloatType) }
                     ?: return dfGroupBy.dataFrame?.clone()?.ok() ?: return DataFrame(null).ok() // todo mesage?
@@ -119,7 +116,7 @@ data class DataFrameGroupBy(
                 return DataFrame(null).withWarn("Cannot resolve 'by' of groupby -> not able to check first operation")
             }
             val nonNumerics =
-                dfGroupBy.dataFrame?.fields
+                dfGroupBy.dataFrame?.columns
                     ?.filter { it.key !in dfGroupBy.by }
                     ?.filter { it.value !in setOf(FieldType.IntType, FieldType.FloatType) }
                     ?: return dfGroupBy.dataFrame?.clone()?.ok() ?: return DataFrame(null).ok() // todo mesage?
@@ -146,7 +143,7 @@ data class DataFrameGroupBy(
                 return DataFrame(null).withWarn("Cannot resolve 'by' of groupby -> not able to check last operation")
             }
             val nonNumerics =
-                dfGroupBy.dataFrame?.fields
+                dfGroupBy.dataFrame?.columns
                     ?.filter { it.key !in dfGroupBy.by }
                     ?.filter { it.value !in setOf(FieldType.IntType, FieldType.FloatType) }
                     ?: return dfGroupBy.dataFrame?.clone()?.ok() ?: return DataFrame(null).ok() // todo mesage?

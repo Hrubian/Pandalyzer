@@ -61,12 +61,12 @@ data class DataFrame_SortValuesFunc(override val dataFrame: DataFrame) : DataFra
             return dataFrame.clone().withWarn("Unable to resolve some 'by' values in the sort_values function.")
         }
 
-        if (dataFrame.fields == null) {
+        if (dataFrame.columns == null) {
             return DataFrame(null).ok()
         }
 
         val actualByItems = byList.items.map { (it as PythonString).value!! }
-        val nonexistentByItems = actualByItems.filterNot { it in dataFrame.fields }
+        val nonexistentByItems = actualByItems.filterNot { it in dataFrame.columns }
         if (nonexistentByItems.isNotEmpty()) {
             return fail("The dataframe does not contain the columns $nonexistentByItems")
         }

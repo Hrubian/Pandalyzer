@@ -42,12 +42,12 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
     ): OperationResult<PythonDataStructure> {
         return if (by.value == null) {
             DataFrameGroupBy(null, null).withWarn("The 'by' is unknown")
-        } else if (dataFrame.fields == null) {
+        } else if (dataFrame.columns == null) {
             DataFrameGroupBy(null, null).withWarn("The fields of dataframe are unknown")
-        } else if (by.value in dataFrame.fields) {
+        } else if (by.value in dataFrame.columns) {
             DataFrameGroupBy(dataFrame, mutableListOf(by.value)).ok()
         } else {
-            fail("The dataframe does not contain the field ${by.value}. Dataframe columns: ${dataFrame.fields.keys}")
+            fail("The dataframe does not contain the field ${by.value}. Dataframe columns: ${dataFrame.columns.keys}")
         }
     }
 
@@ -58,16 +58,16 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
         if (by.items == null) {
             return DataFrameGroupBy(null, null).withWarn("The 'by' is unknown")
         }
-        if (dataFrame.fields == null) {
+        if (dataFrame.columns == null) {
             return DataFrameGroupBy(null, null).withWarn("The fields of the dataframe are unknown")
         }
         val keys = by.items.map { it as? PythonString ?: return fail("Cannot group a dataframe by ${it.typeName}") }
 
-        val missingKeys = keys.filterNot { it.value in dataFrame.fields }
+        val missingKeys = keys.filterNot { it.value in dataFrame.columns }
         if (missingKeys.isNotEmpty()) {
             return fail(
                 "Cannot group by keys $missingKeys, since they were not found in the dataframe. " +
-                    "Dataframe columns: ${dataFrame.fields.keys}",
+                    "Dataframe columns: ${dataFrame.columns.keys}",
             )
         }
 

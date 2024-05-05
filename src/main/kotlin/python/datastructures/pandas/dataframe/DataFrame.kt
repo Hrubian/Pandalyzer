@@ -21,7 +21,7 @@ import python.ok
 import python.withWarn
 
 data class DataFrame(
-    val fields: MutableMap<FieldName, FieldType>?,
+    val columns: MutableMap<FieldName, FieldType>?,
 ) : PythonDataStructure {
     override fun attribute(identifier: Identifier): OperationResult<PythonDataStructure> =
         when (identifier) {
@@ -34,25 +34,25 @@ data class DataFrame(
             else -> fail("Unknown identifier on dataframe: $identifier")
         }
 
-    override fun clone(): PythonDataStructure = DataFrame(fields?.toMutableMap())
+    override fun clone(): PythonDataStructure = DataFrame(columns?.toMutableMap())
 
     override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> {
         when (key) {
             is PythonString -> {
-                return if (fields == null) {
+                return if (columns == null) {
                     Series(null)
                         .withWarn("Unable to subscript a dataframe since the fields of the data frame are unknown")
                 } else if (key.value == null) {
                     Series(null).withWarn("The key for subscript of dataframe is not known")
-                } else if (key.value in fields.keys) {
-                    Series(fields[key.value]!!).ok()
+                } else if (key.value in columns.keys) {
+                    Series(columns[key.value]!!).ok()
                 } else {
                     fail("The key ${key.value} does not exist in the dataframe")
                 }
             }
 
             is PythonList -> {
-                if (fields == null) {
+                if (columns == null) {
                     return DataFrame(null).withWarn("The data frame structure is unknown")
                 } else if (key.items == null) {
                     return DataFrame(null).withWarn("The key for subscripting data frame is unknown")
@@ -69,7 +69,7 @@ data class DataFrame(
 
                     val actualKeys = key.items.map { (it as PythonString).value!! }.toSet()
 
-                    return DataFrame(fields.filterKeys { it in actualKeys }.toMutableMap()).ok()
+                    return DataFrame(columns.filterKeys { it in actualKeys }.toMutableMap()).ok()
                 }
             }
             is Series -> {
@@ -92,15 +92,15 @@ data class DataFrame(
                 if (slice.value == null) {
                     return PythonNone.withWarn("Unable to subscript by an unknown string type")
                 }
-                if (fields == null) {
+                if (columns == null) {
                     return PythonNone.withWarn("Unable to subscript to an unknown dataframe")
                 }
-                fields[slice.value] = FieldType.fromPythonDataStructure(value)
+                columns[slice.value] = FieldType.fromPythonDataStructure(value)
                     ?: return fail("Unable to convert type ${value.typeName} to pandas value")
                 return PythonNone.ok()
             }
             is PythonList -> {
-                if (fields == null) {
+                if (columns == null) {
                     return DataFrame(null).withWarn("Unable to subscript to an unknown dataframe")
                 }
                 if (slice.items == null) {

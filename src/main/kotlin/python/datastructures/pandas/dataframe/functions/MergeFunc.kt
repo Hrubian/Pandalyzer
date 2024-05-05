@@ -8,12 +8,10 @@ import python.arguments.ArgumentMatcher
 import python.arguments.ResolvedArguments
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonBool
-import python.datastructures.defaults.PythonList
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
 import python.datastructures.nonDeterministically
 import python.datastructures.pandas.dataframe.DataFrame
-import python.datastructures.pandas.functions.PandasMergeFunc
 import python.fail
 import python.map
 import python.ok
@@ -76,18 +74,18 @@ data class DataFrame_MergeFunc(override val dataFrame: DataFrame) : DataFrameFun
         leftOn: String,
         rightOn: String,
     ): OperationResult<PythonDataStructure> = left.nonDeterministically {
-        if (left.fields == null) {
+        if (left.columns == null) {
             return DataFrame(null).withWarn("The fields of the left dataframe are unknown")
         }
-        if (right.fields == null) {
+        if (right.columns == null) {
             return DataFrame(null).withWarn("The fields of the right dataframe are unknown")
         }
-        val leftJoin = left.fields[leftOn] ?: return fail("The left dataframe does not contain the column $leftOn")
-        val rightJoin = right.fields[rightOn] ?: return fail("The right dataframe does not contain the column $rightOn")
+        val leftJoin = left.columns[leftOn] ?: return fail("The left dataframe does not contain the column $leftOn")
+        val rightJoin = right.columns[rightOn] ?: return fail("The right dataframe does not contain the column $rightOn")
         if (leftJoin != rightJoin) {
             return fail("The types of $leftOn and $rightOn are different")
         }
-        return DataFrame((left.fields + right.fields).toMutableMap()).ok()
+        return DataFrame((left.columns + right.columns).toMutableMap()).ok()
     }
 
     private val allowedHowValues = setOf("inner", "outer", "left", "right", "cross")

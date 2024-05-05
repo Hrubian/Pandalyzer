@@ -79,7 +79,7 @@ object PandasConcatFunc : PandasFunction{
                     BigInteger.ONE -> {
                         var substituteIndex = 0
                         return DataFrame(
-                            fields = allSeries.associate { (it.label ?: substituteIndex++.toString()) to it.type!! }
+                            columns = allSeries.associate { (it.label ?: substituteIndex++.toString()) to it.type!! }
                                 .toMutableMap()
                         ).ok()
                     }
@@ -88,7 +88,7 @@ object PandasConcatFunc : PandasFunction{
             }
             objects.items.all { it is DataFrame } -> {
                 val allDataFrames = objects.items.map { it as DataFrame }
-                val unknownDataFrames = allDataFrames.filter { it.fields == null }
+                val unknownDataFrames = allDataFrames.filter { it.columns == null }
                 if (unknownDataFrames.isNotEmpty()) {
                     return DataFrame(null).withWarn("Unable to resolve the result of " +
                             "concatenation as some of the dataframes have unknown type")
@@ -101,13 +101,13 @@ object PandasConcatFunc : PandasFunction{
                         return allDataFrames.first().clone().ok()
                     }
                     BigInteger.ONE -> {
-                        val duplicateNames = allDataFrames.flatMap { it.fields!!.keys }
+                        val duplicateNames = allDataFrames.flatMap { it.columns!!.keys }
                             .groupingBy { it }.eachCount().filter { it.value > 1 }.keys
                         if (duplicateNames.isNotEmpty()) {
                             return fail("The dataframes to be concatenated have the following common columns: $duplicateNames")
                         }
                         val resultFields = mutableMapOf<FieldName, FieldType>()
-                        allDataFrames.forEach { resultFields.putAll(it.fields!!) }
+                        allDataFrames.forEach { resultFields.putAll(it.columns!!) }
                         return DataFrame(resultFields).ok()
                     }
                     else -> error("does not happen")
@@ -125,5 +125,5 @@ object PandasConcatFunc : PandasFunction{
         )
 
     private fun haveEqualStructure(df1: DataFrame, df2: DataFrame): Boolean =
-        df1.fields!!.all { df2.fields!![it.key] == it.value } && df2.fields!!.all { df1.fields[it.key] == it.value }
+        df1.columns!!.all { df2.columns!![it.key] == it.value } && df2.columns!!.all { df1.columns[it.key] == it.value }
 }

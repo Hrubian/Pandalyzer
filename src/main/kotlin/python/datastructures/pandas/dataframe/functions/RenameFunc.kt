@@ -46,7 +46,7 @@ data class DataFrame_RenameFunc(override val dataFrame: DataFrame) : DataFrameFu
         if (dict.values == null) {
             return DataFrame(null).withWarn("Unable to rename dataframe because the values of dictionary are unkown")
         }
-        if (dataFrame.fields == null) {
+        if (dataFrame.columns == null) {
             return DataFrame(null).withWarn("Unable to rename dataframe with unknown structure")
         }
 
@@ -70,13 +70,13 @@ data class DataFrame_RenameFunc(override val dataFrame: DataFrame) : DataFrameFu
         val mapping = nullMapping.associate { it.first!! to it.second!! }
 
         // check that all the old values exist in the dataframe
-        val missingOldValues = mapping.keys.filterNot { it in dataFrame.fields }
+        val missingOldValues = mapping.keys.filterNot { it in dataFrame.columns }
         if (missingOldValues.isNotEmpty()) {
             return fail("The values $missingOldValues do not exist in the dataframe")
         }
 
         // check that the new values are not colliding with any old values
-        val collidingValues = mapping.filter { it.value in dataFrame.fields }
+        val collidingValues = mapping.filter { it.value in dataFrame.columns }
         if (collidingValues.isNotEmpty()) {
             val message =
                 collidingValues
@@ -94,7 +94,7 @@ data class DataFrame_RenameFunc(override val dataFrame: DataFrame) : DataFrameFu
             return fail("There are duplicate new values in the rename function: ${duplicateValues.keys}")
         }
 
-        return DataFrame(fields = dataFrame.fields.mapKeys { mapping[it.key] ?: it.key }.toMutableMap()).ok()
+        return DataFrame(columns = dataFrame.columns.mapKeys { mapping[it.key] ?: it.key }.toMutableMap()).ok()
     }
 
     private val argumentSchema =

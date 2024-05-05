@@ -7,7 +7,6 @@ import python.PythonEntity
 import python.addWarnings
 import python.arguments.ArgumentMatcher
 import python.arguments.ResolvedArguments
-import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonBool
 import python.datastructures.defaults.PythonList
@@ -56,7 +55,7 @@ data class DataFrame_DropFunc(override val dataFrame: DataFrame) : DataFrameFunc
             return fail("The list of columns for drop function is not resolvable")
         }
 
-        if (dataFrame.fields == null) {
+        if (dataFrame.columns == null) {
             return fail("The dataframe structure is not known.")
         }
 
@@ -75,15 +74,15 @@ data class DataFrame_DropFunc(override val dataFrame: DataFrame) : DataFrameFunc
         }
 
         val actualColumns = columns.items.map { (it as PythonString).value!! }
-        val incorrectColumns = actualColumns.filterNot { it in dataFrame.fields }.toSet()
+        val incorrectColumns = actualColumns.filterNot { it in dataFrame.columns }.toSet()
         if (incorrectColumns.isNotEmpty()) {
             return fail("The following columns are not present in the dataframe: $incorrectColumns")
         }
         return if (inplace) {
-            actualColumns.forEach { dataFrame.fields.remove(it) }
+            actualColumns.forEach { dataFrame.columns.remove(it) }
             PythonNone.ok()
         } else {
-            DataFrame(dataFrame.fields.filterNot { it.key in actualColumns }.toMutableMap()).ok()
+            DataFrame(dataFrame.columns.filterNot { it.key in actualColumns }.toMutableMap()).ok()
         }
     }
 

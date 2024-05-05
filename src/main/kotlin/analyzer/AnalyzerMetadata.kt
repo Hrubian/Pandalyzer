@@ -17,11 +17,11 @@ data class AnalyzerMetadata(
         data.singleOrNull { it.first.matches(filename) }?.let { DataFrame(it.second.toMutableMap()) }
 
     fun storeDataframe(filename: String, dataFrame: DataFrame): OperationResult<PythonNone> {
-        if (dataFrame.fields == null) {
+        if (dataFrame.columns == null) {
             return PythonNone.withWarn("Unable to store a dataframe to a csv file $filename as the structure is not known")
         }
 //        storedData.getValue(filename).add(dataFrame.fields)
-        storedData.getOrPut(filename) { mutableListOf() }.add(dataFrame.fields)
+        storedData.getOrPut(filename) { mutableListOf() }.add(dataFrame.columns)
         return PythonNone.ok()
     }
 
