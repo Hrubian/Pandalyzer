@@ -1,7 +1,7 @@
 package analyzer
 
 import python.OperationResult
-import python.PythonType
+import python.PythonEntity
 import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonNone
@@ -20,17 +20,17 @@ sealed interface AnalysisContext {
 
     fun addWarning(
         message: String,
-        sourceStatement: PythonType.Statement,
+        sourceStatement: PythonEntity.Statement,
     )
 
     fun addWarnings(
         messages: List<String>,
-        sourceStatement: PythonType.Statement,
+        sourceStatement: PythonEntity.Statement,
     ) = messages.forEach { addWarning(it, sourceStatement) }
 
     fun addError(
         message: String,
-        sourceStatement: PythonType.Statement,
+        sourceStatement: PythonEntity.Statement,
     )
 
     fun getGlobalContext(): AnalysisContext
@@ -59,7 +59,7 @@ sealed interface AnalysisContext {
     }
 }
 
-data class Message(val text: String, val sourceStatement: PythonType.Statement) {
+data class Message(val text: String, val sourceStatement: PythonEntity.Statement) {
     fun summarize(): String =
         "${sourceStatement.javaClass.simpleName} " +
             if (sourceStatement.startLine == sourceStatement.endLine) {
@@ -85,14 +85,14 @@ data class GlobalAnalysisContext(
 
     override fun addWarning(
         message: String,
-        sourceStatement: PythonType.Statement,
+        sourceStatement: PythonEntity.Statement,
     ) {
         warnings.add(Message(message, sourceStatement))
     }
 
     override fun addError(
         message: String,
-        sourceStatement: PythonType.Statement,
+        sourceStatement: PythonEntity.Statement,
     ) {
         errors.add(Message(message, sourceStatement))
     }
@@ -166,14 +166,14 @@ data class FunctionAnalysisContext(
 
     override fun addWarning(
         message: String,
-        sourceStatement: PythonType.Statement,
+        sourceStatement: PythonEntity.Statement,
     ) {
         outerContext.addWarning(message, sourceStatement)
     }
 
     override fun addError(
         message: String,
-        sourceStatement: PythonType.Statement,
+        sourceStatement: PythonEntity.Statement,
     ) {
         outerContext.addError(message, sourceStatement)
     }

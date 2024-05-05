@@ -4,7 +4,7 @@ import analyzer.AnalysisContext
 import analyzer.Identifier
 import analyzer.Pandalyzer.analyzeWith
 import python.OperationResult
-import python.PythonType
+import python.PythonEntity
 import python.datastructures.PythonDataStructure
 import python.datastructures.UnresolvedStructure
 import python.datastructures.defaults.PythonList
@@ -15,16 +15,16 @@ import python.ok
 import python.orElse
 
 data class ResolvedArguments(
-    val positionalArgs: List<PythonType.Arg> = emptyList(),
-    val arguments: List<PythonType.Arg> = emptyList(),
-    val variadicArg: PythonType.Arg? = null,
-    val keywordVariadicArg: PythonType.Arg? = null,
-    val keywordOnlyArgs: List<PythonType.Arg> = emptyList(),
+    val positionalArgs: List<PythonEntity.Arg> = emptyList(),
+    val arguments: List<PythonEntity.Arg> = emptyList(),
+    val variadicArg: PythonEntity.Arg? = null,
+    val keywordVariadicArg: PythonEntity.Arg? = null,
+    val keywordOnlyArgs: List<PythonEntity.Arg> = emptyList(),
     val keywordDefaults: List<PythonDataStructure> = emptyList(),
     val defaults: List<PythonDataStructure> = emptyList(),
 ) {
     companion object {
-        fun PythonType.Arguments.resolve(context: AnalysisContext): Pair<ResolvedArguments, List<String>> {
+        fun PythonEntity.Arguments.resolve(context: AnalysisContext): Pair<ResolvedArguments, List<String>> {
             val (resolved, warns) = defaults.map { expr -> expr.analyzeWith(context).orElse { UnresolvedStructure(it) } }.unzip()
             val (resolvedKeywords, kwWarns) =
                 keywordDefaults.map { expr ->
@@ -75,6 +75,7 @@ object ArgumentMatcher {
                 } else {
                     resultArgs[argDef.identifier] = calledPositionalArguments[argIndex]
                     argIndex++
+                    defaultsIndex++ //todo ensure correct
                 }
             }
 
@@ -92,7 +93,9 @@ object ArgumentMatcher {
             var defaultKeywordIndex = 0
             for (argDef in resolvedArguments.keywordOnlyArgs) {
                 resultArgs[argDef.identifier] = calledKeywordArguments[argDef.identifier]
-                    ?: keywordDefaults.getOrElse(defaultKeywordIndex) { return fail("") }
+                    ?: keywordDefaults.getOrElse(defaultKeywordIndex) {
+                        return fail("")
+                    }
                 remainingKeywordArgs.remove(argDef.identifier)
                 defaultKeywordIndex++
             }
@@ -104,7 +107,7 @@ object ArgumentMatcher {
                 }
                 resultArgs[keywordVariadicArg!!.identifier]
             } else if (remainingKeywordArgs.isNotEmpty()) {
-                return fail("") // todo there is more keyword args than needed
+                return fail("Got unexpected keyword arguments $remainingKeywordArgs")
             }
 
             return MatchedFunctionSchema(resultArgs.toMap()).ok()

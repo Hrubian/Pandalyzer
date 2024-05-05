@@ -16,4 +16,4 @@ def get_dataframe_from_user():
 
 
 user_df = get_dataframe_from_user()
-user_df[["germany_specific_column"]].to_csv("output.csv")
+user_df[["germany_specific_column"]].to_csv("output.csv") # todo need non-deterministic subscript

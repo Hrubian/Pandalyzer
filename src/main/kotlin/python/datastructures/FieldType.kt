@@ -54,7 +54,7 @@ enum class FieldType {
             is PythonString -> StringType
             is PythonBool -> BoolType
             is Series -> struct.type
-            else -> TODO("Unknown mapping from struct to ")
+            else -> null
         }
     }
 }

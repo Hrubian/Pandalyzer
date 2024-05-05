@@ -6,7 +6,9 @@ import python.OperationResult
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
+import python.datastructures.invokeNondeterministic
 import python.datastructures.pandas.dataframe.DataFrame
+import python.datastructures.pandas.functions.PandasMergeFunc
 import python.fail
 import python.withWarn
 
@@ -14,6 +16,13 @@ data class DataFrame_ToCsv(override val dataFrame: DataFrame) : DataFrameFunctio
     override fun clone(): PythonDataStructure = this
 
     override fun invoke(
+        args: List<PythonDataStructure>,
+        keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+        outerContext: AnalysisContext,
+    ): OperationResult<PythonDataStructure> =
+        invokeNondeterministic(args, keywordArgs, outerContext) { iArgs, kArgs, ctx -> invokeInner(iArgs, kArgs, ctx) }
+
+    private fun invokeInner(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
         outerContext: AnalysisContext

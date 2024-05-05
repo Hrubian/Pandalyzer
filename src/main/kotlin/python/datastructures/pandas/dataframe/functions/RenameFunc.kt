@@ -3,13 +3,14 @@ package python.datastructures.pandas.dataframe.functions
 import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
-import python.PythonType
+import python.PythonEntity
 import python.arguments.ArgumentMatcher
 import python.arguments.ResolvedArguments
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonDict
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
+import python.datastructures.invokeNondeterministic
 import python.datastructures.pandas.dataframe.DataFrame
 import python.fail
 import python.map
@@ -20,6 +21,14 @@ data class DataFrame_RenameFunc(override val dataFrame: DataFrame) : DataFrameFu
     override fun clone(): PythonDataStructure = this
 
     override fun invoke(
+        args: List<PythonDataStructure>,
+        keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+        outerContext: AnalysisContext,
+    ): OperationResult<PythonDataStructure> =
+        invokeNondeterministic(args, keywordArgs, outerContext) { a, k, o -> invokeInner(a, k, o) }
+
+
+        fun invokeInner(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
         outerContext: AnalysisContext,
@@ -90,7 +99,7 @@ data class DataFrame_RenameFunc(override val dataFrame: DataFrame) : DataFrameFu
 
     private val argumentSchema =
         ResolvedArguments(
-            arguments = listOf(PythonType.Arg("columns")), // todo the structure is bigger
+            arguments = listOf(PythonEntity.Arg("columns")), // todo the structure is bigger
             defaults = listOf(PythonNone),
         )
 }

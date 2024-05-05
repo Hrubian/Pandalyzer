@@ -8,26 +8,30 @@ class CaseStudies {
 
     @Test
     fun `01`() = runCaseStudy(1) { context ->
-
+        println((context as GlobalAnalysisContext).summarize())
     }
 
     @Test
     fun `02`() = runCaseStudy(2) { context ->
+        println((context as GlobalAnalysisContext).summarize())
 
     }
 
     @Test
     fun `03`() = runCaseStudy(3) { context ->
+        println((context as GlobalAnalysisContext).summarize())
 
     }
 
     @Test
     fun `04`() = runCaseStudy(4) { context ->
+        println((context as GlobalAnalysisContext).summarize())
 
     }
 
     @Test
     fun `05`() = runCaseStudy(5) { context ->
+        println((context as GlobalAnalysisContext).summarize())
 
     }
 

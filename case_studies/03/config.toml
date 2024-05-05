@@ -1,4 +1,4 @@
-[^\d{2}_\d{2}_\d{4}_production\.csv$]
+r[^\d{2}_\d{2}_\d{4}_production\.csv$]
 hour = "int"
 production = "int"
 note = "string"

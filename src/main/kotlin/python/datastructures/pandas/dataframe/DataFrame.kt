@@ -9,9 +9,11 @@ import python.datastructures.UnresolvedStructure
 import python.datastructures.defaults.PythonList
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
+import python.datastructures.pandas.dataframe.functions.DataFrame_DropFunc
 import python.datastructures.pandas.dataframe.functions.DataFrame_GroupByFunc
 import python.datastructures.pandas.dataframe.functions.DataFrame_MergeFunc
 import python.datastructures.pandas.dataframe.functions.DataFrame_RenameFunc
+import python.datastructures.pandas.dataframe.functions.DataFrame_SortValuesFunc
 import python.datastructures.pandas.dataframe.functions.DataFrame_ToCsv
 import python.datastructures.pandas.series.Series
 import python.fail
@@ -27,16 +29,19 @@ data class DataFrame(
             "merge" -> DataFrame_MergeFunc(this).ok()
             "rename" -> DataFrame_RenameFunc(this).ok()
             "to_csv" -> DataFrame_ToCsv(this).ok()
+            "drop" -> DataFrame_DropFunc(this).ok()
+            "sort_values" -> DataFrame_SortValuesFunc(this).ok()
             else -> fail("Unknown identifier on dataframe: $identifier")
         }
 
     override fun clone(): PythonDataStructure = DataFrame(fields?.toMutableMap())
 
-    override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> =
+    override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> {
         when (key) {
             is PythonString -> {
-                if (fields == null) {
-                    Series(null).withWarn("Unable to subscript a dataframe since the fields of the data frame are unknown")
+                return if (fields == null) {
+                    Series(null)
+                        .withWarn("Unable to subscript a dataframe since the fields of the data frame are unknown")
                 } else if (key.value == null) {
                     Series(null).withWarn("The key for subscript of dataframe is not known")
                 } else if (key.value in fields.keys) {
@@ -45,28 +50,38 @@ data class DataFrame(
                     fail("The key ${key.value} does not exist in the dataframe")
                 }
             }
+
             is PythonList -> {
                 if (fields == null) {
-                    DataFrame(null).withWarn("The data frame structure is unknown")
+                    return DataFrame(null).withWarn("The data frame structure is unknown")
                 } else if (key.items == null) {
-                    DataFrame(null).withWarn("The key for subscripting data frame is unknown")
-                } else if (key.items.all { it is PythonString && it.value in fields }) {
-                    DataFrame(
-                        fields.filterKeys { it in key.items.map { it as PythonString }.map { it.value } }.toMutableMap(),
-                    ).ok() // todo this is disgusting :)
-                } else {
-                    fail("TODO") // todo
+                    return DataFrame(null).withWarn("The key for subscripting data frame is unknown")
+                } else {//if (key.items.all { it is PythonString && it.value in fields }) {
+                    val nonStringKeys = key.items.filterNot { it is PythonString }
+                    if (nonStringKeys.isNotEmpty()) {
+                        return fail("The items in the subscript list for dataframe must be all strings")
+                    }
+
+                    val unknownKeys = key.items.filter { (it as PythonString).value == null }
+                    if (unknownKeys.isNotEmpty()) {
+                        return DataFrame(null).withWarn("Unable to resolve some items for subscript of dataframe")
+                    }
+
+                    val actualKeys = key.items.map { (it as PythonString).value!! }.toSet()
+
+                    return DataFrame(fields.filterKeys { it in actualKeys }.toMutableMap()).ok()
                 }
             }
             is Series -> {
-                when (key.type) {
+                return when (key.type) {
                     FieldType.BoolType -> clone().ok()
                     null -> UnresolvedStructure("Unknown type of series items").ok()
                     else -> fail("Boolean series expected, got ${key.type.name}")
                 }
             }
-            else -> fail("Cannot subscript with ${key.typeName} on dataframe")
+            else -> return fail("Cannot subscript with ${key.typeName} on dataframe")
         }
+    }
 
     override fun storeSubscript(
         slice: PythonDataStructure,

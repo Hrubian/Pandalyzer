@@ -76,3 +76,53 @@ interface PythonDataStructure {
     fun storeSubscript(slice: PythonDataStructure, value: PythonDataStructure): OperationResult<PythonDataStructure> =
         fail("Cannot subscript-assing on type $typeName")
 }
+
+fun invokeNondeterministic(
+    args: List<PythonDataStructure>,
+    keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+    outerContext: AnalysisContext,
+    block: (args: List<PythonDataStructure>, keywordArgs: List<Pair<Identifier, PythonDataStructure>>, outerContext: AnalysisContext) -> OperationResult<PythonDataStructure>
+    ): OperationResult<PythonDataStructure> {
+    var result: OperationResult<PythonDataStructure>? = null
+    sequence { generateNondeterministicArgs(emptyList(), emptyList() , args, keywordArgs) }.forEach { (args, kwArgs) ->
+        if (result == null) {
+            result = block(args, kwArgs, outerContext)
+        } else {
+            result = NondeterministicDataStructure.combineResults(result!!, block(args, kwArgs, outerContext))
+        }
+    }
+    if (result == null) {
+        result = block(args, keywordArgs, outerContext)
+    }
+    return result!!
+}
+
+private suspend fun SequenceScope<Pair<
+        List<PythonDataStructure>,
+        List<Pair<Identifier, PythonDataStructure>>
+        >>.generateNondeterministicArgs(
+    argsSoFar: List<PythonDataStructure>,
+    keywordArgsSoFar: List<Pair<Identifier, PythonDataStructure>>,
+    args: List<PythonDataStructure>,
+    keywordArgs: List<Pair<Identifier, PythonDataStructure>>
+) {
+    if (args.isNotEmpty()) {
+        val head = args.first()
+        if (head is NondeterministicDataStructure) {
+            generateNondeterministicArgs(argsSoFar + head.left, keywordArgsSoFar, args.drop(1), keywordArgs)
+            generateNondeterministicArgs(argsSoFar + head.right, keywordArgsSoFar, args.drop(1), keywordArgs)
+        } else {
+            generateNondeterministicArgs(argsSoFar + head, keywordArgsSoFar, args.drop(1), keywordArgs)
+        }
+    } else if (keywordArgs.isNotEmpty()) {
+        val head = keywordArgs.first()
+        if (head.second is NondeterministicDataStructure) {
+            val left = head.first to (head.second as NondeterministicDataStructure).left
+            generateNondeterministicArgs(argsSoFar, keywordArgsSoFar + left, args, keywordArgs.drop(1))
+            val right = head.first to (head.second as NondeterministicDataStructure).right
+            generateNondeterministicArgs(argsSoFar, keywordArgsSoFar + right, args, keywordArgs.drop(1))
+        }
+    } else {
+        yield(argsSoFar to keywordArgsSoFar)
+    }
+}

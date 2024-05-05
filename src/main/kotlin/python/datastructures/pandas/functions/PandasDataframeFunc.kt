@@ -3,7 +3,7 @@ package python.datastructures.pandas.functions
 import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
-import python.PythonType
+import python.PythonEntity
 import python.arguments.ArgumentMatcher
 import python.arguments.ResolvedArguments
 import python.datastructures.FieldType
@@ -92,11 +92,11 @@ object PandasDataframeFunc : PythonDataStructure {
         ResolvedArguments(
             arguments =
                 listOf(
-                    PythonType.Arg("data"),
-                    PythonType.Arg("index"),
-                    PythonType.Arg("columns"),
-                    PythonType.Arg("dtype"),
-                    PythonType.Arg("copy"),
+                    PythonEntity.Arg("data"),
+                    PythonEntity.Arg("index"),
+                    PythonEntity.Arg("columns"),
+                    PythonEntity.Arg("dtype"),
+                    PythonEntity.Arg("copy"),
                 ),
             defaults =
                 listOf(

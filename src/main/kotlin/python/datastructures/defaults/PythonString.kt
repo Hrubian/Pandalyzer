@@ -2,6 +2,7 @@ package python.datastructures.defaults
 
 import python.OperationResult
 import python.datastructures.PythonDataStructure
+import python.datastructures.pandas.series.Series
 import python.fail
 import python.ok
 import python.withWarn
@@ -9,10 +10,10 @@ import python.withWarn
 @JvmInline
 value class PythonString(val value: String?) : PythonDataStructure {
     override operator fun plus(other: PythonDataStructure): OperationResult<PythonDataStructure> {
-        return if (other is PythonString) {
-            PythonString(value + other.value).ok()
-        } else {
-            fail("Cannot sum $typeName with ${other.typeName}")
+        return when (other) {
+            is PythonString -> PythonString(value + other.value).ok()
+            is Series -> other.plus(this)
+            else -> fail("Cannot sum $typeName with ${other.typeName}")
         }
     }
 

@@ -2,6 +2,7 @@ package python.datastructures.defaults
 
 import python.OperationResult
 import python.datastructures.PythonDataStructure
+import python.datastructures.pandas.series.Series
 import python.fail
 import python.ok
 import python.withWarn
@@ -15,6 +16,8 @@ value class PythonInt(val value: BigInteger?) : PythonDataStructure {
         return if (other is PythonInt) {
             if (value == null || other.value == null) return PythonInt(null).ok()
             PythonInt(this.value + other.value).ok()
+        } else if (other is Series) {
+            other.plus(this)
         } else {
             fail("Cannot sum a $typeName with ${other.typeName}")
         }
@@ -24,6 +27,8 @@ value class PythonInt(val value: BigInteger?) : PythonDataStructure {
         return if (other is PythonInt) {
             if (value == null || other.value == null) return PythonInt(null).ok()
             PythonInt(this.value - other.value).ok()
+        } else if (other is Series) {
+            other.minus(this)
         } else {
             fail("Cannot subtract a ${other.typeName} from $typeName")
         }
@@ -33,6 +38,8 @@ value class PythonInt(val value: BigInteger?) : PythonDataStructure {
         return if (other is PythonInt) {
             if (value == null || other.value == null) return PythonInt(null).ok()
             PythonInt(this.value * other.value).ok()
+        } else if (other is Series) {
+            other.times(this)
         } else {
             fail("Cannot multiply a $typeName with $typeName")
         }

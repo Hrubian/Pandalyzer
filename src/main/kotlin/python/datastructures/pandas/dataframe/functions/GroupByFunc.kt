@@ -3,7 +3,7 @@ package python.datastructures.pandas.dataframe.functions
 import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
-import python.PythonType
+import python.PythonEntity
 import python.arguments.ArgumentMatcher
 import python.arguments.ResolvedArguments
 import python.datastructures.PythonDataStructure
@@ -78,14 +78,14 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
         ResolvedArguments(
             arguments =
                 listOf(
-                    PythonType.Arg("by"),
-                    PythonType.Arg("axis"),
-                    PythonType.Arg("level"),
-                    PythonType.Arg("as_index"),
-                    PythonType.Arg("sort"),
-                    PythonType.Arg("group_keys"),
-                    PythonType.Arg("observed"),
-                    PythonType.Arg("dropna"),
+                    PythonEntity.Arg("by"),
+                    PythonEntity.Arg("axis"),
+                    PythonEntity.Arg("level"),
+                    PythonEntity.Arg("as_index"),
+                    PythonEntity.Arg("sort"),
+                    PythonEntity.Arg("group_keys"),
+                    PythonEntity.Arg("observed"),
+                    PythonEntity.Arg("dropna"),
                 ),
             defaults =
                 listOf(
@@ -98,10 +98,5 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
                     PythonNone,
                     PythonBool(true),
                 ),
-            keywordDefaults = emptyList(),
-            keywordOnlyArgs = emptyList(),
-            variadicArg = null,
-            keywordVariadicArg = null,
-            positionalArgs = emptyList(),
         )
 }

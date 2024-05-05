@@ -12,9 +12,9 @@ import java.math.BigInteger
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonClassDiscriminator("_type")
-sealed interface PythonType {
+sealed interface PythonEntity {
     @Serializable
-    sealed interface Mod : PythonType {
+    sealed interface Mod : PythonEntity {
         @Serializable
         @SerialName("Module")
         data class Module(
@@ -26,7 +26,7 @@ sealed interface PythonType {
     }
 
     @Serializable
-    sealed interface Statement : PythonType {
+    sealed interface Statement : PythonEntity {
         @SerialName("lineno")
         val startLine: Int
 
@@ -210,7 +210,7 @@ sealed interface PythonType {
     }
 
     @Serializable
-    sealed interface Expression : PythonType {
+    sealed interface Expression : PythonEntity {
         // todo boolop, namedExpr
 
         @Serializable
@@ -326,7 +326,7 @@ sealed interface PythonType {
     }
 
     @Serializable
-    sealed interface BoolOperator : PythonType {
+    sealed interface BoolOperator : PythonEntity {
         @Serializable
         @SerialName("And")
         data object And : BoolOperator
@@ -337,7 +337,7 @@ sealed interface PythonType {
     }
 
     @Serializable
-    sealed interface Operator : PythonType {
+    sealed interface Operator : PythonEntity {
         @Serializable
         @SerialName("Add")
         data object Add : Operator
@@ -360,7 +360,7 @@ sealed interface PythonType {
     }
 
     @Serializable
-    sealed interface UnaryOperator : PythonType {
+    sealed interface UnaryOperator : PythonEntity {
         @Serializable
         @SerialName("Invert")
         data object Invert : UnaryOperator
@@ -384,10 +384,10 @@ sealed interface PythonType {
         @SerialName("asname")
         val aliasName: String?,
         val name: String,
-    ) : PythonType
+    ) : PythonEntity
 
     @Serializable
-    sealed interface ExpressionContext : PythonType {
+    sealed interface ExpressionContext : PythonEntity {
         @Serializable
         @SerialName("Load")
         data object Load : ExpressionContext
@@ -402,7 +402,7 @@ sealed interface PythonType {
     }
 
     @Serializable
-    sealed interface CompareOperator : PythonType {
+    sealed interface CompareOperator : PythonEntity {
         // Eq | NotEq | Lt | LtE | Gt | GtE | Is | IsNot | In | NotIn
         @Serializable
         @SerialName("Eq")
@@ -460,18 +460,18 @@ sealed interface PythonType {
         @SerialName("kw_defaults")
         val keywordDefaults: List<Expression?>,
         val defaults: List<Expression>,
-    ) : PythonType
+    ) : PythonEntity
 
     @Serializable
     data class Arg(
         @SerialName("arg")
         val identifier: String,
-    ) : PythonType
+    ) : PythonEntity
 
     @Serializable
     data class KeywordArg(
         @SerialName("arg")
         val identifier: String,
         val value: Expression,
-    ) : PythonType
+    ) : PythonEntity
 }

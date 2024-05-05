@@ -11,8 +11,8 @@ import java.io.File
 
 data class AnalyzerMetadata(
     private val data: List<Pair<Regex, Map<FieldName, FieldType>>>,
-    private val storedData: MutableMap<String, Map<FieldName, FieldType>> = mutableMapOf(),
 ) {
+    private val storedData = mutableMapOf<String, MutableList<Map<FieldName, FieldType>>>()//.withDefault { mutableListOf() }
     fun getDataFrameOrNull(filename: String): DataFrame? =
         data.singleOrNull { it.first.matches(filename) }?.let { DataFrame(it.second.toMutableMap()) }
 
@@ -20,22 +20,34 @@ data class AnalyzerMetadata(
         if (dataFrame.fields == null) {
             return PythonNone.withWarn("Unable to store a dataframe to a csv file $filename as the structure is not known")
         }
-        if (filename in storedData) {
-            storedData[filename] = dataFrame.fields
-            return PythonNone.withWarn("Writting a dataframe to a file where we have already written before.")
-        }
-        storedData[filename] = dataFrame.fields
+//        storedData.getValue(filename).add(dataFrame.fields)
+        storedData.getOrPut(filename) { mutableListOf() }.add(dataFrame.fields)
         return PythonNone.ok()
     }
 
     fun summarize(): String = buildString {
         append("Output files (${storedData.size}) summary\n")
-        storedData.forEach { (filename, dataframe) ->
-            append("File $filename: \n")
-            dataframe.forEach { (columnName, columnType) ->
-                append("    $columnName: $columnType\n")
-            }
+        storedData.forEach { (filename, fileWrites) ->
+            appendLine("File $filename: ")
+            summarizeFile(fileWrites)
             append('\n')
+        }
+    }
+
+    private fun StringBuilder.summarizeFile(fileWrites: List<Map<FieldName, FieldType>>) {
+        if (fileWrites.size > 1) {
+            appendLine("    Warning: There are multiple options how the" +
+                    " resulting file looks like. We will show all of them")
+            fileWrites.forEachIndexed { index, dataframe ->
+                appendLine("    Option #$index")
+                dataframe.forEach { (columnName, columnType) ->
+                    appendLine("        $columnName : $columnType")
+                }
+            }
+        } else {
+            fileWrites.single().forEach { (columnName, columnType) ->
+                appendLine("    $columnName : $columnType")
+            }
         }
     }
 

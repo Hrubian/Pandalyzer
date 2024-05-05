@@ -4,6 +4,7 @@ import analyzer.Identifier
 import python.OperationResult
 import python.datastructures.ImportStruct
 import python.datastructures.PythonDataStructure
+import python.datastructures.pandas.functions.PandasConcatFunc
 import python.datastructures.pandas.functions.PandasDataframeFunc
 import python.datastructures.pandas.functions.PandasFunction
 import python.datastructures.pandas.functions.PandasMergeFunc
@@ -16,7 +17,7 @@ data object PandasImport : ImportStruct {
             "merge" -> PandasMergeFunc.ok()
             "DataFrame" -> PandasDataframeFunc.ok()
             "Series" -> PandasFunction.SeriesFunc.ok()
-            "concat" -> PandasFunction.ConcatFunc.ok()
+            "concat" -> PandasConcatFunc.ok()
             "groupby" -> PandasFunction.GroupByFunc.ok()
             "read_csv" -> PandasFunction.ReadCsvFunc.ok()
             else -> fail("Unknown pandas identifier $identifier.")

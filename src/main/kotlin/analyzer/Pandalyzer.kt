@@ -1,51 +1,52 @@
 package analyzer
 
 import python.OperationResult
-import python.PythonType
-import python.PythonType.BoolOperator.And
-import python.PythonType.BoolOperator.Or
-import python.PythonType.CompareOperator
-import python.PythonType.Expression.Attribute
-import python.PythonType.Expression.BinaryOperation
-import python.PythonType.Expression.BoolOperation
-import python.PythonType.Expression.Call
-import python.PythonType.Expression.Compare
-import python.PythonType.Expression.Constant.BoolConstant
-import python.PythonType.Expression.Constant.IntConstant
-import python.PythonType.Expression.Constant.NoneConstant
-import python.PythonType.Expression.Constant.StringConstant
-import python.PythonType.Expression.Dictionary
-import python.PythonType.Expression.Name
-import python.PythonType.Expression.PythonList
-import python.PythonType.Expression.Subscript
-import python.PythonType.Expression.UnaryOperation
-import python.PythonType.ExpressionContext
-import python.PythonType.ExpressionContext.Load
-import python.PythonType.Mod.Module
-import python.PythonType.Operator.Add
-import python.PythonType.Operator.Div
-import python.PythonType.Operator.FloorDiv
-import python.PythonType.Operator.Mult
-import python.PythonType.Operator.Sub
-import python.PythonType.Statement.Assign
-import python.PythonType.Statement.Break
-import python.PythonType.Statement.Continue
-import python.PythonType.Statement.ExpressionStatement
-import python.PythonType.Statement.ForLoop
-import python.PythonType.Statement.FunctionDef
-import python.PythonType.Statement.IfStatement
-import python.PythonType.Statement.Import
-import python.PythonType.Statement.ImportFrom
-import python.PythonType.Statement.Return
-import python.PythonType.Statement.WhileLoop
-import python.PythonType.UnaryOperator.Invert
-import python.PythonType.UnaryOperator.Not
-import python.PythonType.UnaryOperator.UnaryMinus
-import python.PythonType.UnaryOperator.UnaryPlus
+import python.PythonEntity
+import python.PythonEntity.BoolOperator.And
+import python.PythonEntity.BoolOperator.Or
+import python.PythonEntity.CompareOperator
+import python.PythonEntity.Expression.Attribute
+import python.PythonEntity.Expression.BinaryOperation
+import python.PythonEntity.Expression.BoolOperation
+import python.PythonEntity.Expression.Call
+import python.PythonEntity.Expression.Compare
+import python.PythonEntity.Expression.Constant.BoolConstant
+import python.PythonEntity.Expression.Constant.IntConstant
+import python.PythonEntity.Expression.Constant.NoneConstant
+import python.PythonEntity.Expression.Constant.StringConstant
+import python.PythonEntity.Expression.Dictionary
+import python.PythonEntity.Expression.Name
+import python.PythonEntity.Expression.PythonList
+import python.PythonEntity.Expression.Subscript
+import python.PythonEntity.Expression.UnaryOperation
+import python.PythonEntity.ExpressionContext
+import python.PythonEntity.ExpressionContext.Load
+import python.PythonEntity.Mod.Module
+import python.PythonEntity.Operator.Add
+import python.PythonEntity.Operator.Div
+import python.PythonEntity.Operator.FloorDiv
+import python.PythonEntity.Operator.Mult
+import python.PythonEntity.Operator.Sub
+import python.PythonEntity.Statement.Assign
+import python.PythonEntity.Statement.Break
+import python.PythonEntity.Statement.Continue
+import python.PythonEntity.Statement.ExpressionStatement
+import python.PythonEntity.Statement.ForLoop
+import python.PythonEntity.Statement.FunctionDef
+import python.PythonEntity.Statement.IfStatement
+import python.PythonEntity.Statement.Import
+import python.PythonEntity.Statement.ImportFrom
+import python.PythonEntity.Statement.Return
+import python.PythonEntity.Statement.WhileLoop
+import python.PythonEntity.UnaryOperator.Invert
+import python.PythonEntity.UnaryOperator.Not
+import python.PythonEntity.UnaryOperator.UnaryMinus
+import python.PythonEntity.UnaryOperator.UnaryPlus
 import python.addWarnings
 import python.arguments.ResolvedArguments.Companion.resolve
 import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
+import python.datastructures.UnresolvedStructure
 import python.datastructures.createImportStruct
 import python.datastructures.defaults.PythonBool
 import python.datastructures.defaults.PythonDict
@@ -91,7 +92,8 @@ object Pandalyzer {
         val (value, warn) =
         assign.value.analyzeWith(context).orElse {
             context.addError(it, assign)
-            return StatementAnalysisResult.Ended
+//            return StatementAnalysisResult.Ended
+            UnresolvedStructure(it) //todo does it work?
         }
         context.addWarnings(warn, assign)
         when (val target = assign.targets.single()) {
@@ -249,7 +251,7 @@ object Pandalyzer {
 
     private fun analyzeInner(
         left: PythonDataStructure,
-        rightRest: List<PythonType.Expression>,
+        rightRest: List<PythonEntity.Expression>,
         operators: List<CompareOperator>,
         context: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
@@ -373,7 +375,7 @@ object Pandalyzer {
         }.addWarnings(warns)
     }
 
-    fun PythonType.Expression.analyzeWith(context: AnalysisContext): OperationResult<PythonDataStructure> =
+    fun PythonEntity.Expression.analyzeWith(context: AnalysisContext): OperationResult<PythonDataStructure> =
         when (this) {
             is Name -> analyze(this, context)
             is Attribute -> value.analyzeWith(context).map { it.attribute(attr) }
@@ -394,7 +396,7 @@ object Pandalyzer {
             is UnaryOperation -> analyze(this, context)
         }
 
-    fun PythonType.Statement.analyzeWith(context: AnalysisContext): StatementAnalysisResult =
+    fun PythonEntity.Statement.analyzeWith(context: AnalysisContext): StatementAnalysisResult =
         when (this) {
             is Assign -> analyze(this, context)
             is Break -> error("Return should be processed via analyzeStatements function")

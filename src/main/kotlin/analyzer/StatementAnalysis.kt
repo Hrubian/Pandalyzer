@@ -2,26 +2,26 @@ package analyzer
 
 import analyzer.Pandalyzer.analyzeWith
 import python.OperationResult
-import python.PythonType
+import python.PythonEntity
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonNone
 import python.ok
 
 fun analyzeStatements(
-    statements: List<PythonType.Statement>,
+    statements: List<PythonEntity.Statement>,
     context: AnalysisContext,
 ): StatementAnalysisResult =
     statements.forEachIndexed { index, stmt ->
         when (stmt) {
-            is PythonType.Statement.Break -> return StatementAnalysisResult.Breaked
-            is PythonType.Statement.Continue -> return StatementAnalysisResult.Continued
-            is PythonType.Statement.Return -> return StatementAnalysisResult.Returned(stmt.value?.analyzeWith(context) ?: PythonNone.ok())
+            is PythonEntity.Statement.Break -> return StatementAnalysisResult.Breaked
+            is PythonEntity.Statement.Continue -> return StatementAnalysisResult.Continued
+            is PythonEntity.Statement.Return -> return StatementAnalysisResult.Returned(stmt.value?.analyzeWith(context) ?: PythonNone.ok())
             else -> stmt.analyzeWith(context).anotherFun(statements.drop(index + 1), context)?.let { return it } // todo refactor }
         }
     }.let { StatementAnalysisResult.Ended }
 
 private fun StatementAnalysisResult.anotherFun( // todo rename me :)
-    remainingStatements: List<PythonType.Statement>,
+    remainingStatements: List<PythonEntity.Statement>,
     context: AnalysisContext,
 ): StatementAnalysisResult? {
     when (this) {

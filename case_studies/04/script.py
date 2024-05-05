@@ -7,6 +7,6 @@ df = pd.DataFrame({
 
 print(df[input("What column do you want to see? ")])
 
-df.insert(2, "note", "User inserted string: " + df["string_column"]) # todo age, insert is_adult
+df["note"] = "User inserted the following string" + df["string_column"]  # todo age, insert is_adult
 
 df.to_csv("output.csv")

@@ -6,7 +6,7 @@ import analyzer.StatementAnalysisResult
 import analyzer.StatementAnalysisResult.NondeterministicResult
 import analyzer.analyzeStatements
 import python.OperationResult
-import python.PythonType
+import python.PythonEntity
 import python.arguments.ArgumentMatcher
 import python.arguments.MatchedFunctionSchema
 import python.arguments.ResolvedArguments
@@ -18,9 +18,9 @@ import python.orElse
 
 data class PythonFunc(
     val name: Identifier,
-    val body: List<PythonType.Statement>,
+    val body: List<PythonEntity.Statement>,
     val arguments: ResolvedArguments,
-    val functionDef: PythonType.Statement.FunctionDef,
+    val functionDef: PythonEntity.Statement.FunctionDef,
 ) : PythonDataStructure {
     override fun invoke(
         args: List<PythonDataStructure>,

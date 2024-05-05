@@ -7,6 +7,9 @@ import python.datastructures.FieldName
 import python.datastructures.FieldType
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonInvokable
+import python.datastructures.defaults.PythonList
+import python.datastructures.defaults.PythonString
+import python.datastructures.pandas.series.SeriesGroupBy
 import python.fail
 import python.ok
 import python.withWarn
@@ -23,8 +26,34 @@ data class DataFrameGroupBy(
             "sum" -> Sum(this).ok()
             "first" -> First(this).ok()
             "last" -> Last(this).ok()
+            "head" -> Head(this).ok()
             else -> fail("Unknown attribute $identifier on DataFrameGroupBy object")
         }
+
+    override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> {
+        TODO()
+//        when (key) {
+//            is PythonString -> { // returns SeriesGroupBy
+//                if (key.value == null) {
+//                    return SeriesGroupBy(null, null).withWarn("") //todo
+//                }
+//                if (dataFrame == null) {
+//                    return SeriesGroupBy(null, null).withWarn("")
+//                }
+//                if (by == null) {
+//                    return SeriesGroupBy(null, null).withWarn("")
+//                }
+//                if (dataFrame.fields == null) {
+//                    return SeriesGroupBy(null, null).withWarn("")
+//                }
+//
+//                return SeriesGroupBy()
+//            }
+//            is PythonList -> { // returns DataframeGroupBy
+//
+//            }
+//        }
+    }
 
     data class Mean(private val dfGroupBy: DataFrameGroupBy) : PythonInvokable {
         override fun invoke(
@@ -62,7 +91,7 @@ data class DataFrameGroupBy(
             if (dfGroupBy.by == null) {
                 return DataFrame(null).withWarn("Cannot resolve 'by' of groupby -> not able to check sum operation")
             }
-            val nonNumerics =
+            val nonNumerics = //wrong
                 dfGroupBy.dataFrame?.fields
                     ?.filter { it.key !in dfGroupBy.by }
                     ?.filter { it.value !in setOf(FieldType.IntType, FieldType.FloatType) }
@@ -133,4 +162,18 @@ data class DataFrameGroupBy(
             }
         }
     }
+
+    data class Head(private val dfGroupBy: DataFrameGroupBy) : PythonInvokable {
+        override fun invoke(
+            args: List<PythonDataStructure>,
+            keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+            outerContext: AnalysisContext,
+        ): OperationResult<PythonDataStructure> {
+            if (dfGroupBy.by == null) {
+                return DataFrame(null).withWarn("Cannot resolve 'by' of groupby -> not able to check last operation")
+            }
+            return (dfGroupBy.dataFrame?.clone() ?: DataFrame(null)).ok() //todo is this correct?
+        }
+    }
+
 }

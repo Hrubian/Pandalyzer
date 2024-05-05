@@ -3,7 +3,7 @@ package python.datastructures.defaults
 import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
-import python.PythonType
+import python.PythonEntity
 import python.addWarnings
 import python.arguments.ArgumentMatcher
 import python.arguments.ResolvedArguments
@@ -47,8 +47,8 @@ val builtinFunctions =
             PythonInvokable { args, kwArgs, _ ->
                 val schema =
                     ResolvedArguments(
-                        positionalArgs = listOf(PythonType.Arg("x")),
-                        arguments = listOf(PythonType.Arg("base")),
+                        positionalArgs = listOf(PythonEntity.Arg("x")),
+                        arguments = listOf(PythonEntity.Arg("base")),
                         defaults = listOf(PythonInt(BigInteger.TEN)),
                     )
                 val (matchedArgs, matchWarnings) =

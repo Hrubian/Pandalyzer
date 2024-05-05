@@ -3,12 +3,14 @@ package python.datastructures.pandas.functions
 import analyzer.AnalysisContext
 import analyzer.Identifier
 import python.OperationResult
-import python.PythonType
+import python.PythonEntity
 import python.arguments.ArgumentMatcher
 import python.arguments.ResolvedArguments
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
+import python.datastructures.invokeNondeterministic
+import python.datastructures.nonDeterministically
 import python.datastructures.pandas.dataframe.DataFrame
 import python.fail
 import python.map
@@ -16,7 +18,15 @@ import python.ok
 import python.withWarn
 
 object PandasMergeFunc : PandasFunction {
+
     override fun invoke(
+        args: List<PythonDataStructure>,
+        keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+        outerContext: AnalysisContext,
+    ): OperationResult<PythonDataStructure> =
+        invokeNondeterministic(args, keywordArgs, outerContext) { iArgs, kArgs, ctx -> invokeInner(iArgs, kArgs, ctx) }
+
+        private fun invokeInner(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
         outerContext: AnalysisContext,
@@ -60,7 +70,7 @@ object PandasMergeFunc : PandasFunction {
         right: DataFrame,
         leftOn: String,
         rightOn: String,
-    ): OperationResult<PythonDataStructure> {
+    ): OperationResult<PythonDataStructure> = left.nonDeterministically {
         if (left.fields == null) {
             return DataFrame(null).withWarn("The fields of the left dataframe are unknown")
         }
@@ -81,12 +91,12 @@ object PandasMergeFunc : PandasFunction {
         ResolvedArguments(
             arguments =
                 listOf(
-                    PythonType.Arg("left"),
-                    PythonType.Arg("right"),
-                    PythonType.Arg("how"),
-                    PythonType.Arg("on"),
-                    PythonType.Arg("left_on"),
-                    PythonType.Arg("right_on"), // todo missing args
+                    PythonEntity.Arg("left"),
+                    PythonEntity.Arg("right"),
+                    PythonEntity.Arg("how"),
+                    PythonEntity.Arg("on"),
+                    PythonEntity.Arg("left_on"),
+                    PythonEntity.Arg("right_on"), // todo missing args
                 ),
             defaults =
                 listOf(
