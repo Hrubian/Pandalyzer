@@ -10,13 +10,9 @@ fun main(args: Array<String>): Unit =
                     Pandalyzer.analyze(tree.root, it)
                 }
             }.let { result ->
-                println(result.summarize())
-//                exitProcess(result.getExitValue())
+                when (outputFormat) {
+                    OutputFormat.HumanReadable -> println(result.summarize())
+                    OutputFormat.JSON -> println(result.toJson())
+                }
             }
     }
-
-// fun AnalysisContext.getExitValue(): Int = when(this) {
-//    is AnalysisContext.OK -> 0
-//    is AnalysisContext.Error -> 1
-//    is AnalysisContext.Returned -> -1
-// }

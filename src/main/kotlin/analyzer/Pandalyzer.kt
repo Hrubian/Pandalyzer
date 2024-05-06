@@ -65,7 +65,7 @@ object Pandalyzer {
         module: Module,
         context: AnalysisContext,
     ) {
-        analyzeStatements(module.body, context) // todo do something with the result? :)
+        analyzeStatements(module.body, context)
     }
 
     fun analyze(
@@ -170,7 +170,7 @@ object Pandalyzer {
         importFrom: ImportFrom,
         context: AnalysisContext,
     ): StatementAnalysisResult {
-        val importStruct = createImportStruct(importFrom.module!!, importFrom.module) // todo resolve "!!"
+        val importStruct = createImportStruct(importFrom.module!!, importFrom.module)
         importFrom.names.forEach { (aliasName, name) ->
             when (val result = importStruct.attribute(name)) {
                 is OperationResult.Ok -> context.upsertStruct(aliasName ?: name, result.result)

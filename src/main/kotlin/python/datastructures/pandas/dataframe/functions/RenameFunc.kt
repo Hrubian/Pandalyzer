@@ -72,7 +72,7 @@ data class DataFrame_RenameFunc(override val dataFrame: DataFrame) : DataFrameFu
         // check that all the old values exist in the dataframe
         val missingOldValues = mapping.keys.filterNot { it in dataFrame.columns }
         if (missingOldValues.isNotEmpty()) {
-            return fail("The values $missingOldValues do not exist in the dataframe")
+            return fail("The columns $missingOldValues do not exist in the dataframe")
         }
 
         // check that the new values are not colliding with any old values

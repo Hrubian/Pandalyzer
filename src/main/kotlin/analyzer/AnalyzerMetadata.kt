@@ -26,7 +26,7 @@ data class AnalyzerMetadata(
     }
 
     fun summarize(): String = buildString {
-        append("Output files (${storedData.size}) summary\n")
+        appendLine("Output files (${storedData.size}): ")
         storedData.forEach { (filename, fileWrites) ->
             appendLine("File $filename: ")
             summarizeFile(fileWrites)

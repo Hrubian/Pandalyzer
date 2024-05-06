@@ -4,6 +4,8 @@ import python.OperationResult
 import python.PythonEntity
 import python.datastructures.NondeterministicDataStructure
 import python.datastructures.PythonDataStructure
+import python.datastructures.defaults.PythonFunc
+import python.datastructures.defaults.PythonInvokable
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.builtinFunctions
 import python.datastructures.pandas.dataframe.DataFrame
@@ -131,12 +133,15 @@ data class GlobalAnalysisContext(
 
     fun summarize(): String =
         buildString {
+            val dataStructuresToShow = pythonDataStructures
+                .filterNot { it.key in builtinFunctions && it.value is PythonInvokable }
+                .filterNot { it.value is PythonFunc }
             append("Summary of analysis: ")
             append(if (errors.isEmpty()) "OK" else "NOT OK")
             append('\n')
 
-            append("Global data structures (${pythonDataStructures.size}):\n")
-            pythonDataStructures.forEach { (ident, struct) -> append("$ident: $struct \n") }
+            append("Global data structures (${dataStructuresToShow.size}):\n")
+            dataStructuresToShow.forEach { (ident, struct) -> append("$ident: $struct \n") }
             append('\n')
 
             append("Warnings (${warnings.size}):\n")
@@ -149,6 +154,10 @@ data class GlobalAnalysisContext(
 
             append(metadata.summarize())
         }
+
+    fun toJson(): String {
+        TODO()
+    }
 }
 
 data class FunctionAnalysisContext(

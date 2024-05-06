@@ -71,6 +71,10 @@ data class DataFrame(
                     }
 
                     val actualKeys = key.items.map { (it as PythonString).value!! }.toSet()
+                    val nonexistentKeys = actualKeys.filterNot { it in columns }
+                    if (nonexistentKeys.isNotEmpty()) {
+                        return@nondeterministically fail("The keys $nonexistentKeys do not exist in the dataframe")
+                    }
 
                     return@nondeterministically DataFrame(columns.filterKeys { it in actualKeys }.toMutableMap()).ok()
                 }
