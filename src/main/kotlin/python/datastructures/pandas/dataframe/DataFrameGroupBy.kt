@@ -24,6 +24,7 @@ data class DataFrameGroupBy(
             "first" -> First(this).ok()
             "last" -> Last(this).ok()
             "head" -> Head(this).ok()
+            "count" -> Count(this).ok()
             else -> fail("Unknown attribute $identifier on DataFrameGroupBy object")
         }
 
@@ -88,16 +89,16 @@ data class DataFrameGroupBy(
             if (dfGroupBy.by == null) {
                 return DataFrame(null).withWarn("Cannot resolve 'by' of groupby -> not able to check sum operation")
             }
-            val nonNumerics = //wrong
+            val nonSummable = //wrong
                 dfGroupBy.dataFrame?.columns
                     ?.filter { it.key !in dfGroupBy.by }
-                    ?.filter { it.value !in setOf(FieldType.IntType, FieldType.FloatType) }
+                    ?.filter { it.value !in setOf(FieldType.IntType, FieldType.FloatType, FieldType.StringType) }
                     ?: return dfGroupBy.dataFrame?.clone()?.ok() ?: return DataFrame(null).ok() // todo mesage?
-            return if (nonNumerics.isNotEmpty()) {
+            return if (nonSummable.isNotEmpty()) {
                 val message =
                     StringBuilder().apply {
                         append("Cannot apply sum on the columns: ")
-                        nonNumerics.forEach { append("${it.key} of type ${it.value.name}, ") }
+                        nonSummable.forEach { append("${it.key} of type ${it.value.name}, ") }
                     }.toString()
                 fail(message)
             } else {
@@ -173,4 +174,24 @@ data class DataFrameGroupBy(
         }
     }
 
+    data class Count(private val dfGroupBy: DataFrameGroupBy) : PythonInvokable {
+        override fun invoke(
+            args: List<PythonDataStructure>,
+            keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+            outerContext: AnalysisContext,
+        ): OperationResult<PythonDataStructure> {
+            if (args.isNotEmpty() || keywordArgs.isNotEmpty()) {
+                return fail("The count function does not accept any arguments")
+            }
+            if (dfGroupBy.by == null) {
+                return DataFrame(null).withWarn("Cannot resolve 'by' of groupby -> not able to check count operation")
+            }
+            if (dfGroupBy.dataFrame?.columns == null) {
+                return DataFrame(null).withWarn("Cannot resolve dataframe of groupby -> unable to check count operation")
+            }
+            return DataFrame(columns = dfGroupBy.dataFrame.columns.map { (columnName, columnType) ->
+                columnName to if (columnName in dfGroupBy.by)  columnType else FieldType.IntType
+            }.toMap().toMutableMap()).ok()
+        }
+    }
 }

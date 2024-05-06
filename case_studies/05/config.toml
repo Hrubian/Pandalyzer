@@ -1,4 +1,19 @@
-[attendees.csv]
-name = "string"
-surname = "string"
-age = "int"
+[all_strings.csv]
+str1 = "string"
+str2 = "string"
+str3 = "string"
+
+[first_string.csv]
+col1 = "string"
+col2 = "int"
+col3 = "int"
+
+[first_int.csv]
+col1 = "int"
+col2 = "string"
+col3 = "string"
+
+[all_different.csv]
+int_col = "int"
+str_col = "string"
+bool_col = "bool"
