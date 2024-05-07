@@ -47,7 +47,7 @@ value class PythonList(
 
     override fun storeSubscript(
         slice: PythonDataStructure,
-        value: PythonDataStructure
+        value: PythonDataStructure,
     ): OperationResult<PythonDataStructure> {
         if (slice !is PythonInt) {
             return fail("Cannot subscript to list with type ${slice.typeName}")
@@ -66,11 +66,11 @@ value class PythonList(
             items.add(value)
             return PythonNone.ok()
         }
-        if (index in 0..< items.size) {
+        if (index in 0..<items.size) {
             items[index] = value
             return PythonNone.ok()
         }
-        if (index in -items.size ..< 0) {
+        if (index in -items.size..<0) {
             items[items.size + index] = value
             return PythonNone.ok()
         }

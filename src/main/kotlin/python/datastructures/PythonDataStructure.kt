@@ -70,21 +70,29 @@ interface PythonDataStructure {
     infix fun notIn(other: PythonDataStructure): OperationResult<PythonDataStructure> =
         fail("Cannot perform notIn on $typeName and ${other.typeName}")
 
-    fun storeAttribute(attribute: Identifier, value: PythonDataStructure): OperationResult<PythonDataStructure> =
-        fail("Cannot store attribute on type $typeName")
+    fun storeAttribute(
+        attribute: Identifier,
+        value: PythonDataStructure,
+    ): OperationResult<PythonDataStructure> = fail("Cannot store attribute on type $typeName")
 
-    fun storeSubscript(slice: PythonDataStructure, value: PythonDataStructure): OperationResult<PythonDataStructure> =
-        fail("Cannot subscript-assing on type $typeName")
+    fun storeSubscript(
+        slice: PythonDataStructure,
+        value: PythonDataStructure,
+    ): OperationResult<PythonDataStructure> = fail("Cannot subscript-assing on type $typeName")
 }
 
 fun invokeNondeterministic(
     args: List<PythonDataStructure>,
     keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
     outerContext: AnalysisContext,
-    block: (args: List<PythonDataStructure>, keywordArgs: List<Pair<Identifier, PythonDataStructure>>, outerContext: AnalysisContext) -> OperationResult<PythonDataStructure>
-    ): OperationResult<PythonDataStructure> {
+    block: (
+        args: List<PythonDataStructure>,
+        keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
+        outerContext: AnalysisContext,
+    ) -> OperationResult<PythonDataStructure>,
+): OperationResult<PythonDataStructure> {
     var result: OperationResult<PythonDataStructure>? = null
-    sequence { generateNondeterministicArgs(emptyList(), emptyList() , args, keywordArgs) }.forEach { (args, kwArgs) ->
+    sequence { generateNondeterministicArgs(emptyList(), emptyList(), args, keywordArgs) }.forEach { (args, kwArgs) ->
         if (result == null) {
             result = block(args, kwArgs, outerContext)
         } else {
@@ -97,28 +105,27 @@ fun invokeNondeterministic(
     return result!!
 }
 
-fun PythonDataStructure.nondeterministically(
-    block: () -> OperationResult<PythonDataStructure>
-): OperationResult<PythonDataStructure> =
+fun PythonDataStructure.nondeterministically(block: () -> OperationResult<PythonDataStructure>): OperationResult<PythonDataStructure> =
     when (this) {
         is NondeterministicDataStructure -> {
             NondeterministicDataStructure.combineResults(
                 result1 = left.nondeterministically(block),
-                result2 = right.nondeterministically(block)
+                result2 = right.nondeterministically(block),
             )
         }
         else -> block()
     }
 
-
-private suspend fun SequenceScope<Pair<
+private suspend fun SequenceScope<
+    Pair<
         List<PythonDataStructure>,
-        List<Pair<Identifier, PythonDataStructure>>
-        >>.generateNondeterministicArgs(
+        List<Pair<Identifier, PythonDataStructure>>,
+        >,
+    >.generateNondeterministicArgs(
     argsSoFar: List<PythonDataStructure>,
     keywordArgsSoFar: List<Pair<Identifier, PythonDataStructure>>,
     args: List<PythonDataStructure>,
-    keywordArgs: List<Pair<Identifier, PythonDataStructure>>
+    keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
 ) {
     if (args.isNotEmpty()) {
         val head = args.first()

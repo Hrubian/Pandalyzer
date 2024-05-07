@@ -18,7 +18,6 @@ import python.ok
 import python.withWarn
 
 object PandasMergeFunc : PandasFunction {
-
     override fun invoke(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
@@ -26,7 +25,7 @@ object PandasMergeFunc : PandasFunction {
     ): OperationResult<PythonDataStructure> =
         invokeNondeterministic(args, keywordArgs, outerContext) { iArgs, kArgs, ctx -> invokeInner(iArgs, kArgs, ctx) }
 
-        private fun invokeInner(
+    private fun invokeInner(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
         outerContext: AnalysisContext,
@@ -65,25 +64,26 @@ object PandasMergeFunc : PandasFunction {
             }
         }
 
-    private fun merge( // TODO suffixes and lists
+    private fun merge(
         left: DataFrame,
         right: DataFrame,
         leftOn: String,
         rightOn: String,
-    ): OperationResult<PythonDataStructure> = left.nonDeterministically {
-        if (left.columns == null) {
-            return DataFrame(null).withWarn("The fields of the left dataframe are unknown")
+    ): OperationResult<PythonDataStructure> =
+        left.nonDeterministically {
+            if (left.columns == null) {
+                return DataFrame(null).withWarn("The fields of the left dataframe are unknown")
+            }
+            if (right.columns == null) {
+                return DataFrame(null).withWarn("The fields of the right dataframe are unknown")
+            }
+            val leftJoin = left.columns[leftOn] ?: return fail("The left dataframe does not contain the column $leftOn")
+            val rightJoin = right.columns[rightOn] ?: return fail("The right dataframe does not contain the column $rightOn")
+            if (leftJoin != rightJoin) {
+                return fail("The types of $leftOn and $rightOn are different")
+            }
+            return DataFrame((left.columns + right.columns).toMutableMap()).ok()
         }
-        if (right.columns == null) {
-            return DataFrame(null).withWarn("The fields of the right dataframe are unknown")
-        }
-        val leftJoin = left.columns[leftOn] ?: return fail("The left dataframe does not contain the column $leftOn")
-        val rightJoin = right.columns[rightOn] ?: return fail("The right dataframe does not contain the column $rightOn")
-        if (leftJoin != rightJoin) {
-            return fail("The types of $leftOn and $rightOn are different")
-        }
-        return DataFrame((left.columns + right.columns).toMutableMap()).ok()
-    }
 
     private val allowedHowValues = setOf("inner", "outer", "left", "right", "cross")
 
@@ -96,7 +96,7 @@ object PandasMergeFunc : PandasFunction {
                     PythonEntity.Arg("how"),
                     PythonEntity.Arg("on"),
                     PythonEntity.Arg("left_on"),
-                    PythonEntity.Arg("right_on"), // todo missing args
+                    PythonEntity.Arg("right_on"),
                 ),
             defaults =
                 listOf(

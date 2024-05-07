@@ -17,18 +17,16 @@ import python.map
 import python.ok
 import python.withWarn
 
-data class DataFrame_RenameFunc(override val dataFrame: DataFrame) : DataFrameFunction {
+data class DataFrameRenameFunc(override val dataFrame: DataFrame) : DataFrameFunction {
     override fun clone(): PythonDataStructure = this
 
     override fun invoke(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
         outerContext: AnalysisContext,
-    ): OperationResult<PythonDataStructure> =
-        invokeNondeterministic(args, keywordArgs, outerContext) { a, k, o -> invokeInner(a, k, o) }
+    ): OperationResult<PythonDataStructure> = invokeNondeterministic(args, keywordArgs, outerContext) { a, k, o -> invokeInner(a, k, o) }
 
-
-        fun invokeInner(
+    fun invokeInner(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
         outerContext: AnalysisContext,
@@ -99,7 +97,7 @@ data class DataFrame_RenameFunc(override val dataFrame: DataFrame) : DataFrameFu
 
     private val argumentSchema =
         ResolvedArguments(
-            arguments = listOf(PythonEntity.Arg("columns")), // todo the structure is bigger
+            arguments = listOf(PythonEntity.Arg("columns")),
             defaults = listOf(PythonNone),
         )
 }

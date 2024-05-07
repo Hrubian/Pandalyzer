@@ -12,11 +12,15 @@ import java.io.File
 data class AnalyzerMetadata(
     private val data: List<Pair<Regex, Map<FieldName, FieldType>>>,
 ) {
-    private val storedData = mutableMapOf<String, MutableList<Map<FieldName, FieldType>>>()//.withDefault { mutableListOf() }
+    private val storedData = mutableMapOf<String, MutableList<Map<FieldName, FieldType>>>() // .withDefault { mutableListOf() }
+
     fun getDataFrameOrNull(filename: String): DataFrame? =
         data.singleOrNull { it.first.matches(filename) }?.let { DataFrame(it.second.toMutableMap()) }
 
-    fun storeDataframe(filename: String, dataFrame: DataFrame): OperationResult<PythonNone> {
+    fun storeDataframe(
+        filename: String,
+        dataFrame: DataFrame,
+    ): OperationResult<PythonNone> {
         if (dataFrame.columns == null) {
             return PythonNone.withWarn("Unable to store a dataframe to a csv file $filename as the structure is not known")
         }
@@ -25,19 +29,22 @@ data class AnalyzerMetadata(
         return PythonNone.ok()
     }
 
-    fun summarize(): String = buildString {
-        appendLine("Output files (${storedData.size}): ")
-        storedData.forEach { (filename, fileWrites) ->
-            appendLine("File $filename: ")
-            summarizeFile(fileWrites)
-            append('\n')
+    fun summarize(): String =
+        buildString {
+            appendLine("Output files (${storedData.size}): ")
+            storedData.forEach { (filename, fileWrites) ->
+                appendLine("File $filename: ")
+                summarizeFile(fileWrites)
+                append('\n')
+            }
         }
-    }
 
     private fun StringBuilder.summarizeFile(fileWrites: List<Map<FieldName, FieldType>>) {
         if (fileWrites.size > 1) {
-            appendLine("    Warning: There are multiple options how the" +
-                    " resulting file looks like. We will show all of them")
+            appendLine(
+                "    Warning: There are multiple options how the" +
+                    " resulting file looks like. We will show all of them",
+            )
             fileWrites.forEachIndexed { index, dataframe ->
                 appendLine("    Option #$index")
                 dataframe.forEach { (columnName, columnType) ->
@@ -75,9 +82,8 @@ data class AnalyzerMetadata(
                             line.drop(1).dropLast(1)
                                 .also { check(it.isNotBlank()) { "The filename should not be blank" } }
                                 .let { Regex.fromLiteral(it) }
-
                     }
-                    line.startsWith("r[")&& line.endsWith(']') -> {
+                    line.startsWith("r[") && line.endsWith(']') -> {
                         if (currentFile != null) {
                             check(resultData.put(currentFile!!, currentColumns.toMap()) == null)
                             currentColumns.clear()

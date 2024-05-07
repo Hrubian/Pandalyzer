@@ -89,7 +89,7 @@ data class DataFrameGroupBy(
             if (dfGroupBy.by == null) {
                 return DataFrame(null).withWarn("Cannot resolve 'by' of groupby -> not able to check sum operation")
             }
-            val nonSummable = //wrong
+            val nonSummable = // wrong
                 dfGroupBy.dataFrame?.columns
                     ?.filter { it.key !in dfGroupBy.by }
                     ?.filter { it.value !in setOf(FieldType.IntType, FieldType.FloatType, FieldType.StringType) }
@@ -170,7 +170,7 @@ data class DataFrameGroupBy(
             if (dfGroupBy.by == null) {
                 return DataFrame(null).withWarn("Cannot resolve 'by' of groupby -> not able to check last operation")
             }
-            return (dfGroupBy.dataFrame?.clone() ?: DataFrame(null)).ok() //todo is this correct?
+            return (dfGroupBy.dataFrame?.clone() ?: DataFrame(null)).ok() // todo is this correct?
         }
     }
 
@@ -189,9 +189,12 @@ data class DataFrameGroupBy(
             if (dfGroupBy.dataFrame?.columns == null) {
                 return DataFrame(null).withWarn("Cannot resolve dataframe of groupby -> unable to check count operation")
             }
-            return DataFrame(columns = dfGroupBy.dataFrame.columns.map { (columnName, columnType) ->
-                columnName to if (columnName in dfGroupBy.by)  columnType else FieldType.IntType
-            }.toMap().toMutableMap()).ok()
+            return DataFrame(
+                columns =
+                    dfGroupBy.dataFrame.columns.map { (columnName, columnType) ->
+                        columnName to if (columnName in dfGroupBy.by) columnType else FieldType.IntType
+                    }.toMap().toMutableMap(),
+            ).ok()
         }
     }
 }

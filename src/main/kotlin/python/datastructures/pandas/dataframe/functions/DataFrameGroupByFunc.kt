@@ -18,7 +18,7 @@ import python.map
 import python.ok
 import python.withWarn
 
-data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameFunction {
+data class DataFrameGroupByFunc(override val dataFrame: DataFrame) : DataFrameFunction {
     override fun invoke(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
@@ -34,7 +34,7 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
         }
     }
 
-    override fun clone(): PythonDataStructure = DataFrame_GroupByFunc(dataFrame.clone() as DataFrame)
+    override fun clone(): PythonDataStructure = DataFrameGroupByFunc(dataFrame.clone() as DataFrame)
 
     private fun groupBy(
         dataFrame: DataFrame,
@@ -90,8 +90,8 @@ data class DataFrame_GroupByFunc(override val dataFrame: DataFrame) : DataFrameF
             defaults =
                 listOf(
                     PythonNone,
-                    PythonNone, // todo
-                    PythonNone, // todo,
+                    PythonNone,
+                    PythonNone,
                     PythonBool(true),
                     PythonBool(true),
                     PythonBool(true),

@@ -56,7 +56,7 @@ data class NondeterministicDataStructure(
             when {
                 result1 is OperationResult.Ok && result2 is OperationResult.Ok ->
                     NondeterministicDataStructure(result1.result, result2.result).ok()
-                result1 is OperationResult.Ok && result2 is OperationResult.Warning->
+                result1 is OperationResult.Ok && result2 is OperationResult.Warning ->
                     NondeterministicDataStructure(result1.result, result2.result).ok(result2.messages)
                 result1 is OperationResult.Warning && result2 is OperationResult.Ok ->
                     NondeterministicDataStructure(result1.result, result2.result).ok(result1.messages)
@@ -65,7 +65,7 @@ data class NondeterministicDataStructure(
                         .ok(result1.messages + result2.messages)
                 result1 is OperationResult.Error && result2 is OperationResult.Error ->
                     fail("Both execution branches failed. Branch1: ${result1.reason}, Branch2: ${result2.reason}")
-                result1 is OperationResult.Error && result2 is OperationResult.Ok->
+                result1 is OperationResult.Error && result2 is OperationResult.Ok ->
                     result2.result.withWarn("First branch of execution failed with reason: ${result1.reason}")
                 result1 is OperationResult.Ok && result2 is OperationResult.Error ->
                     result1.result.withWarn("Second branch of execution failed with reason: ${result2.reason}")
@@ -81,7 +81,7 @@ data class NondeterministicDataStructure(
 }
 
 inline fun PythonDataStructure.nonDeterministically(
-    block: (value: PythonDataStructure) -> OperationResult<PythonDataStructure>
+    block: (value: PythonDataStructure) -> OperationResult<PythonDataStructure>,
 ): OperationResult<PythonDataStructure> =
     when (this) {
         is NondeterministicDataStructure -> NondeterministicDataStructure.combineResults(block(this.left), block(this.right))

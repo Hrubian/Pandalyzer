@@ -90,32 +90,35 @@ object Pandalyzer {
         context: AnalysisContext,
     ): StatementAnalysisResult {
         val (value, warn) =
-        assign.value.analyzeWith(context).orElse {
-            context.addError(it, assign)
+            assign.value.analyzeWith(context).orElse {
+                context.addError(it, assign)
 //            return StatementAnalysisResult.Ended
-            UnresolvedStructure(it) //todo does it work?
-        }
+                UnresolvedStructure(it) // todo does it work?
+            }
         context.addWarnings(warn, assign)
         when (val target = assign.targets.single()) {
             is Name -> context.upsertStruct(target.identifier, value)
             is Attribute -> {
-                val (_, warns) = target.value.analyzeWith(context).map { it.storeAttribute(target.attr, it) }.orElse {
-                    context.addError(it, assign)
-                    return StatementAnalysisResult.Ended
-                }
-                context.addWarnings(warns, assign)
-            }
-            is Subscript -> {
-                val (subscriptTarget, warns) = target.value.analyzeWith(context).orElse {
-                    context.addError(it, assign)
-                    return StatementAnalysisResult.Ended
-                }
-                context.addWarnings(warns, assign)
-                val (_, sliceWarns) = target.slice.analyzeWith(context).map { subscriptTarget.storeSubscript(it, value) }
-                    .orElse {
+                val (_, warns) =
+                    target.value.analyzeWith(context).map { it.storeAttribute(target.attr, it) }.orElse {
                         context.addError(it, assign)
                         return StatementAnalysisResult.Ended
                     }
+                context.addWarnings(warns, assign)
+            }
+            is Subscript -> {
+                val (subscriptTarget, warns) =
+                    target.value.analyzeWith(context).orElse {
+                        context.addError(it, assign)
+                        return StatementAnalysisResult.Ended
+                    }
+                context.addWarnings(warns, assign)
+                val (_, sliceWarns) =
+                    target.slice.analyzeWith(context).map { subscriptTarget.storeSubscript(it, value) }
+                        .orElse {
+                            context.addError(it, assign)
+                            return StatementAnalysisResult.Ended
+                        }
                 context.addWarnings(sliceWarns, assign)
             }
             else -> {

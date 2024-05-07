@@ -19,26 +19,28 @@ import python.ok
 import python.orElse
 import python.withWarn
 
-data class DataFrame_DropFunc(override val dataFrame: DataFrame) : DataFrameFunction {
-    override fun clone(): PythonDataStructure = this //todo
+data class DataFrameDropFunc(override val dataFrame: DataFrame) : DataFrameFunction {
+    override fun clone(): PythonDataStructure = this // todo
 
     override fun invoke(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-        outerContext: AnalysisContext
-    ): OperationResult<PythonDataStructure> =
-        invokeNondeterministic(args, keywordArgs, outerContext) { arg, kw, _ -> invokeInner(arg, kw) }
+        outerContext: AnalysisContext,
+    ): OperationResult<PythonDataStructure> = invokeNondeterministic(args, keywordArgs, outerContext) { arg, kw, _ -> invokeInner(arg, kw) }
 
     private fun invokeInner(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-        ): OperationResult<PythonDataStructure> {
-        val (matchedArgs, warns) = ArgumentMatcher.match(argumentSchema, args, keywordArgs.toMap())
-            .orElse { return fail(it) }
-        val inplace = (matchedArgs.matchedArguments["inplace"] as? PythonBool)
-            ?: return fail("The inplace argument of drop function should be a bool")
-        val columns = matchedArgs.matchedArguments["columns"]
-            ?: return fail("The columns argument of drop function was not provided")
+    ): OperationResult<PythonDataStructure> {
+        val (matchedArgs, warns) =
+            ArgumentMatcher.match(argumentSchema, args, keywordArgs.toMap())
+                .orElse { return fail(it) }
+        val inplace =
+            (matchedArgs.matchedArguments["inplace"] as? PythonBool)
+                ?: return fail("The inplace argument of drop function should be a bool")
+        val columns =
+            matchedArgs.matchedArguments["columns"]
+                ?: return fail("The columns argument of drop function was not provided")
         if (inplace.value == null) {
             return fail("Unable to perform drop operation as the inplace argument is not known")
         }
@@ -50,7 +52,10 @@ data class DataFrame_DropFunc(override val dataFrame: DataFrame) : DataFrameFunc
         }.addWarnings(warns)
     }
 
-    private fun drop(columns: PythonList, inplace: Boolean): OperationResult<PythonDataStructure> {
+    private fun drop(
+        columns: PythonList,
+        inplace: Boolean,
+    ): OperationResult<PythonDataStructure> {
         if (columns.items == null) {
             return fail("The list of columns for drop function is not resolvable")
         }
@@ -66,11 +71,12 @@ data class DataFrame_DropFunc(override val dataFrame: DataFrame) : DataFrameFunc
 
         val unknownStrings = columns.items.filter { col -> (col as PythonString).value == null }
         if (unknownStrings.isNotEmpty()) {
-            return if (inplace)
+            return if (inplace) {
                 fail("Unable to drop columns inplace as some of the columns are unknown")
-            else
+            } else {
                 DataFrame(null)
                     .withWarn("Unable to resolve structure of the drop result as some of the strings are null")
+            }
         }
 
         val actualColumns = columns.items.map { (it as PythonString).value!! }
@@ -86,9 +92,9 @@ data class DataFrame_DropFunc(override val dataFrame: DataFrame) : DataFrameFunc
         }
     }
 
-    private val argumentSchema = ResolvedArguments(
-        keywordOnlyArgs = listOf(PythonEntity.Arg("columns"), PythonEntity.Arg("inplace")),
-        keywordDefaults = listOf(PythonNone, PythonBool(false))
-    )
-
+    private val argumentSchema =
+        ResolvedArguments(
+            keywordOnlyArgs = listOf(PythonEntity.Arg("columns"), PythonEntity.Arg("inplace")),
+            keywordDefaults = listOf(PythonNone, PythonBool(false)),
+        )
 }

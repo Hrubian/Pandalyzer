@@ -69,14 +69,15 @@ data class Series(
 
     private fun compare(other: PythonDataStructure): OperationResult<PythonDataStructure> {
         if (type == null) {
-            return Series(FieldType.BoolType).withWarn("Unable to check type compatibility " +
-                    "of comparison since the series structure is not known")
+            return Series(FieldType.BoolType).withWarn(
+                "Unable to check type compatibility " +
+                    "of comparison since the series structure is not known",
+            )
         }
-        return if (type.toPythonDataStructure().typeName == other.typeName) { //todo what about comparison of ints and floats
+        return if (type.toPythonDataStructure().typeName == other.typeName) { // todo what about comparison of ints and floats
             Series(FieldType.BoolType).ok()
         } else {
             fail("Unable to compare values of type $type and ${other.typeName}")
         }
     }
-
 }

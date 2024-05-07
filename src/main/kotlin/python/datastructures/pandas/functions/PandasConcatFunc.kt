@@ -21,8 +21,7 @@ import python.ok
 import python.withWarn
 import java.math.BigInteger
 
-object PandasConcatFunc : PandasFunction{
-
+object PandasConcatFunc : PandasFunction {
     override fun invoke(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
@@ -34,15 +33,21 @@ object PandasConcatFunc : PandasFunction{
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
         outerContext: AnalysisContext,
-    ): OperationResult<PythonDataStructure> = ArgumentMatcher.match(functionSchema, args, keywordArgs.toMap()).map {
-        val objects = it.matchedArguments["objs"] as? PythonList
-            ?: return@map fail("The first argument of concat function should be a list")
-        val axis = it.matchedArguments["axis"] as? PythonInt
-            ?: return@map fail("The axis argument of concat function must be an integer")
-        return@map concat(objects, axis)
-    }
+    ): OperationResult<PythonDataStructure> =
+        ArgumentMatcher.match(functionSchema, args, keywordArgs.toMap()).map {
+            val objects =
+                it.matchedArguments["objs"] as? PythonList
+                    ?: return@map fail("The first argument of concat function should be a list")
+            val axis =
+                it.matchedArguments["axis"] as? PythonInt
+                    ?: return@map fail("The axis argument of concat function must be an integer")
+            return@map concat(objects, axis)
+        }
 
-    private fun concat(objects: PythonList, axis: PythonInt): OperationResult<PythonDataStructure> {
+    private fun concat(
+        objects: PythonList,
+        axis: PythonInt,
+    ): OperationResult<PythonDataStructure> {
         if (axis.value == null) {
             return NondeterministicDataStructure(DataFrame(null), Series(null))
                 .withWarn("Unable to resolve the 'axis' argument of concat function")
@@ -65,8 +70,10 @@ object PandasConcatFunc : PandasFunction{
                 val allSeries = objects.items.map { it as Series }
                 val unknownSeries = allSeries.filter { it.type == null }
                 if (unknownSeries.isNotEmpty()) {
-                    return Series(null).withWarn("Unable to resolve the result of " +
-                            "concatenation as some of the series have unknown type")
+                    return Series(null).withWarn(
+                        "Unable to resolve the result of " +
+                            "concatenation as some of the series have unknown type",
+                    )
                 }
                 when (axis.value) {
                     BigInteger.ZERO -> {
@@ -79,8 +86,9 @@ object PandasConcatFunc : PandasFunction{
                     BigInteger.ONE -> {
                         var substituteIndex = 0
                         return DataFrame(
-                            columns = allSeries.associate { (it.label ?: substituteIndex++.toString()) to it.type!! }
-                                .toMutableMap()
+                            columns =
+                                allSeries.associate { (it.label ?: substituteIndex++.toString()) to it.type!! }
+                                    .toMutableMap(),
                         ).ok()
                     }
                     else -> error("does not happen")
@@ -90,8 +98,10 @@ object PandasConcatFunc : PandasFunction{
                 val allDataFrames = objects.items.map { it as DataFrame }
                 val unknownDataFrames = allDataFrames.filter { it.columns == null }
                 if (unknownDataFrames.isNotEmpty()) {
-                    return DataFrame(null).withWarn("Unable to resolve the result of " +
-                            "concatenation as some of the dataframes have unknown type")
+                    return DataFrame(null).withWarn(
+                        "Unable to resolve the result of " +
+                            "concatenation as some of the dataframes have unknown type",
+                    )
                 }
                 when (axis.value) {
                     BigInteger.ZERO -> {
@@ -101,8 +111,9 @@ object PandasConcatFunc : PandasFunction{
                         return allDataFrames.first().clone().ok()
                     }
                     BigInteger.ONE -> {
-                        val duplicateNames = allDataFrames.flatMap { it.columns!!.keys }
-                            .groupingBy { it }.eachCount().filter { it.value > 1 }.keys
+                        val duplicateNames =
+                            allDataFrames.flatMap { it.columns!!.keys }
+                                .groupingBy { it }.eachCount().filter { it.value > 1 }.keys
                         if (duplicateNames.isNotEmpty()) {
                             return fail("The dataframes to be concatenated have the following common columns: $duplicateNames")
                         }
@@ -121,9 +132,11 @@ object PandasConcatFunc : PandasFunction{
         ResolvedArguments(
             positionalArgs = listOf(PythonEntity.Arg("objs")),
             arguments = listOf(PythonEntity.Arg("axis")),
-            defaults = listOf(PythonInt(BigInteger.ZERO))
+            defaults = listOf(PythonInt(BigInteger.ZERO)),
         )
 
-    private fun haveEqualStructure(df1: DataFrame, df2: DataFrame): Boolean =
-        df1.columns!!.all { df2.columns!![it.key] == it.value } && df2.columns!!.all { df1.columns[it.key] == it.value }
+    private fun haveEqualStructure(
+        df1: DataFrame,
+        df2: DataFrame,
+    ): Boolean = df1.columns!!.all { df2.columns!![it.key] == it.value } && df2.columns!!.all { df1.columns[it.key] == it.value }
 }

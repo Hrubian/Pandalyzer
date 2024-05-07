@@ -6,7 +6,6 @@ import python.OperationResult
 import python.datastructures.PythonDataStructure
 import python.datastructures.defaults.PythonString
 import python.datastructures.pandas.dataframe.DataFrame
-import python.datastructures.pandas.series.Series
 import python.fail
 import python.ok
 import python.withWarn

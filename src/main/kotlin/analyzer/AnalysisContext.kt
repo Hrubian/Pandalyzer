@@ -43,7 +43,10 @@ sealed interface AnalysisContext {
 
     fun getDataframeFromMetadata(filename: String): DataFrame?
 
-    fun storeDataframeToMetadata(filename: String, dataFrame: DataFrame): OperationResult<PythonNone>
+    fun storeDataframeToMetadata(
+        filename: String,
+        dataFrame: DataFrame,
+    ): OperationResult<PythonNone>
 
     companion object {
         fun buildEmpty(metadata: AnalyzerMetadata): GlobalAnalysisContext =
@@ -128,14 +131,17 @@ data class GlobalAnalysisContext(
 
     override fun getDataframeFromMetadata(filename: String): DataFrame? = metadata.getDataFrameOrNull(filename)
 
-    override fun storeDataframeToMetadata(filename: String, dataFrame: DataFrame): OperationResult<PythonNone> =
-        metadata.storeDataframe(filename, dataFrame)
+    override fun storeDataframeToMetadata(
+        filename: String,
+        dataFrame: DataFrame,
+    ): OperationResult<PythonNone> = metadata.storeDataframe(filename, dataFrame)
 
     fun summarize(): String =
         buildString {
-            val dataStructuresToShow = pythonDataStructures
-                .filterNot { it.key in builtinFunctions && it.value is PythonInvokable }
-                .filterNot { it.value is PythonFunc }
+            val dataStructuresToShow =
+                pythonDataStructures
+                    .filterNot { it.key in builtinFunctions && it.value is PythonInvokable }
+                    .filterNot { it.value is PythonFunc }
             append("Summary of analysis: ")
             append(if (errors.isEmpty()) "OK" else "NOT OK")
             append('\n')
@@ -212,6 +218,8 @@ data class FunctionAnalysisContext(
 
     override fun getDataframeFromMetadata(filename: String): DataFrame? = globalContext.getDataframeFromMetadata(filename)
 
-    override fun storeDataframeToMetadata(filename: String, dataFrame: DataFrame) =
-        globalContext.storeDataframeToMetadata(filename, dataFrame)
+    override fun storeDataframeToMetadata(
+        filename: String,
+        dataFrame: DataFrame,
+    ) = globalContext.storeDataframeToMetadata(filename, dataFrame)
 }

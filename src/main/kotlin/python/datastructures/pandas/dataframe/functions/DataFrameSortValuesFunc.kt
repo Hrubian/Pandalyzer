@@ -18,35 +18,36 @@ import python.map
 import python.ok
 import python.withWarn
 
-data class DataFrame_SortValuesFunc(override val dataFrame: DataFrame) : DataFrameFunction {
+data class DataFrameSortValuesFunc(override val dataFrame: DataFrame) : DataFrameFunction {
     override fun clone(): PythonDataStructure = this
 
     override fun invoke(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-        outerContext: AnalysisContext
+        outerContext: AnalysisContext,
     ): OperationResult<PythonDataStructure> =
         invokeNondeterministic(args, keywordArgs, outerContext) { iArgs, kArgs, ctx -> invokeInner(iArgs, kArgs, ctx) }
 
     private fun invokeInner(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-        outerContext: AnalysisContext
+        outerContext: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
         val matchedArguments = ArgumentMatcher.match(argumentSchema, args, keywordArgs.toMap())
         return matchedArguments.map { argumentSchema ->
-            if (argumentSchema.matchedArguments["ascending"] !is PythonBool)
+            if (argumentSchema.matchedArguments["ascending"] !is PythonBool) {
                 return@map fail("The 'ascending' argument of sort_vallues must be a bool value")
+            }
 
             when (val by = argumentSchema.matchedArguments["by"]!!) {
-                is PythonString -> sort_values(PythonList(mutableListOf(by)))
-                is PythonList -> sort_values(by)
+                is PythonString -> sortValues(PythonList(mutableListOf(by)))
+                is PythonList -> sortValues(by)
                 else -> fail("The 'by' argument of Dataframe.sort_values must be a string or a list")
             }
         }
     }
 
-    private fun sort_values(byList: PythonList): OperationResult<PythonDataStructure> {
+    private fun sortValues(byList: PythonList): OperationResult<PythonDataStructure> {
         if (byList.items == null) {
             return dataFrame.clone().withWarn("Unable to resolve the by values in sort_values function")
         }
@@ -74,8 +75,9 @@ data class DataFrame_SortValuesFunc(override val dataFrame: DataFrame) : DataFra
         return dataFrame.clone().ok()
     }
 
-    private val argumentSchema = ResolvedArguments(
-        arguments = listOf(PythonEntity.Arg("by"), PythonEntity.Arg("ascending")),
-        defaults = listOf(PythonNone, PythonBool(true))
-    )
+    private val argumentSchema =
+        ResolvedArguments(
+            arguments = listOf(PythonEntity.Arg("by"), PythonEntity.Arg("ascending")),
+            defaults = listOf(PythonNone, PythonBool(true)),
+        )
 }
