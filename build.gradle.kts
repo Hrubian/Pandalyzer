@@ -3,15 +3,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     val kotlinVersion = libs.versions.kotlin
-    kotlin("jvm") version kotlinVersion
+
     application
+    kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
     alias(libs.plugins.ktlint)
 }
-
-group = "org.example"
-version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
