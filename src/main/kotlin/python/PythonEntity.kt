@@ -380,7 +380,7 @@ sealed interface PythonEntity {
 
     @Serializable
     @SerialName("alias")
-    data class Alias( // todo what about col_offset, lineno...?
+    data class Alias(
         @SerialName("asname")
         val aliasName: String?,
         val name: String,

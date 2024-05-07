@@ -1,15 +1,11 @@
-// package python.datastructures.defaults
-//
-// import python.OperationResult
-// import python.datastructures.PythonDataStructure
-// import python.fail
-// import python.ok
-// import java.math.BigInteger
-//
-// @JvmInline
-// value class PythonFloat(val value: Double?) : PythonDataStructure {
-//    override fun clone(): PythonDataStructure = this
-//
+package python.datastructures.defaults
+
+import python.datastructures.PythonDataStructure
+
+@JvmInline
+value class PythonFloat(val value: Double?) : PythonDataStructure {
+    override fun clone(): PythonDataStructure = this
+
 //    override operator fun plus(other: PythonDataStructure): OperationResult<PythonDataStructure> {
 //        return if (other is PythonFloat) {
 //            if (value == null || other.value == null) return PythonInt(null).ok()
@@ -56,4 +52,4 @@
 //        }
 //    }
 //
-// }
+}

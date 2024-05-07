@@ -41,7 +41,8 @@ val builtinFunctions =
                     else -> fail("Cannot apply len function to $args")
                 }
             },
-        "list" to PythonInvokable { _, _, _ -> PythonList(mutableListOf()).ok() }, // todo what about version with args
+        "list" to PythonInvokable { _, _, _ -> PythonList(mutableListOf()).ok() },
+        // todo what about version with args
         "input" to PythonInvokable { _, _, _ -> PythonString(null).withWarn("Unable to resolve result of input") },
         "int" to
             PythonInvokable { args, kwArgs, _ ->

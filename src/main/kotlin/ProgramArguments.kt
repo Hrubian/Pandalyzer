@@ -23,7 +23,7 @@ data class ProgramArguments(
                 addOption("o", "output", true, "Output file path")
                 addOption("f", "format", true, "Output file format")
                 addOption("w", "werr", false, "Treat warnings as errors")
-                addOption("c", "config", true, "Config file location (default is $defaultConfigFile")
+                addOption("c", "config", true, "Config file location (default is $DEFAULT_CONFIG_FILE")
                 addOption("h", "help", false, "Prints this info")
             }
         private val parser = DefaultParser()
@@ -40,7 +40,7 @@ data class ProgramArguments(
                     inputFile = commandLine.getOptionValue("input"),
                     outputStream = commandLine.getOptionValue("output")?.let { FileOutputStream(it) } ?: System.out,
                     outputFormat = OutputFormat.fromString(commandLine.getOptionValue("format")),
-                    metadata = AnalyzerMetadata.fromConfigFile(commandLine.getOptionValue("help") ?: defaultConfigFile),
+                    metadata = AnalyzerMetadata.fromConfigFile(commandLine.getOptionValue("help") ?: DEFAULT_CONFIG_FILE),
                     treatWarningsAsErrors = commandLine.hasOption("verbose"),
                     verbose = commandLine.hasOption("verbose"),
                 )
@@ -50,7 +50,7 @@ data class ProgramArguments(
             }
         }
 
-        private const val defaultConfigFile = "./config.toml"
+        private const val DEFAULT_CONFIG_FILE = "./config.toml"
     }
 }
 
