@@ -50,7 +50,6 @@ sealed interface PythonEntity {
             override val columnStart: Int,
             @SerialName("end_col_offset")
             override val columnEnd: Int,
-            // todo others
         ) : Statement
 
         @Serializable
@@ -207,7 +206,6 @@ sealed interface PythonEntity {
 
     @Serializable
     sealed interface Expression : PythonEntity {
-        // todo boolop, namedExpr
 
         @Serializable
         @SerialName("BoolOp")

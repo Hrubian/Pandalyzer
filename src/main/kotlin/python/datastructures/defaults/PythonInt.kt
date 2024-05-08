@@ -130,7 +130,7 @@ value class PythonInt(val value: BigInteger?) : PythonDataStructure {
                 PythonBool(operation(value, other.value)).ok()
             } else {
                 PythonBool(null).withWarn("unable to get the values of integers for comparing")
-            }
+            } //todo add support for comparing with floats
         } else {
             PythonBool(false).withWarn("Comparing different types: $typeName and ${other.typeName}")
         }
