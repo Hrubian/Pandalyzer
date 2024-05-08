@@ -49,7 +49,7 @@ object PandasDataframeFunc : PythonDataStructure {
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
             outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> {
-            val data = args.firstOrNull() ?: return fail("")
+            val data = args.firstOrNull() ?: return fail("The from_dict accepts one dictionary argument")
             return if (data is PythonDict) {
                 dataFrameFromDict(data)
             } else {

@@ -28,30 +28,8 @@ data class DataFrameGroupBy(
             else -> fail("Unknown attribute $identifier on DataFrameGroupBy object")
         }
 
-    override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> {
-        TODO()
-//        when (key) {
-//            is PythonString -> { // returns SeriesGroupBy
-//                if (key.value == null) {
-//                    return SeriesGroupBy(null, null).withWarn("") //todo
-//                }
-//                if (dataFrame == null) {
-//                    return SeriesGroupBy(null, null).withWarn("")
-//                }
-//                if (by == null) {
-//                    return SeriesGroupBy(null, null).withWarn("")
-//                }
-//                if (dataFrame.fields == null) {
-//                    return SeriesGroupBy(null, null).withWarn("")
-//                }
-//
-//                return SeriesGroupBy()
-//            }
-//            is PythonList -> { // returns DataframeGroupBy
-//
-//            }
-//        }
-    }
+    override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> =
+        TODO("Subscript on DataframeGroupBy not implementedyet")
 
     data class Mean(private val dfGroupBy: DataFrameGroupBy) : PythonInvokable {
         override fun invoke(
@@ -66,7 +44,7 @@ data class DataFrameGroupBy(
                 dfGroupBy.dataFrame?.columns
                     ?.filter { it.key !in dfGroupBy.by }
                     ?.filter { it.value !in setOf(FieldType.IntType, FieldType.FloatType) }
-                    ?: return dfGroupBy.dataFrame?.clone()?.ok() ?: return DataFrame(null).ok() // todo mesage?
+                    ?: return dfGroupBy.dataFrame?.clone()?.ok() ?: return DataFrame(null).ok()
             return if (nonNumerics.isNotEmpty()) {
                 val message =
                     StringBuilder().apply {
@@ -93,7 +71,7 @@ data class DataFrameGroupBy(
                 dfGroupBy.dataFrame?.columns
                     ?.filter { it.key !in dfGroupBy.by }
                     ?.filter { it.value !in setOf(FieldType.IntType, FieldType.FloatType, FieldType.StringType) }
-                    ?: return dfGroupBy.dataFrame?.clone()?.ok() ?: return DataFrame(null).ok() // todo mesage?
+                    ?: return dfGroupBy.dataFrame?.clone()?.ok() ?: return DataFrame(null).ok()
             return if (nonSummable.isNotEmpty()) {
                 val message =
                     StringBuilder().apply {
@@ -120,7 +98,7 @@ data class DataFrameGroupBy(
                 dfGroupBy.dataFrame?.columns
                     ?.filter { it.key !in dfGroupBy.by }
                     ?.filter { it.value !in setOf(FieldType.IntType, FieldType.FloatType) }
-                    ?: return dfGroupBy.dataFrame?.clone()?.ok() ?: return DataFrame(null).ok() // todo mesage?
+                    ?: return dfGroupBy.dataFrame?.clone()?.ok() ?: return DataFrame(null).ok()
             return if (nonNumerics.isNotEmpty()) {
                 val message =
                     StringBuilder().apply {
@@ -147,7 +125,7 @@ data class DataFrameGroupBy(
                 dfGroupBy.dataFrame?.columns
                     ?.filter { it.key !in dfGroupBy.by }
                     ?.filter { it.value !in setOf(FieldType.IntType, FieldType.FloatType) }
-                    ?: return dfGroupBy.dataFrame?.clone()?.ok() ?: return DataFrame(null).ok() // todo mesage?
+                    ?: return dfGroupBy.dataFrame?.clone()?.ok() ?: return DataFrame(null).ok()
             return if (nonNumerics.isNotEmpty()) {
                 val message =
                     StringBuilder().apply {
@@ -170,7 +148,7 @@ data class DataFrameGroupBy(
             if (dfGroupBy.by == null) {
                 return DataFrame(null).withWarn("Cannot resolve 'by' of groupby -> not able to check last operation")
             }
-            return (dfGroupBy.dataFrame?.clone() ?: DataFrame(null)).ok() // todo is this correct?
+            return (dfGroupBy.dataFrame?.clone() ?: DataFrame(null)).ok()
         }
     }
 

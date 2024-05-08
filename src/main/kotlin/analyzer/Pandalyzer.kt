@@ -95,8 +95,7 @@ object Pandalyzer {
         val (value, warn) =
             assign.value.analyzeWith(context).orElse {
                 context.addError(it, assign)
-//            return StatementAnalysisResult.Ended
-                UnresolvedStructure(it) // todo does it work?
+                UnresolvedStructure(it)
             }
         context.addWarnings(warn, assign)
         when (val target = assign.targets.single()) {
@@ -306,12 +305,10 @@ object Pandalyzer {
                 val (elements, warns) = pythonList.elements.map { el -> el.analyzeWith(context).orElse { return fail(it) } }.unzip()
                 return python.datastructures.defaults.PythonList(elements.toMutableList()).ok().addWarnings(warns.flatten())
             }
-            is ExpressionContext.Store -> {
-                TODO("Store not implemented")
-            }
-            is ExpressionContext.Delete -> {
-                TODO("Del not implemented")
-            }
+            is ExpressionContext.Store ->
+                TODO("Storing to a list is not supported by the current version of Pandalyzer")
+            is ExpressionContext.Delete ->
+                TODO("Deletion is not supported by the current version of Pandalyzer")
         }
     }
 
@@ -374,7 +371,7 @@ object Pandalyzer {
     ): OperationResult<PythonDataStructure> {
         val (result, warns) = unaryOperation.operand.analyzeWith(context).orElse { return fail(it) }
         return when (unaryOperation.operator) {
-            Invert -> TODO("Invert operator not implemented")
+            Invert -> TODO("Invert operator is not supported by the current version of Pandalyzer")
             Not -> PythonBool(result.boolValue()?.not()).ok()
             UnaryMinus -> result.negate()
             UnaryPlus -> result.positive()
@@ -408,12 +405,12 @@ object Pandalyzer {
             is Break -> error("Return should be processed via analyzeStatements function")
             is Continue -> error("Return should be processed via analyzeStatements function")
             is ExpressionStatement -> analyze(this, context)
-            is ForLoop -> TODO()
+            is ForLoop -> TODO("For loop is not supported by the current version of Pandalyzer")
             is FunctionDef -> analyze(this, context)
             is IfStatement -> analyze(this, context)
             is Import -> analyze(this, context)
             is ImportFrom -> analyze(this, context)
             is Return -> error("Return should be processed via analyzeStatements function")
-            is WhileLoop -> TODO()
+            is WhileLoop -> TODO("While loop is not supported by the current version of Pandalyzer")
         }
 }

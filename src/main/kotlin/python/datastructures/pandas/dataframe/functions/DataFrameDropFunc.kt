@@ -20,7 +20,7 @@ import python.orElse
 import python.withWarn
 
 data class DataFrameDropFunc(override val dataFrame: DataFrame) : DataFrameFunction {
-    override fun clone(): PythonDataStructure = this // todo
+    override fun clone(): PythonDataStructure = this
 
     override fun invoke(
         args: List<PythonDataStructure>,

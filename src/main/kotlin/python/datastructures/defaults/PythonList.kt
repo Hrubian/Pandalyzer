@@ -41,9 +41,7 @@ value class PythonList(
 
     override fun boolValue(): Boolean? = items?.isNotEmpty()
 
-    override fun inn(other: PythonDataStructure): OperationResult<PythonDataStructure> {
-        TODO()
-    }
+    override fun inn(other: PythonDataStructure): OperationResult<PythonDataStructure> = PythonBool(items?.contains(other)).ok()
 
     override fun storeSubscript(
         slice: PythonDataStructure,
@@ -101,7 +99,7 @@ value class PythonList(
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
             outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> {
-            TODO("Not yet implemented")
+            TODO("Insert on list not implemented yet")
         }
     }
 
@@ -111,7 +109,7 @@ value class PythonList(
             keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
             outerContext: AnalysisContext,
         ): OperationResult<PythonDataStructure> {
-            TODO("Not yet implemented")
+            TODO("Remove from list not implemented yet")
         }
     }
 }

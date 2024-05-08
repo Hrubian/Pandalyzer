@@ -33,13 +33,12 @@ fun analyzeStatements(
             is PythonEntity.Statement.Continue -> return StatementAnalysisResult.Continued
             is PythonEntity.Statement.Return ->
                 return StatementAnalysisResult.Returned(stmt.value?.analyzeWith(context) ?: PythonNone.ok())
-            else -> stmt.analyzeWith(context).anotherFun(statements.drop(index + 1), context)?.let { return it }
+            else -> stmt.analyzeWith(context).dispatchResult(statements.drop(index + 1), context)?.let { return it }
             // todo refactor }
         }
     }.let { StatementAnalysisResult.Ended }
 
-private fun StatementAnalysisResult.anotherFun(
-// todo rename me :)
+private fun StatementAnalysisResult.dispatchResult(
     remainingStatements: List<PythonEntity.Statement>,
     context: AnalysisContext,
 ): StatementAnalysisResult? {
@@ -52,7 +51,7 @@ private fun StatementAnalysisResult.anotherFun(
                         StatementAnalysisResult.Continued -> leftResult
                         StatementAnalysisResult.Ended -> analyzeStatements(remainingStatements, context)
                         is StatementAnalysisResult.NondeterministicResult ->
-                            leftResult.anotherFun(remainingStatements, context) ?: return null
+                            leftResult.dispatchResult(remainingStatements, context) ?: return null
                         is StatementAnalysisResult.Returned -> leftResult
                     },
                 rightResult =
@@ -61,7 +60,7 @@ private fun StatementAnalysisResult.anotherFun(
                         StatementAnalysisResult.Continued -> rightResult
                         StatementAnalysisResult.Ended -> analyzeStatements(remainingStatements, context)
                         is StatementAnalysisResult.NondeterministicResult ->
-                            rightResult.anotherFun(remainingStatements, context) ?: return null
+                            rightResult.dispatchResult(remainingStatements, context) ?: return null
                         is StatementAnalysisResult.Returned -> rightResult
                     },
             )

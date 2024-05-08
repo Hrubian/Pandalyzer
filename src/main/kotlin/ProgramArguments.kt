@@ -77,7 +77,7 @@ enum class OutputFormat {
             when (it) {
                 "hr" -> HumanReadable
                 "json" -> JSON
-                else -> default() // todo warning/error
+                else -> default()
             }
 
         fun default() = HumanReadable

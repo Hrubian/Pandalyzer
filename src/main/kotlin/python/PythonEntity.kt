@@ -19,10 +19,7 @@ sealed interface PythonEntity {
         @SerialName("Module")
         data class Module(
             val body: List<Statement>,
-            // todo type_ignore
         ) : Mod
-
-        // todo missing Interactive, Expression, FunctionType
     }
 
     @Serializable
@@ -44,7 +41,6 @@ sealed interface PythonEntity {
         data class FunctionDef(
             val name: String,
             val args: Arguments,
-//            val args: List //todo arguments
             val body: List<Statement>,
             @SerialName("lineno")
             override val startLine: Int,

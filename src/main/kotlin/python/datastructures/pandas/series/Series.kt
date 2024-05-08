@@ -14,11 +14,11 @@ data class Series(
     val type: FieldType?,
     val label: FieldName? = null,
 ) : PythonDataStructure {
-    override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> {
-        TODO()
-    }
+    override fun subscript(key: PythonDataStructure): OperationResult<PythonDataStructure> =
+        type?.toPythonDataStructure()?.withWarn("Missing value information when subscripting Series")
+            ?: fail("Unable to subscript to a series with unknown type")
 
-    override fun clone(): PythonDataStructure = this // todo really?
+    override fun clone(): PythonDataStructure = this
 
     override fun plus(other: PythonDataStructure): OperationResult<PythonDataStructure> {
         when (other) {
@@ -74,7 +74,8 @@ data class Series(
                     "of comparison since the series structure is not known",
             )
         }
-        return if (type.toPythonDataStructure().typeName == other.typeName) { // todo what about comparison of ints and floats
+        return if (type.toPythonDataStructure().typeName == other.typeName) {
+            // todo what about comparison of e.g., ints and floats
             Series(FieldType.BoolType).ok()
         } else {
             fail("Unable to compare values of type $type and ${other.typeName}")

@@ -61,7 +61,7 @@ object ArgumentMatcher {
             for (argDef in resolvedArguments.positionalArgs) {
                 if (argIndex == calledPositionalArguments.size) {
                     return fail("Missing positional argument ${argDef.identifier}")
-                } // todo should the positional take defaults too?
+                }
                 resultArgs[argDef.identifier] = calledPositionalArguments[argIndex]
                 argIndex++
             }
@@ -75,7 +75,7 @@ object ArgumentMatcher {
                 } else {
                     resultArgs[argDef.identifier] = calledPositionalArguments[argIndex]
                     argIndex++
-                    defaultsIndex++ // todo ensure correct
+                    defaultsIndex++
                 }
             }
 

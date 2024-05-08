@@ -94,7 +94,7 @@ data class DataFrame(
     override fun storeSubscript(
         slice: PythonDataStructure,
         value: PythonDataStructure,
-    ): OperationResult<PythonDataStructure> { // wrong!!! acts like normal subscript
+    ): OperationResult<PythonDataStructure> {
         when (slice) {
             is PythonString -> {
                 if (slice.value == null) {
@@ -120,9 +120,7 @@ data class DataFrame(
                     }.map {
                         it.value ?: return DataFrame(null).withWarn("Unable to subscript by a list with unknown values")
                     }
-                TODO()
-//                return DataFrame(fields = columns.associateWith {
-//                    (fields[it] ?: return fail("The column $it is not in the dataframe")) }.toMutableMap()).ok()
+                TODO("Store subscript based on list not implemented yet")
             }
             else -> return fail("Cannot subscript to value of type ${value.typeName}")
         }

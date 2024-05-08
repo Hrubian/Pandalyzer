@@ -27,12 +27,11 @@ object PandasConcatFunc : PandasFunction {
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
         outerContext: AnalysisContext,
     ): OperationResult<PythonDataStructure> =
-        invokeNondeterministic(args, keywordArgs, outerContext) { iArgs, kArgs, ctx -> invokeInner(iArgs, kArgs, ctx) }
+        invokeNondeterministic(args, keywordArgs, outerContext) { iArgs, kArgs, _ -> invokeInner(iArgs, kArgs) }
 
     private fun invokeInner(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-        outerContext: AnalysisContext,
     ): OperationResult<PythonDataStructure> =
         ArgumentMatcher.match(functionSchema, args, keywordArgs.toMap()).map {
             val objects =

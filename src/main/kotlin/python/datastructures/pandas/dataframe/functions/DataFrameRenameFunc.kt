@@ -24,12 +24,11 @@ data class DataFrameRenameFunc(override val dataFrame: DataFrame) : DataFrameFun
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
         outerContext: AnalysisContext,
-    ): OperationResult<PythonDataStructure> = invokeNondeterministic(args, keywordArgs, outerContext) { a, k, o -> invokeInner(a, k, o) }
+    ): OperationResult<PythonDataStructure> = invokeNondeterministic(args, keywordArgs, outerContext) { a, k, _ -> invokeInner(a, k) }
 
     fun invokeInner(
         args: List<PythonDataStructure>,
         keywordArgs: List<Pair<Identifier, PythonDataStructure>>,
-        outerContext: AnalysisContext,
     ): OperationResult<PythonDataStructure> {
         val matchedArguments = ArgumentMatcher.match(argumentSchema, args, keywordArgs.toMap())
         return matchedArguments.map { arguments ->
