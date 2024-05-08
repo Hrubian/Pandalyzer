@@ -206,7 +206,6 @@ sealed interface PythonEntity {
 
     @Serializable
     sealed interface Expression : PythonEntity {
-
         @Serializable
         @SerialName("BoolOp")
         data class BoolOperation(
