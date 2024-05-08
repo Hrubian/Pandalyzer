@@ -60,6 +60,9 @@ import python.ok
 import python.orElse
 import python.withWarn
 
+/**
+ * A wrapper object containing all analysis functions for all nodes
+ */
 object Pandalyzer {
     fun analyze(
         module: Module,

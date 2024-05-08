@@ -13,37 +13,70 @@ import python.datastructures.pandas.dataframe.DataFrame
 
 typealias Identifier = String
 
+/**
+ * Mutable structure representing a current state in the analysis
+ */
 sealed interface AnalysisContext {
+    /**
+     * Add or update a structure [value] under the name [name]
+     */
     fun upsertStruct(
         name: Identifier,
         value: PythonDataStructure,
     ): PythonDataStructure?
 
+    /**
+     * Get a structure registered under the name [name] or null if no such structure was registered yet
+     */
     fun getStruct(name: Identifier): PythonDataStructure?
 
+    /**
+     * Add a new warning triggered by the analysis
+     */
     fun addWarning(
         message: String,
         sourceStatement: PythonEntity.Statement,
     )
 
+    /**
+     * Add a set of warnings triggered by the analysis
+     */
     fun addWarnings(
         messages: List<String>,
         sourceStatement: PythonEntity.Statement,
     ) = messages.forEach { addWarning(it, sourceStatement) }
 
+    /**
+     * Add a new error that was raised during the analysis
+     */
     fun addError(
         message: String,
         sourceStatement: PythonEntity.Statement,
     )
 
+    /**
+     * Get the outer-most global context
+     */
     fun getGlobalContext(): AnalysisContext
 
+    /**
+     * Creates a new, same [AnalysisContext] that can be used for non-deterministic execution
+     */
     fun fork(): AnalysisContext
 
+    /**
+     * Joins the previously forked [other] [AnalysisContext], merging the nondeterministic structures
+     */
     fun join(other: AnalysisContext)
 
+    /**
+     * Gets the Dataframe accessible via read_csv function under the name [filename] from the metadata
+     */
     fun getDataframeFromMetadata(filename: String): DataFrame?
 
+    /**
+     * Stores the [dataFrame] to the record registered under the [filename] in the metadata
+     */
     fun storeDataframeToMetadata(
         filename: String,
         dataFrame: DataFrame,

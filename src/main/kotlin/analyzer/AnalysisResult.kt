@@ -7,6 +7,11 @@ import python.PythonEntity
 import python.datastructures.FieldName
 import python.datastructures.FieldType
 
+/**
+ * The result of the single analysis.
+ * Contains information such as the [result], list of [warnings] and [errors],
+ * list of all displayable [globalDataStructures] and [outputFiles] to which something was written.
+ */
 @Serializable
 data class AnalysisResult(
     val result: String,

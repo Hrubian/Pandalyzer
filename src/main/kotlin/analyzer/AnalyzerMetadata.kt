@@ -9,10 +9,14 @@ import python.ok
 import python.withWarn
 import java.io.File
 
+/**
+ * The metadata about existing CSV files created from the configuration file
+ * Use [fromConfigFile] function to create the metadata
+ */
 data class AnalyzerMetadata(
     private val data: List<Pair<Regex, Map<FieldName, FieldType>>>,
 ) {
-    private val storedData = mutableMapOf<String, MutableList<Map<FieldName, FieldType>>>() // .withDefault { mutableListOf() }
+    private val storedData = mutableMapOf<String, MutableList<Map<FieldName, FieldType>>>()
 
     fun getDataFrameOrNull(filename: String): DataFrame? =
         data.singleOrNull { it.first.matches(filename) }?.let { DataFrame(it.second.toMutableMap()) }
