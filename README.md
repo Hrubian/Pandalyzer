@@ -15,7 +15,7 @@ actually starts.
 
 ### Used technologies
 - Python language
-  - ast and ast2json libraries (abstract syntax tree) for parsing the python code and converting it to json format
+  - ast and library (abstract syntax tree) for parsing the python code
 - Kotlin language for the analysis itself
 
 ### References
@@ -24,8 +24,6 @@ actually starts.
 - [ast2json library docs](https://pypi.org/project/ast2json/)
 - [Kotlin language docs](https://kotlinlang.org/docs/home.html)
 
-
-## In-depth description of the project
 
 ### Motivation
 Consider for example the following program.
@@ -51,24 +49,54 @@ There are some harder-to-spot mistakes such as referencing a dropped column, sum
 or a misspelled column name.
 All these mistakes are detected at~runtime causing crash of the program.
 
-The Python interpreter does not the structure of the csv files, so it cannot lead us and tell us that something does not
-make sense. But usually we know in advance what the data look like. 
+The Python interpreter does know not the structure of the csv files, so it cannot lead us and tell us that something 
+does not make sense. But usually we know in advance what the data look like. 
 
-### Specification
-Our goal will be to develop a tool that is able to take a simple Python code and analyze it, given the CSV file
-structures in advance.
+The tool uses Abstract Interpretation method for the analysis.
+Detailed information regarding the implementation can be found in my bachelor-thesis repository in the third, fourth 
+and fifth chapter:
+(https://github.com/Hrubian/bachelor-thesis)
 
-It will be a command-line tool that would be able to analyze a single Python file with configuration file.
+### An example config file
+```
+[file.csv]
+col1 = "int"
+col2 = "string"
+col3 = "string"
 
-### Project Scope Limitations
+[file2.csv]
+int_col = "int"
+str_col = "string"
+bool_col = "bool"
+```
 
-When people write code with pandas, they usually do not modify one dataframe. They create a new dataframe with each 
-operation, so the dataframes act as if they were immutable. In my project I will make this an assumption - all datasets
-cannot be modified with respect to their column structure after they are created. 
+## Building from source
 
-Another challenging topic is conditional execution - if statements and for/while loops. We will support if statements
-and will analyze each branch of the if statement separately and then assume that the dataset is in non-deterministic 
-state and we will remember all options. However, we will not support while and for loops.
+To build the Pandalyzer from sources, follow the steps below:
 
-In the initial version (proof of concept) we will assume that the code is not organized - it is just written line by line,
-no custom functions and no if statements. Support for functions and if statements will be added later.
+1. Ensure that you have Java (version 21.0.1 or higher), Git and Python 3.x installed.
+2.  Clone the Pandalyzer repository:
+```
+git clone https://github.com/Hrubian/Pandalyzer.git
+```
+3. Navigate to the root folder of the repository:
+```
+cd Pandalyzer
+```
+4. Run the Gradle bootstrap script:
+```
+./gradlew build (or ./gradlew.bat build on Windows)
+```
+
+## Running the tool
+
+The build generates a ./build
+Check that there are also ./build/distributions/Pandalyzer.tar ./build/distributions/Pandalyzer.zip archives.
+Unpack one of them (depending on what tools you are provided with) and run the Pandalyzer (or
+Pandalyzer.bat) script in the bin folder.
+The program accepts the following command-line arguments:
+- -h, --help - Prints usage information and exits
+- -i, --input - The input python script to analyze **(mandatory)**
+- -o, --output - The output file to store the analysis result to (standard output by default)
+- -c, --config - The configuration file to read the file structures from (config.toml by default)
+- -f, --format - The format of the analysis output, possible options: hr (human-readable), json (hr by default), csv
