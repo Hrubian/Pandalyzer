@@ -10,9 +10,6 @@ fun main(args: Array<String>): Unit =
                     Pandalyzer.analyze(tree.root, it)
                 }
             }.let { result ->
-                when (outputFormat) {
-                    OutputFormat.HumanReadable -> println(result.summarize())
-                    OutputFormat.JSON -> println(result.toJson())
-                }
+                outputStream.use { it.write(result.summarize(outputFormat).toByteArray()) }
             }
     }

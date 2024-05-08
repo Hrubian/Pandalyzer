@@ -24,39 +24,11 @@ data class AnalyzerMetadata(
         if (dataFrame.columns == null) {
             return PythonNone.withWarn("Unable to store a dataframe to a csv file $filename as the structure is not known")
         }
-//        storedData.getValue(filename).add(dataFrame.fields)
         storedData.getOrPut(filename) { mutableListOf() }.add(dataFrame.columns)
         return PythonNone.ok()
     }
 
-    fun summarize(): String =
-        buildString {
-            appendLine("Output files (${storedData.size}): ")
-            storedData.forEach { (filename, fileWrites) ->
-                appendLine("File $filename: ")
-                summarizeFile(fileWrites)
-                append('\n')
-            }
-        }
-
-    private fun StringBuilder.summarizeFile(fileWrites: List<Map<FieldName, FieldType>>) {
-        if (fileWrites.size > 1) {
-            appendLine(
-                "    Warning: There are multiple options how the" +
-                    " resulting file looks like. We will show all of them",
-            )
-            fileWrites.forEachIndexed { index, dataframe ->
-                appendLine("    Option #$index")
-                dataframe.forEach { (columnName, columnType) ->
-                    appendLine("        $columnName : $columnType")
-                }
-            }
-        } else {
-            fileWrites.single().forEach { (columnName, columnType) ->
-                appendLine("    $columnName : $columnType")
-            }
-        }
-    }
+    fun summarize(): AnalysisMetadataResult = AnalysisMetadataResult(storedData.toMap())
 
     companion object {
         fun fromConfigFile(configFileName: String): AnalyzerMetadata {

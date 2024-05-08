@@ -6,39 +6,21 @@ import python.PythonTree
 
 class CaseStudies {
     @Test
-    fun `01`() =
-        runCaseStudy(1) { context ->
-            println((context as GlobalAnalysisContext).summarize())
-        }
+    fun `01`() = runCaseStudy(1)
 
     @Test
-    fun `02`() =
-        runCaseStudy(2) { context ->
-            println((context as GlobalAnalysisContext).summarize())
-        }
+    fun `02`() = runCaseStudy(2)
 
     @Test
-    fun `03`() =
-        runCaseStudy(3) { context ->
-            println((context as GlobalAnalysisContext).summarize())
-        }
+    fun `03`() = runCaseStudy(3)
 
     @Test
-    fun `04`() =
-        runCaseStudy(4) { context ->
-            println((context as GlobalAnalysisContext).summarize())
-        }
+    fun `04`() = runCaseStudy(4)
 
     @Test
-    fun `05`() =
-        runCaseStudy(5) { context ->
-            println((context as GlobalAnalysisContext).summarize())
-        }
+    fun `05`() = runCaseStudy(5)
 
-    private fun runCaseStudy(
-        caseStudyNumber: Int,
-        assertBlock: (AnalysisContext) -> Unit,
-    ) {
+    private fun runCaseStudy(caseStudyNumber: Int) {
         val basePath = "./case_studies/${caseStudyNumber.toString().padStart(2, '0')}"
         val scriptPath = "$basePath/script.py"
         val configPath = "$basePath/config.toml"
@@ -55,6 +37,6 @@ class CaseStudies {
         val context = AnalysisContext.buildWithBuiltins(args.metadata)
         val tree = PythonTree.fromFile(args.inputFile)
         Pandalyzer.analyze(tree.root, context)
-        assertBlock(context)
+        println((context).summarize(OutputFormat.HumanReadable))
     }
 }

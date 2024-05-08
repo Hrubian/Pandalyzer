@@ -1,5 +1,6 @@
 package analyzer
 
+import OutputFormat
 import python.OperationResult
 import python.PythonEntity
 import python.datastructures.NondeterministicDataStructure
@@ -64,17 +65,6 @@ sealed interface AnalysisContext {
     }
 }
 
-data class Message(val text: String, val sourceStatement: PythonEntity.Statement) {
-    fun summarize(): String =
-        "${sourceStatement.javaClass.simpleName} " +
-            if (sourceStatement.startLine == sourceStatement.endLine) {
-                "on line ${sourceStatement.startLine} "
-            } else {
-                "from line ${sourceStatement.startLine} to line ${sourceStatement.endLine} "
-            } +
-            "columns ${sourceStatement.columnStart} - ${sourceStatement.columnEnd}: $text"
-}
-
 data class GlobalAnalysisContext(
     private val pythonDataStructures: MutableMap<Identifier, PythonDataStructure>,
     private val warnings: MutableList<Message>,
@@ -92,14 +82,14 @@ data class GlobalAnalysisContext(
         message: String,
         sourceStatement: PythonEntity.Statement,
     ) {
-        warnings.add(Message(message, sourceStatement))
+        warnings.add(Message.createMessage(message, sourceStatement))
     }
 
     override fun addError(
         message: String,
         sourceStatement: PythonEntity.Statement,
     ) {
-        errors.add(Message(message, sourceStatement))
+        errors.add(Message.createMessage(message, sourceStatement))
     }
 
     override fun getGlobalContext(): AnalysisContext = this
@@ -136,33 +126,23 @@ data class GlobalAnalysisContext(
         dataFrame: DataFrame,
     ): OperationResult<PythonNone> = metadata.storeDataframe(filename, dataFrame)
 
-    fun summarize(): String =
-        buildString {
-            val dataStructuresToShow =
-                pythonDataStructures
-                    .filterNot { it.key in builtinFunctions && it.value is PythonInvokable }
-                    .filterNot { it.value is PythonFunc }
-            append("Summary of analysis: ")
-            append(if (errors.isEmpty()) "OK" else "NOT OK")
-            append('\n')
-
-            append("Global data structures (${dataStructuresToShow.size}):\n")
-            dataStructuresToShow.forEach { (ident, struct) -> append("$ident: $struct \n") }
-            append('\n')
-
-            append("Warnings (${warnings.size}):\n")
-            warnings.forEachIndexed { i, warn -> append("$i: ${warn.summarize()}\n") }
-            append('\n')
-
-            append("Errors (${errors.size}):\n")
-            errors.forEachIndexed { i, error -> append("$i: ${error.summarize()}\n") }
-            append('\n')
-
-            append(metadata.summarize())
+    fun summarize(format: OutputFormat): String {
+        val result =
+            AnalysisResult(
+                result = if (errors.isEmpty()) "OK" else "NOT OK",
+                warnings = warnings,
+                errors = errors,
+                globalDataStructures =
+                    pythonDataStructures
+                        .filterNot { it.key in builtinFunctions && it.value is PythonInvokable }
+                        .filterNot { it.value is PythonFunc }
+                        .mapValues { it.toString() },
+                outputFiles = metadata.summarize(),
+            )
+        return when (format) {
+            OutputFormat.HumanReadable -> result.toHumanReadable()
+            OutputFormat.JSON -> result.toJson()
         }
-
-    fun toJson(): String {
-        TODO()
     }
 }
 

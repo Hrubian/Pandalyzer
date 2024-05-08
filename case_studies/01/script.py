@@ -10,7 +10,7 @@ attendees_df["name_surname"] = \
 attendees_df = attendees_df.drop(columns=["name", "surname"])
 
 scores_with_match_name_df = scores_df \
-    .merge(matches_df, left_or="match_id", right_on="id") \
+    .merge(matches_df, left_on="match_id", right_on="id") \
     .drop(columns="id")
 
 scores_with_age_df = pd.merge(
