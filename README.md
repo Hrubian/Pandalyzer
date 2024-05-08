@@ -24,12 +24,6 @@ actually starts.
 - [ast2json library docs](https://pypi.org/project/ast2json/)
 - [Kotlin language docs](https://kotlinlang.org/docs/home.html)
 
-### Milestones plan
-| Date       | Milestone        |
-|------------|------------------|
-| 2023-12-04 | Proof of concept |
-
-
 
 ## In-depth description of the project
 
