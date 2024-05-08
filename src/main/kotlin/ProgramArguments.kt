@@ -18,11 +18,11 @@ data class ProgramArguments(
     companion object {
         private val options =
             Options().apply {
-                addOption("v", "verbose", false, "Enable verbose mode")
+                addOption("v", "verbose", false, "Enable verbose mode (not implemented yet)")
                 addOption("i", "input", true, "Input file path (mandatory)")
                 addOption("o", "output", true, "Output file path")
                 addOption("f", "format", true, "Output file format")
-                addOption("w", "werr", false, "Treat warnings as errors")
+                addOption("w", "werr", false, "Treat warnings as errors (not implemented yet)")
                 addOption("c", "config", true, "Config file location (default is $DEFAULT_CONFIG_FILE)")
                 addOption("h", "help", false, "Prints this info")
             }
