@@ -68,6 +68,8 @@ def get_node_type(node):
             return "BoolConstant"
         elif isinstance(val, int):
             return "IntConstant"
+        elif isinstance(val, float):
+            return "FloatConstant"
         elif val is None:
             return "NoneConstant"
         else:

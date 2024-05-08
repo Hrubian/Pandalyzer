@@ -255,6 +255,12 @@ sealed interface PythonEntity {
             ) : Constant
 
             @Serializable
+            @SerialName("FloatConstant")
+            data class FloatConstant(
+                val value: Double,
+            ) : Constant
+
+            @Serializable
             @SerialName("NoneConstant")
             data object NoneConstant : Constant
         }

@@ -11,6 +11,7 @@ import python.PythonEntity.Expression.BoolOperation
 import python.PythonEntity.Expression.Call
 import python.PythonEntity.Expression.Compare
 import python.PythonEntity.Expression.Constant.BoolConstant
+import python.PythonEntity.Expression.Constant.FloatConstant
 import python.PythonEntity.Expression.Constant.IntConstant
 import python.PythonEntity.Expression.Constant.NoneConstant
 import python.PythonEntity.Expression.Constant.StringConstant
@@ -50,6 +51,7 @@ import python.datastructures.UnresolvedStructure
 import python.datastructures.createImportStruct
 import python.datastructures.defaults.PythonBool
 import python.datastructures.defaults.PythonDict
+import python.datastructures.defaults.PythonFloat
 import python.datastructures.defaults.PythonFunc
 import python.datastructures.defaults.PythonInt
 import python.datastructures.defaults.PythonNone
@@ -388,6 +390,7 @@ object Pandalyzer {
             is Compare -> analyze(this, context)
             is BoolConstant -> PythonBool(this.value).ok()
             is IntConstant -> PythonInt(this.value).ok()
+            is FloatConstant -> PythonFloat(this.value).ok()
             is NoneConstant -> PythonNone.ok()
             is StringConstant -> PythonString(this.value).ok()
             is Dictionary -> analyze(this, context)

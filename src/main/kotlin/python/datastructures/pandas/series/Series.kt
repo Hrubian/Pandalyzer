@@ -4,6 +4,7 @@ import python.OperationResult
 import python.datastructures.FieldName
 import python.datastructures.FieldType
 import python.datastructures.PythonDataStructure
+import python.datastructures.defaults.PythonFloat
 import python.datastructures.defaults.PythonInt
 import python.datastructures.defaults.PythonString
 import python.fail
@@ -47,6 +48,15 @@ data class Series(
                     Series(type).ok()
                 } else {
                     fail("Cannot sum a series of type $type with PythonString")
+                }
+            }
+            is PythonFloat -> {
+                return if (type == null) {
+                    Series(null).withWarn("Unable to sum series of unknown type")
+                } else if (type.toPythonDataStructure() is PythonInt) {
+                    Series(type).ok()
+                } else {
+                    fail("Cannot sum a series of type $type with PythonInt")
                 }
             }
             else -> {

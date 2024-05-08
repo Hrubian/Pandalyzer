@@ -13,54 +13,87 @@ value class PythonInt(val value: BigInteger?) : PythonDataStructure {
     override fun clone(): PythonDataStructure = PythonInt(value)
 
     override operator fun plus(other: PythonDataStructure): OperationResult<PythonDataStructure> {
-        return if (other is PythonInt) {
-            if (value == null || other.value == null) return PythonInt(null).ok()
-            PythonInt(this.value + other.value).ok()
-        } else if (other is Series) {
-            other.plus(this)
-        } else {
-            fail("Cannot sum a $typeName with ${other.typeName}")
+        return when (other) {
+            is PythonInt -> {
+                if (value == null || other.value == null) return PythonInt(null).ok()
+                PythonInt(this.value + other.value).ok()
+            }
+            is PythonFloat -> {
+                if (value == null || other.value == null) return PythonFloat(null).ok()
+                PythonFloat(this.value.toDouble() + other.value).ok()
+            }
+            is Series -> {
+                other.plus(this)
+            }
+            else -> fail("Cannot sum a $typeName with ${other.typeName}")
         }
     }
 
     override operator fun minus(other: PythonDataStructure): OperationResult<PythonDataStructure> {
-        return if (other is PythonInt) {
-            if (value == null || other.value == null) return PythonInt(null).ok()
-            PythonInt(this.value - other.value).ok()
-        } else if (other is Series) {
-            other.minus(this)
-        } else {
-            fail("Cannot subtract a ${other.typeName} from $typeName")
+        return when (other) {
+            is PythonInt -> {
+                if (value == null || other.value == null) return PythonInt(null).ok()
+                PythonInt(this.value - other.value).ok()
+            }
+            is PythonFloat -> {
+                if (value == null || other.value == null) return PythonFloat(null).ok()
+                PythonFloat(this.value.toDouble() - other.value).ok()
+            }
+            is Series -> {
+                other.minus(this)
+            }
+            else -> fail("Cannot subtract a ${other.typeName} from $typeName")
         }
     }
 
     override operator fun times(other: PythonDataStructure): OperationResult<PythonDataStructure> {
-        return if (other is PythonInt) {
-            if (value == null || other.value == null) return PythonInt(null).ok()
-            PythonInt(this.value * other.value).ok()
-        } else if (other is Series) {
-            other.times(this)
-        } else {
-            fail("Cannot multiply a $typeName with $typeName")
+        return when (other) {
+            is PythonInt -> {
+                if (value == null || other.value == null) return PythonInt(null).ok()
+                PythonInt(this.value * other.value).ok()
+            }
+            is PythonFloat -> {
+                if (value == null || other.value == null) return PythonFloat(null).ok()
+                PythonFloat(this.value.toDouble() * other.value).ok()
+            }
+            is Series -> {
+                other.times(this)
+            }
+            else -> fail("Cannot multiply a $typeName with ${other.typeName}")
         }
     }
 
     override operator fun div(other: PythonDataStructure): OperationResult<PythonDataStructure> {
-        return if (other is PythonInt && other.value != BigInteger.ZERO) {
-            if (value == null || other.value == null) return PythonInt(null).ok()
-            TODO("implement floats!!!")
-//            PythonInt(BigDecimal(this.value) / other.value).ok()
-        } else {
-            fail("Cannot divide $typeName by ${other.typeName}")
+        return when (other) {
+            is PythonInt -> {
+                if (value == null || other.value == null) return PythonInt(null).ok()
+                PythonFloat(this.value.toDouble() / other.value.toDouble()).ok()
+            }
+            is PythonFloat -> {
+                if (value == null || other.value == null) return PythonFloat(null).ok()
+                PythonFloat(this.value.toDouble() * other.value).ok()
+            }
+            is Series -> {
+                other.times(this)
+            }
+            else -> fail("Cannot divide $typeName by ${other.typeName}")
         }
     }
 
     override fun floorDiv(other: PythonDataStructure): OperationResult<PythonDataStructure> {
-        return if (other is PythonInt && other.value != BigInteger.ZERO) {
-            if (value == null || other.value == null) return PythonInt(null).ok()
-            PythonInt(this.value / other.value).ok()
-        } else {
-            fail("Cannot floor-dive $typeName by ${other.typeName}")
+        return when (other) {
+            is PythonInt -> {
+                if (value == null || other.value == null) return PythonInt(null).ok()
+                PythonInt(this.value / other.value).ok()
+            }
+            is PythonFloat -> {
+                if (value == null || other.value == null) return PythonFloat(null).ok()
+                PythonInt(this.value * other.value.toInt().toBigInteger()).ok()
+            }
+            is Series -> {
+                other.times(this)
+            }
+            else -> fail("Cannot divide $typeName by ${other.typeName}")
         }
     }
 

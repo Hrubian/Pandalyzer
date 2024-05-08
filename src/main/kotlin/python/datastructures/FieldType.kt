@@ -1,6 +1,7 @@
 package python.datastructures
 
 import python.datastructures.defaults.PythonBool
+import python.datastructures.defaults.PythonFloat
 import python.datastructures.defaults.PythonInt
 import python.datastructures.defaults.PythonNone
 import python.datastructures.defaults.PythonString
@@ -34,7 +35,7 @@ enum class FieldType {
 
     fun toPythonDataStructure(): PythonDataStructure =
         when (this) {
-            FloatType -> TODO() // todo implement python float
+            FloatType -> PythonFloat(null)
             IntType -> PythonInt(null)
             BoolType -> PythonBool(null)
             TimeDelta -> TODO()
@@ -57,6 +58,7 @@ enum class FieldType {
                 is PythonInt -> IntType
                 is PythonString -> StringType
                 is PythonBool -> BoolType
+                is PythonFloat -> FloatType
                 is Series -> struct.type
                 else -> null
             }
