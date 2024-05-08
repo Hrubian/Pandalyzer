@@ -99,3 +99,10 @@ The program accepts the following command-line arguments:
 - -o, --output - The output file to store the analysis result to (standard output by default)
 - -c, --config - The configuration file to read the file structures from (config.toml by default)
 - -f, --format - The format of the analysis output, possible options: hr (human-readable), json (hr by default), csv
+
+# Case studies
+There is a folder *case_studies* containing various examples. 
+You can use these examples when trying to run the Pandalyzer.
+each directory contains script.py and config.toml that can be set as --input and --config command-line arguments.
+The behavior of these case studies is explained in the fifth chapter of 
+[my bachelor thesis](https://github.com/Hrubian/bachelor-thesis).
