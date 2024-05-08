@@ -21,7 +21,6 @@ actually starts.
 ### References
 - [Official Pandas webpage](https://pandas.pydata.org/)
 - [ast library docs](https://docs.python.org/3/library/ast.html)
-- [ast2json library docs](https://pypi.org/project/ast2json/)
 - [Kotlin language docs](https://kotlinlang.org/docs/home.html)
 
 
